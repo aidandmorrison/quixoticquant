@@ -1,0 +1,8 @@
+baseurl = "/"
+relativeurls = true
+languageCode = "en-us"
+title = "Quixotic Quant"
+theme = "hugo_theme_robust"
+googleAnalytics = ""
+disqusShortname = ""
+ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
