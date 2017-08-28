@@ -5,3 +5,7 @@ title = "Quixotic Quant"
 googleAnalytics = ""
 disqusShortname = ""
 ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
+
+
+sectionPagesMenu = "main"
+
