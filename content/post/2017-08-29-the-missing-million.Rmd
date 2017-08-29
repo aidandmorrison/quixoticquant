@@ -3,8 +3,12 @@ title: The Missing Million
 author: Aidan
 date: '2017-08-29'
 slug: the-missing-million
-categories: [Demographics]
-tags: [ABS, Census, Immigration]
+categories:   
+  - Demographics
+tags:
+  - ABS
+  - Census
+  - Immigration
 ---
 
 
