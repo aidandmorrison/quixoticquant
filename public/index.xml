@@ -12,6 +12,15 @@
     
     
     <item>
+      <title>About the Quixotic Quant Blog</title>
+      <link>/post/opening-remarks/</link>
+      <pubDate>Tue, 29 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/post/opening-remarks/</guid>
+      <description>I think it’s worth a short post to explain where the name ‘Quixotic Quant’ came from, and why I’ve chosen it for this blog. The short version is that it’s a neat way of capturing a simple juxtaposition this blog seeks to embrace: 1. A high standard of rigour, objectivity, transparency to the quantitative analysis 2. A style that’s intellectually combative, provocative, and accessible and entertaining to a broad audience Regarding the first objective, I’m convinced that the best standard for objectivity and rigour is to publish not only a link to the data at source, but also the code-chunk that’s been used to conduct the analysis.</description>
+    </item>
+    
+    <item>
       <title>Blog Post 2</title>
       <link>/post/blog-post-2/</link>
       <pubDate>Tue, 29 Aug 2017 00:00:00 +0000</pubDate>
@@ -44,7 +53,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/about/</guid>
-      <description>Aidan writes about &amp;hellip;</description>
+      <description>Aidan took leave from a PhD in experimental particle physics at the University of Melbourne, working in the ATLAS experiment at CERN, to start Rubber Ducky Defence. Combining strong academic background in physics, along with a passion for lateral–thinking and global, real–world problem solving, Aidan’s initial intrigue with military strategy and technology was inspired whilst working with the Australian National University’s Crawford School of Economics and Government, where he met and began discussing the anomalies of defence policy with some of Australia’s leading defence experts.</description>
     </item>
     
     <item>
