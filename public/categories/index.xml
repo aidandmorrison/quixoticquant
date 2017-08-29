@@ -10,32 +10,5 @@
 	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
-    <item>
-      <title>Defense</title>
-      <link>/categories/defense/</link>
-      <pubDate>Sun, 27 Aug 2017 00:00:00 +0000</pubDate>
-      
-      <guid>/categories/defense/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Demographics</title>
-      <link>/categories/demographics/</link>
-      <pubDate>Tue, 29 Aug 2017 00:00:00 +0000</pubDate>
-      
-      <guid>/categories/demographics/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Economics</title>
-      <link>/categories/economics/</link>
-      <pubDate>Tue, 29 Aug 2017 00:00:00 +0000</pubDate>
-      
-      <guid>/categories/economics/</guid>
-      <description></description>
-    </item>
-    
   </channel>
 </rss>
