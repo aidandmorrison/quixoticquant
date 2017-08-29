@@ -6,9 +6,37 @@
     <description>Recent content in Tags on Quixotic Quant</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+    <lastBuildDate>Tue, 29 Aug 2017 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Abs</title>
+      <link>/tags/abs/</link>
+      <pubDate>Tue, 29 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/abs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Census</title>
+      <link>/tags/census/</link>
+      <pubDate>Tue, 29 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/census/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Immigration</title>
+      <link>/tags/immigration/</link>
+      <pubDate>Tue, 29 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/immigration/</guid>
+      <description></description>
+    </item>
     
   </channel>
 </rss>

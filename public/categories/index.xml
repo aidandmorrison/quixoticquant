@@ -10,5 +10,14 @@
 	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
+    <item>
+      <title>Demographics</title>
+      <link>/categories/demographics/</link>
+      <pubDate>Tue, 29 Aug 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/demographics/</guid>
+      <description></description>
+    </item>
+    
   </channel>
 </rss>

@@ -3,8 +3,8 @@ title: The Missing Million
 author: Aidan
 date: '2017-08-29'
 slug: the-missing-million
-categories: []
-tags: []
+categories: [Demographics]
+tags: [ABS, Census, Immigration]
 ---
 
 
@@ -64,7 +64,7 @@ sheet_340102 <- prev_12_month(sheet_340102, meta)
 ## The most deceptive, misused graph in Australian Economics
 Well that could possibly be the situation we're in with the public conception of Net Overseas Migration (NOM), and with it, our Estimated Resident Population (ERP). As far as graphs go, NOM would have to be one of the rising-stars in Australian economic policy debates.  Naturally it's frequently cited by property and business blogs for obvious reasons. But it's waxing influce has also risen the tide of confusion amongst the world's conomists, who are floundering to explain the new low-inflation, low-growth new-normal paradigm that has beset the World.  Everyone's casting around for a theory, and with a slightly selective date-range (say from around 1991 onwards), this graph gives some Australian pundits and commentators exactly what they want: some substantial level-shift that occurs somewhere around the GFC, and hasn't returned to old normal levels. (Use the zoom/selector tool to cut out the pre-1991 part, and check out how that level shift leaps off the page.)
 
-```{r NOM_basic, warning=FALSE, message= FALSE}
+```{r NOM_basic, warning=FALSE, message= FALSE, fig.align="center"}
 
 plot <- ggplot(sheet_310101, aes(x = Date, y = Net.Ove.Mig.Aus.Pre.12m, text = as_date(Date)))+
   geom_line()+
