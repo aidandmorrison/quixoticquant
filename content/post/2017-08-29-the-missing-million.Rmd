@@ -91,7 +91,7 @@ I mightn't have ever noticed, if I hadn't attempted to reproduce two columns cal
 
 Naturally I failed.  I wanted to assume that some simple addition of the Permanent and Long Term Arrivals would produce the 3101 Arrivals, and same with Departures, and the net of those would produce (or at least closely follow) the hallowed NOM.  Please enjoy chuckling at my niaivity.  Infact the net Permanent and Long Term movements give a trend that's far higher than Net Overseas Migration.   The Net Short Term movements, on the other hand, used to be trivial, but had in recent decades had become quite large and negative.
 
-```{r Movements_NOM, warning=FALSE, message= FALSE}
+```{r Movements_NOM, warning=FALSE, message= FALSE, }
 sheet_310101 <- sheet_310101 %>% 
   mutate(NOM.12.12.Pre.12 = (case_when(Date < "2006-09-01 GMT" ~ Net.Ove.Mig.Aus.Pre.12m)),
          NOM.12.16.Pre.12 = (case_when(Date >= "2006-09-01 GMT" ~ Net.Ove.Mig.Aus.Pre.12m)))
@@ -209,7 +209,7 @@ At least here the idea of a 'level shift' occuring in migration in the mid 2000s
 But if you're happy to slum it with a 'C-' for data visualising data with integrity, you could do what the [Productivity Commission](http://www.pc.gov.au/inquiries/completed/migrant-intake/report/migrant-intake-report.pdf) does.  String it all together with the same colours, but add a footnote that you hope people read.
 
 
-![Productivity Commission, April 2016](images/Screen Shot 2017-08-25 at 9.46.11 am.png){ width=50% }
+![Productivity Commission, April 2016](/images/Screen Shot 2017-08-25 at 9.46.11 am.png){ width=50% }
 
 
 Or, if you're the dunce of the class and aiming for a 'D', then you could do what the Australian Bureau of Statistics does themselves in their official [pdf explanation](http://www.abs.gov.au/AUSSTATS/abs@.nsf/DetailsPage/3101.0Jun%202016?OpenDocument) for Series 3101 on Australian Demographic Statistics. They just use a tiny little gap in the line, as well as adding a footnote at the bottom of two other footnotes.  Why is that a complete and utter fail?  Because for anyone who reads graphs who has a modicum of common-sense about them (let alone those of us who paid attention when studying science, stats, or commerce) would know exactly what a gap in a line should represent.  You got it, a gap.  A missing data-point in an otherwise consistently recorded and defined stream of data.  So when normal people read ABS charts that have been cut-and-pasted by unscrupulous journalists at trashy magazines (in this case [David Scutt at Business Insider Australia](https://www.businessinsider.com.au/australian-population-growth-picks-up-as-immigration-hits-a-4-year-high-2017-3)) we all get absolutely the wrong impression.
