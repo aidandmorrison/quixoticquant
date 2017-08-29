@@ -6,6 +6,3 @@ googleAnalytics = ""
 disqusShortname = "quixoticquant"
 ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
 
-
-sectionPagesMenu = "main"
-
