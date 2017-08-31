@@ -211,13 +211,13 @@ At least here the idea of a 'level shift' occuring in migration in the mid 2000s
 But if you're happy to slum it with a 'C-' for data visualising data with integrity, you could do what the [Productivity Commission](http://www.pc.gov.au/inquiries/completed/migrant-intake/report/migrant-intake-report.pdf) does.  String it all together with the same colours, but add a footnote that you hope people read.
 
 
-![Productivity Commission, April 2016](images/pc plot 1.jpg){ width=50% }
+![Productivity Commission, April 2016](images/pc_plot_1.jpg){ width=50% }
 
 In their defence, those who make it to page 68 of their 730 page report may well be the kind of reader who reads footnotes.
 
 Or, if you're the dunce of the class and aiming for a 'D', then you could do what the Australian Bureau of Statistics does themselves in their official [pdf explanation](http://www.abs.gov.au/AUSSTATS/abs@.nsf/DetailsPage/3101.0Jun%202016?OpenDocument) for Series 3101 on Australian Demographic Statistics. They just use a tiny little gap in the line, as well as adding a footnote at the bottom of two other footnotes.  Why is that a complete and utter fail?  Because for anyone who reads graphs who has a modicum of common-sense about them (let alone those of us who paid attention when studying science, stats, or commerce) would know exactly what a gap in a line should represent.  You got it, a gap.  A missing data-point in an otherwise consistently recorded and defined stream of data.  So when normal people read ABS charts that have been cut-and-pasted by unscrupulous journalists at trashy magazines (in this case [David Scutt at Business Insider Australia](https://www.businessinsider.com.au/australian-population-growth-picks-up-as-immigration-hits-a-4-year-high-2017-3)) we all get absolutely the wrong impression.
 
-![Busines Insider Quoting ABS PDF](images//ABS-population-increase.jpg)
+![Busines Insider Quoting ABS PDF](images/ABS-population-increase.jpg)
 
 Of course Business Insider isn't actually trashy. But the job of a journalist should be to hold authorities to account, not mindlessly regurgitate the most carelss of their work, so Business Insider deserves a tut-tut in this case. 
 
