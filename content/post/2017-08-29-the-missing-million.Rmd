@@ -20,6 +20,7 @@ Imagine that one of the most important graphs for economic and policy planning w
 
 ```{r get_data, include=FALSE}
 library(tidyverse)
+library(stringr)
 library(gdata)
 library(lubridate)
 library(plotly)
@@ -228,7 +229,7 @@ But they're hardly the worst. A step worse than failing would be absolutely not 
 
 [Bernard Salt](https://assets.kpmg.com/content/dam/kpmg/pdf/2014/11/population-housing-infographic.pdf), the KPMG partner who specialises in demography and darling columnist for The Australian also falls in the 'don't realise, or don't care' category. Happy to footnote an annual estimate made on three quarters of data, but no mention of the definition shift in 2006.
 
-```{r, fig.align="center", out.width=70, fig.cap="Exctract from KPMG Immigration Infographic"}
+```{r, fig.align="center", fig.width = 100, fig.cap="Exctract from KPMG Immigration Infographic"}
 
 knitr::include_graphics("images/kpmg.png")
 ```
