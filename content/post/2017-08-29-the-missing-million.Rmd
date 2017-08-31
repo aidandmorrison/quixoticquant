@@ -26,6 +26,7 @@ library(plotly)
 library(UtilsQQ)
 library(ggplot2)
 
+
 sheet_310101 <- readxl::read_xls("data/310101.xls", sheet = 2)
 sheet_310101 <- good_names(sheet = sheet_310101)
 meta <- stash_meta(sheet_310101)
@@ -210,8 +211,8 @@ At least here the idea of a 'level shift' occuring in migration in the mid 2000s
 
 But if you're happy to slum it with a 'C-' for data visualising data with integrity, you could do what the [Productivity Commission](http://www.pc.gov.au/inquiries/completed/migrant-intake/report/migrant-intake-report.pdf) does.  String it all together with the same colours, but add a footnote that you hope people read.
 
+<img src = "images/pc_plot_1.jpg" align = "center"/>
 
-![Productivity Commission, April 2016](images/pc_plot_1.jpg){ width=50% }
 
 In their defence, those who make it to page 68 of their 730 page report may well be the kind of reader who reads footnotes.
 
@@ -226,6 +227,10 @@ But they're hardly the worst. A step worse than failing would be absolutely not 
 ![Cameron Kusher, Core Logic, 3 July 2017](images//Screen Shot 2017-08-25 at 10.30.23 am.png)
 
 [Bernard Salt](https://assets.kpmg.com/content/dam/kpmg/pdf/2014/11/population-housing-infographic.pdf), the KPMG partner who specialises in demography and darling columnist for The Australian also falls in the 'don't realise, or don't care' category. Happy to footnote an annual estimate made on three quarters of data, but no mention of the definition shift in 2006.
+
+```{r, fig.align="center", fig.width=200, fig.height=200, fig.cap="Exctract from KPMG Immigration Infographic"}
+knitr::include_graphics(str_replace_all("images/Screen Shot 2017-08-25 at 11.05.33 am.png", " ", "%20"))
+```
 
 ![Exctract from KPMG Immigration Infographic](images/Screen Shot 2017-08-25 at 11.05.33 am.png)
 
