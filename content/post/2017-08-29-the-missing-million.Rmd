@@ -228,11 +228,11 @@ But they're hardly the worst. A step worse than failing would be absolutely not 
 
 [Bernard Salt](https://assets.kpmg.com/content/dam/kpmg/pdf/2014/11/population-housing-infographic.pdf), the KPMG partner who specialises in demography and darling columnist for The Australian also falls in the 'don't realise, or don't care' category. Happy to footnote an annual estimate made on three quarters of data, but no mention of the definition shift in 2006.
 
-```{r, fig.align="center", fig.width=200, fig.height=200, fig.cap="Exctract from KPMG Immigration Infographic"}
-knitr::include_graphics(str_replace_all("images/Screen Shot 2017-08-25 at 11.05.33 am.png", " ", "%20"))
+```{r}
+print(getwd())
+knitr::include_graphics("images/kpmg.png")
 ```
 
-![Exctract from KPMG Immigration Infographic](images/Screen Shot 2017-08-25 at 11.05.33 am.png)
 
 What could possibly be worse than presenting bad data without the slightest apology or sign of awareness?  Easy.  You could be wrong, and really obnoxious about it.  Here the gong has to go to Leith Van Onselen from Macrobusiness, who has to be the head cheer-leader for the very small clutch of economists indulging in this dalliance with the 'population ponzi' explanation for mediocre economic performance of our economy.  In a trend that saddens me for a fun, insightul business blog which I otherwise love reading and pay money to subscribe to, Leith is slowly turning half of Macrobuiness into a thinly econo-veiled anti-immigration rant.  And he wheels out this graph and state-based ones (and longer ones with even more, larger definition shifts) [again](https://www.macrobusiness.com.au/2017/06/dick-smith-attacks-lucy-turnbulls-population-ponzi-scheme/), and [again](https://www.macrobusiness.com.au/2017/06/immigration-no-golden-goose-economy/), and [again](https://www.macrobusiness.com.au/2017/03/busting-immigrations-biggest-economic-myth/), and [again](https://www.macrobusiness.com.au/2017/04/even-domainfax-questioning-population-ponzi/) to explain every imginable economic ailment from [low wages](https://www.macrobusiness.com.au/2017/03/evidence-clear-immigration-reduces-wages/) to [crowded trains](https://www.macrobusiness.com.au/2017/07/population-ponzi-overruns-melbournes-trains/). 
 
