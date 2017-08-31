@@ -93,7 +93,9 @@ I mightn't have ever noticed, if I hadn't attempted to reproduce two columns in 
 
 Naturally I failed even after creating a little package of code to manage the necessary wrangling.  I wanted to assume that some simple addition of the Permanent and Long Term Arrivals would produce the 3101 Arrivals, and same with Departures, and the net of those would produce (or at least closely follow) the hallowed NOM.  Please enjoy chuckling at my naivety.  Infact the net Permanent and Long Term movements give a trend that's far higher than Net Overseas Migration.   The Net Short Term movements, on the other hand, used to be trivial, but had in recent decades had become quite large and negative.
 
+
 ```{r Movements_NOM, warning=FALSE, message= FALSE}
+
 
 
 sheet_310101 <- sheet_310101 %>% 
@@ -214,9 +216,11 @@ But if you're happy to slum it with a 'C-' for data visualising data with integr
 
 ```{r, fig.align="center", out.width = 400, fig.cap="Prod Commission..."}
 
+
 knitr::include_graphics("images/pc_plot_1.jpg")
 
 ```
+
 
 In their defence, those who make it to page 68 of their 730 page report may well be the kind of reader who reads footnotes.
 
