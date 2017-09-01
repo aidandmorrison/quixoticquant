@@ -206,7 +206,7 @@ At least here the idea of a 'level shift' occuring in migration in the mid 2000s
 
 But if you're happy to slum it with a 'C-' for data visualising data with integrity, you could do what the [Productivity Commission](http://www.pc.gov.au/inquiries/completed/migrant-intake/report/migrant-intake-report.pdf) does.  String it all together with the same colours, but add a footnote that you hope people read.
 
-```{r, fig.align="center", out.width = 600, fig.cap="Productivity Commission, 2016"}
+```{r, fig.align="center", out.width = 500, fig.cap="Productivity Commission, 2016"}
 
 
 knitr::include_graphics("images/pc_plot_1.jpg")
@@ -239,7 +239,7 @@ knitr::include_graphics("images//CLCameronKusher.png")
 
 [Bernard Salt](https://assets.kpmg.com/content/dam/kpmg/pdf/2014/11/population-housing-infographic.pdf), the KPMG partner who specialises in demography and darling columnist for The Australian also falls in the 'don't realise, or don't care' category. Happy to footnote an annual estimate made on three quarters of data, but no mention of the definition shift in 2006.
 
-```{r, fig.align="center", out.width = 800, fig.cap="Exctract from KPMG Immigration Infographic"}
+```{r, fig.align="center", out.width = 700, fig.cap="Exctract from KPMG Immigration Infographic"}
 
 knitr::include_graphics("images/kpmg.png")
 
@@ -249,7 +249,7 @@ knitr::include_graphics("images/kpmg.png")
 
 What could possibly be worse than presenting bad data without the slightest apology or sign of awareness?  Easy.  You could be wrong, and really obnoxious about it.  Here the gong has to go to Leith Van Onselen from Macrobusiness, who has to be the head cheer-leader for the very small clutch of economists indulging in this dalliance with the 'population ponzi' explanation for mediocre economic performance of our economy.  In a trend that saddens me for a fun, insightul business blog which I otherwise love reading and pay money to subscribe to, Leith is slowly turning half of Macrobuiness into a thinly econo-veiled anti-immigration rant.  And he wheels out this graph and state-based ones (and longer ones with even more, larger definition shifts) [again](https://www.macrobusiness.com.au/2017/06/dick-smith-attacks-lucy-turnbulls-population-ponzi-scheme/), and [again](https://www.macrobusiness.com.au/2017/06/immigration-no-golden-goose-economy/), and [again](https://www.macrobusiness.com.au/2017/03/busting-immigrations-biggest-economic-myth/), and [again](https://www.macrobusiness.com.au/2017/04/even-domainfax-questioning-population-ponzi/) to explain every imginable economic ailment from [low wages](https://www.macrobusiness.com.au/2017/03/evidence-clear-immigration-reduces-wages/) to [crowded trains](https://www.macrobusiness.com.au/2017/07/population-ponzi-overruns-melbournes-trains/). 
 
-```{r, fig.align="center", out.width = 600, fig.cap="Macrobusiness reposting a NAB graphic, 2017"}
+```{r, fig.align="center", out.width = 500, fig.cap="Macrobusiness reposting a NAB graphic, 2017"}
 
 knitr::include_graphics("images/MacroNab.png")
 
