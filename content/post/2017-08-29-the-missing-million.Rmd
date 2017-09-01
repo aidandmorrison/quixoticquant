@@ -100,7 +100,7 @@ I mightn't have ever noticed the definition shift, if I hadn't attempted to repr
 Naturally I failed, even after creating a little package of code in R to manage the necessary wrangling.  I wanted to assume that some simple addition of the Permanent and Long Term Arrivals would produce the 3101 Arrivals, and same with Departures, and the net of those would produce (or at least closely follow) the hallowed NOM.  Please enjoy chuckling at my naivety.  Infact the net Permanent and Long Term movements give a trend that's far higher than Net Overseas Migration.   The Net Short Term movements, on the other hand, used to be trivial, but had in recent decades had become quite large and negative.
 
 
-```{r Movements_NOM, warning=FALSE, message= FALSE}
+```{r, fig.align="center", Movements_NOM, warning=FALSE, message= FALSE, fig.cap = "The standard shape of the official ABS Net Overseas Migration Series"}
 
 
 
@@ -190,7 +190,7 @@ plot <- ggplot(sheet_310101, aes(x = Date, text = as_date(Date)))+
   geom_vline(xintercept = as.numeric(sheet_340101$Date[date_change]), linetype = 4, size = .8) +
   geom_text(x = as.numeric(sheet_340101$Date[date_change - 60]), y = 300000, label =  "Break in 
             Methodology", size =4)+
-  labs(title = "Marking the two series") +
+  labs(title = "Net Overseas Migration") +
   ylab("asd")+
   scale_y_continuous(labels = scales::comma) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
@@ -225,7 +225,7 @@ knitr::include_graphics("images/ABS-population-increase.jpg")
 
 ```
 
-Of course Business Insider isn't actually trashy. But the job of a journalist should be to hold authorities to account, not mindlessly regurgitate the most carelss of their work.
+Of course Business Insider isn't actually trashy. But the job of a journalist should be to hold authorities to account, not mindlessly regurgitate the most careless of their work.
 
 But they're hardly the worst. A step worse than failing would be absolutely not caring (or realising?), and presenting the data without even the slightest gap, footnote, or explanation.  Like the Reserve Bank of Australia did in [August 2015](http://www.rba.gov.au/publications/smp/2015/aug/graphs/graph-d1.html), in a light-weight document known as the Statment on Monetary Policy. The National Australia Bank does exactly the same thing when they produce [reports on Population Growth](http://business.nab.com.au/wp-content/uploads/2017/03/nab-thematic-population-growth-strengthens.pdf), as did Gareth Aird from [Commonwealth Bank recently](http://www.abc.net.au/news/2017-07-12/population-growth-masking-australian-economic-weakness/8700288).  Just as wrong and definitely not caring about it are all the property market data traders, like [Core Logic](https://www.corelogic.com.au/news/migration-remains-the-key-driver-of-population-growth#.WZ9vbncjG8U), who produce graphs like this all the time:
 
@@ -465,7 +465,7 @@ plot <-ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
   labs(title = "Discrepancy")+
   geom_vline(xintercept = as.numeric(sheet_340101$Date[date_change]), linetype = 4, size = 0.4) +
   scale_y_continuous("Number")+
-  geom_text(x = as.numeric(sheet_340101$Date[date_change - 350]), y = 750000, label =  "Break in 
+  geom_text(x = as.numeric(sheet_340101$Date[date_change - 40]), y = 750000, label =  "Break in 
             Methodology", size =3)+
   scale_y_continuous(labels = scales::comma) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
@@ -476,7 +476,9 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-This also has a pretty dramatic impact if you calculate an alternative population, which would be the "Physically Present Population".  Combining the far more rigorous and clear-cut Net Overseas Movements with Births and Deaths (which one should also hope is a pretty clean-cut stat) would produce, with great confidence a "Physically Present Population". 
+This also has a pretty dramatic impact if you calculate an alternative population, which would be the "Physically Present Population". Using the arbitrarily defined estimate we call ERP is the equivalent of pretending that we have another two Tasmanias worth of people dangling unnoticed somewhere off the bottom of mainland Australia.  But those two Tasmania's worth of people will be roughly as rich and productive as the average Australian, i.e. much more like New South Wales and Victoria.  
+
+I can't see any reason why we shouldn't pay more attention to that number.  Combining the rigorous, cleanly defined, universally colleced Net Overseas Movements with Births and Deaths (which one should also hope well collected) would produce, a time series we could all have condfidence in.  Furthermore, we could release it monthly or quarterly with almost no delay, rather than waiting for the full 16 months required for Net Overseas Migration to be calculated, and amusing ourselves in the fog of confusion created by all of ABS's opaque estimates in the time-being.  Here's what such a series, plotted quarterly, but calculated as the sum of the previous 12 months:
 
 ```{r pop_change_ppp, warning=FALSE, message= FALSE}
 
@@ -527,7 +529,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-And the comparison the two when expressed as a rate:
+And here's the comparison the two when expressed as a rate, side by side, with some period averages calculated:
 
 ```{r pop_change_erp_rate, warning=FALSE, message= FALSE}
 joint_21st <- joint_sheet_310101 %>% 
@@ -568,7 +570,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-Here the baselessness of the ponzi story is exposed.  We're not importing masses of people just to delay the impacts of population ageing, so that a later generation can deal with that propblem.  We're issuing long-term visas to attract new people to replace the rising fraction of Australian's who still claim as our own, but aren't actually here anything like 'full-time'. The Net Overseas Migration metrics have completely failed to capture the story.
+Here the baselessness of the ponzi story is exposed.  We're not importing masses of people just to delay the impacts of population ageing, so that a later generation can deal with that propblem.  We're issuing long-term visas to attract new people to replace the rising fraction of Australian's who are leaving, officially only 'short term' but aren't actually here anything like 'full-time'. The Net Overseas Migration metrics have completely failed to capture the correct story.
 
 In a generous moment I might conced that the arbitrarily defined NOM might still be interesting to track for some purposes, for example in property prices. Aussies are likely to hold onto their homes even while the spend more time overseas (often leaving them empty), and an investor who spends little time here can push up property prices. But the moment someone starts claiming that immigrants are congesting our roads and there's no way we can build enough infrastructure can keep up with their rate of arrival, (see Cory Bernardi and Mark Latham [here](https://www.youtube.com/watch?v=28ZO4BXRq-Q)) it's time to grip your sides and start rolling around in the aisles in laughter. _That_ particular rate of growth has unequivocally slowed.  People who are overseas don't drive their cars on the M4 in Sydney, or cram up the train stations in Melbourne.  
 
