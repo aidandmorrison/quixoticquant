@@ -572,7 +572,7 @@ plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
                       breaks = c("Increase in PPP Annual Rate", "Increase in ERP Annual Rate", "Average 2000-2017 ERP growth rate", "Average 2000-2017 PPP growth rate", "Average 1982-1999 PPP growth rate", "Average 1982-1999 ERP growth rate"),
                       values = c("orange", "turquoise",  "orange3", "turquoise3", "red", "blue"))+
   labs(title = "Comparison of Alternative Population Growth Rates")+
-  scale_y_continuous(labels = scales::percent, limits = c(0.0054, 0.033)) +
+  scale_y_continuous(labels = scales::percent, limits = c(0.0054, 0.025)) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
@@ -581,42 +581,40 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-Here the alternative to Australia's runaway migration program can be seen.  It is possible that for some factors the NOM might be a relevant predictory, for example in property. Aussies are likely to hold onto their homes even while the spend more time overseas, and ab investor who spends little time here can push up property prices. But the moment someone starts claiming that immigrants are congesting our roads and we should cut immigration because our infrastructure can't keep up with their rate of arrival, (see Cory Bernardi and Mark Latham [here](https://www.youtube.com/watch?v=28ZO4BXRq-Q)), or read Macrobusiness any day of the week, and it's time to grip your sides and start rolling around in the aisles in laughter. _That_ particular rate of growth has unequivocally slowed.  People who are overseas don't drive their cars on the M4 in Sydney, or cram up the train stations in Melbourne.  It's more likely Australia's economy is shedding high-paying jobs, and the most skilled and mobile in our economy are chasing the work around the world.
+Here the alternative to Australia's runaway migration program can be seen.  
 
-The mind boggles at the slew 
+It is possible that for some factors the NOM might be a relevant predictory, for example in property. Aussies are likely to hold onto their homes even while the spend more time overseas, and an investor who spends little time here can push up property prices. But the moment someone starts claiming that immigrants are congesting our roads and there's no way our infrastructure can keep up with their rate of arrival, (see Cory Bernardi and Mark Latham [here](https://www.youtube.com/watch?v=28ZO4BXRq-Q)), or read Macrobusiness any day of the week, and it's time to grip your sides and start rolling around in the aisles in laughter. _That_ particular rate of growth has unequivocally slowed.  People who are overseas don't drive their cars on the M4 in Sydney, or cram up the train stations in Melbourne.  
 
-Want confirmation?  Lucky we had a [census](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/036) last year from which ABS has published some stats. The Census found that in the final quarter we had 23,401,892 people. And yet according to the ABS series 3101, our 'Estimated Resident Population' is 24,385,600. Almost exactly a million too much. 
-Or, to be precise, the cumulative discrepancy between NOM and Net Movements matches the discrepancy between the Estimated Resident Population and the Census Population almost precisely, just 2242 people off, or 0.37%. 
+It's also ridiculous that the million officially resident - but presently absent - people constitute a ["growing reserve arbmy of labour"](http://www.abc.net.au/news/2017-07-12/population-growth-masking-australian-economic-weakness/8700288) that's bidding down the prices of local labour.  The reality is that at any given moment there's actually a million-strong army of non-present residents, many of whom are probably chasing higher incomes - but overseas. 
 
-```{r calc, echo=TRUE}
-(24307200 - 23401892) - 992450
-((24307200 - 23401892) - 992450)/23401892
-```
-So the ABS has confirmed with incredible precision that the series on population that the publish is utterly meaningless, not even accurate to within a million people, and the series they don't publish and bury within separate unweildy spreadsheets in under different headings recorded in different time intervals is almost perfectly accurate.
+The mind boggles at the slew of other statistics that this could seriously affect if the ERP was replaced with PPP.  It might explain the consistently disappointing nominal GDP growth that Australia has been experiencing for some time, which assumes that a comfy 1.5% growth can come from population increases, before any productivity is added. And plenty of labour statistics are bound to be out aswell, since surveys of local addresses wouldn't tell us much about how hard the army of non-present residents actually work (or what they earn) while they're not here.  But ABS scales up the results, [using ERP](http://www.abs.gov.au/AUSSTATS/abs@.nsf/Lookup/6202.0Explanatory%20Notes1Jul%202017?OpenDocument), to include them in the labour force. Lacklustre wage growth, poor tax revenue, almost everything that the government relies on to make proper policy decisions could be woefully distorted, but exploring that mess will also have to wait until a later post.
 
-As the premier body for Australian Statistics, that's an disgrace on all accounts. 
+It's also perfectly possible that plenty of other developed countries have also been effectively double-counting an increasing part of their populations.  In my searching of ABS definitions, I found no mention of needing to adhere to any international rules or standards to ensure that the world's population added up.  Perhaps the miscounting of populations could be added to the [list](https://www.vox.com/2016/8/1/12131216/theories-gdp-growth-slow) of possible explanations of low-growth and productivity decline in the Western World.  Depending on time, and reader interest, that may be one I'll explore further. 
 
-Just because I love graphs, I"ll include just one more so that you can join the dots between when the definitions worked to define NOM and ERP and the two subsequent cesus results.
+But before signing off for now, I'll give the ABS one final lashing, in response to a nasty twist that emerged late in my research for this post, when trying to get confirmation of my hypothesis from the recent Census.  Yes, it turned out I was naive again.  The quick and obvious numbers from [ABS Quickstat](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/036) for 2016 and 2011 ("Persons count based on place of usual residence on Census night" which I've plotted below) actually aren't directly comparable to either the ERP or PPP.  But finding the ones that are turned out to be, well, not that easy.  Let's just say that ABS knows what it's like to realise they've been over-estimating population by a few hundred thousand people. [Last time that happened](http://www.abs.gov.au/AUSSTATS/abs@.nsf/Previousproducts/3101.0Feature%20Article3Jun%202012?opendocument&tabname=Summary&prodno=3101.0&issue=Jun%202012&num=&view=) (2011) they smeared the error out over the previous two decades so that no-one would notice. Unpicking that mess, and relating it to the observations above will be the subject of my next post.
+
+
 
 ```{r ERP_Census, warning=FALSE, message= FALSE}
 Date <- c(as.POSIXct(as_date( "2011-09-09 GMT")))
-Cen.Pop <- c( (21727158))
+Cen.Pop <- c( (10634012 + 10873706))
 Census_2011 <- tibble(Date, Cen.Pop)
 
 Date <- c(as.POSIXct(as_date("2016-09-09 GMT")))
-Cen.Pop <- c(23717400)
+Cen.Pop <- c(23401892)
 Census_2016 <- tibble(Date, Cen.Pop)
 
 plot<- ggplot(joint_sheet_310101, aes(x = Date, y = Est.Res.Pop.ERP.Aus, text = as_date(Date)))+
   #geom_vline(xintercept = as.numeric(sheet_340101$Date[date_change]), linetype = 4, size = 0.4) +
   geom_line(aes(y = Est.Res.Pop.ERP.Aus, col = "Official ERP"), size =0.8)+
   geom_line(aes(y = (Est.Res.Pop.ERP.Aus - cum.discrepancy), colour = "Net Movements, Births, Deaths"), linetype = 3, size = 1)+
-  geom_point(data = Census_2011, aes(x = Date, y = Cen.Pop, colour = "Census 2011"),  shape = 4, size = 3)+ 
-  geom_point(data = Census_2016, aes(x = Date, y = Cen.Pop, colour = "Census 2016"), shape = 4, size = 3)+
+  geom_point(data = Census_2011, aes(x = Date, y = Cen.Pop, colour = "Census 2011 PURP"),  shape = 4, size = 3)+ 
+  geom_point(data = Census_2016, aes(x = Date, y = Cen.Pop, colour = "Census 2016 PURP"), shape = 4, size = 3)+
   scale_y_continuous(labels = scales::comma) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
-  labs(title = "Comparing Census Population
-       with ABS 'Estimated Resident Population (ERP)")
+  labs(title = "Estimated Resident Population (ERP), 
+       Physically Present Population(PPP),
+Recent Census Place of Ususal Residence (PURP) Counts")
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
   layout(margin=list(l=100, t = 100, b = 100, r = 100),
@@ -625,4 +623,4 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-How the ERP can be taken seriously after more than a decade of consistenly not performing incredible. 
+QQ.
