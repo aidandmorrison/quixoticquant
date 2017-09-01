@@ -141,12 +141,13 @@ plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
                       breaks = c("Net Short Term Movements", "Net Overseas Migration", "Net Permanent and Long Term"),
                       values = c("red", "black", "green"))+
   labs(title = "Net Overseas Migration with Net Short and Long Term Movements")+
-  scale_y_continuous(labels = scales::comma) +
+  scale_y_continuous(labels = scales::comma, limits = c(-300000, 460000)) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
   layout(margin=list(l=100, t = 100, b = 100, r = 100),
          legend = list(x = 0.01, y = 0.99))
+
 
 ```
 
@@ -168,7 +169,6 @@ Undoubtedly the best way is to just do two different graphs, and lament the fact
 
 ```{r NOM_12_12, warning=FALSE, message= FALSE}
 
-
 plot1 <- ggplot(sheet_310101, aes(x = Date, y = NOM.12.12.Pre.12, text = as_date(Date)))+
   geom_line(size = 0.8)+
   labs(title = "NOM using the 12-month-continuous stay or absence
@@ -178,6 +178,9 @@ plot1 <- ggplot(sheet_310101, aes(x = Date, y = NOM.12.12.Pre.12, text = as_date
 
 ggplotly(plot1, tooltip = c("text", "y")) %>% 
   layout(margin=list(l=100, t = 100))
+```
+
+```{r NOM_12_16, warning=FALSE, message= FALSE}
 
 plot2 <- ggplot(sheet_310101, aes(x = Date, y = NOM.12.16.Pre.12, text = as_date(Date)))+
   geom_line(size = 0.8)+
@@ -191,7 +194,7 @@ ggplotly(plot2, tooltip = c("text", "y")) %>%
   
   
 ```
-This presentation gets top marks for integrity in your quantitative methods course.  It poses the proper question: Why does the ABS not have a longer data series on immigration? (Spoiler alert: it does, it's just not giving it to us.)
+This presentation gets good marks for integrity in your quantitative methods course.  It poses the proper question: Why does the ABS not have a longer data series on immigration? (Spoiler alert: it does, it's just not giving it to us.)
 
 Or, you could maybe accept a 'B' grade for integrity, and string all the data together on the same plot and axis, but use some other clear devices (like lines and colours) to indicate that the data is infact not a single continuous series.
 
@@ -210,7 +213,8 @@ plot <- ggplot(sheet_310101, aes(x = Date, text = as_date(Date)))+
                       breaks = c("12/12 Rule Definition of NOM", "12/16 Rule Definition of NOM"),
                       values = c( "red", "magenta1"))+
   geom_vline(xintercept = as.numeric(sheet_340101$Date[date_change]), linetype = 4, size = .8) +
-  geom_text(x = as.numeric(sheet_340101$Date[date_change - 120]), y = 300000, label =  "Break in Methodology", size =4)+
+  geom_text(x = as.numeric(sheet_340101$Date[date_change - 60]), y = 300000, label =  "Break in 
+            Methodology", size =4)+
   labs(title = "Marking the two series") +
   ylab("asd")+
   scale_y_continuous(labels = scales::comma) +
@@ -286,10 +290,13 @@ plot <- ggplot(sheet_arr_dep, aes(x = Date, text = as_date(Date)))+
   scale_colour_manual("",
                       breaks = c("Total Arrivals Monthly", "Total Departures Monthly"),
                       values = c("green", "orange"))+
-  labs(title = "All Arrivals and Departures")+
-  scale_y_continuous("Monthly Movements")
+  labs(title = "All Arrivals and Departures Monthly")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 100, r = 100))
+  layout(margin=list(l=100, t = 100, b = 70, r = 100),
+         legend = list(y = 0.9, x = 0.1))
 
 ```
 
@@ -299,11 +306,12 @@ And here's how that nets out:
 
 
 plot <- ggplot(sheet_arr_dep, aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep, colour = "Total Monthly Net Movements" ))+
-  labs(title = "All Net Movements (Positive is net Arrivals)")+
-  scale_y_continuous("Monthly Movements")
+  geom_line(aes(y = Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep ))+
+  labs(title = "Net Monthly Movements (Positive is net Arrivals)")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 100, r = 100))
+  layout(margin=list(l=100, t = 100, b = 70, r = 100))
 
 ```
 
@@ -331,7 +339,8 @@ plot <- joint_sheet_310101 %>%
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
   
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 70, r = 50))
+  layout(margin=list(l=100, t = 100, b = 70, r = 50),
+         legend = list(y = 0.98, x = 0.4))
 
 
 ```
@@ -367,7 +376,8 @@ plot <- joint_sheet_310101 %>%
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
   
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 100, r = 100))
+  layout(margin=list(l=100, t = 100, b = 70, r = 100),
+         legend = list(y = 0.95, x = 0.3))
 
 
 ```
@@ -389,13 +399,15 @@ plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
   scale_colour_manual("",
                       breaks = c("Total Arrivals 12 Months", "Total Departures 12 Months", "Net Movements 12 Months"),
                       values = c("black", "green", "orange"))+
-  geom_text(x = as.numeric(sheet_340101$Date[date_change - 10]), y = 15000000, label =  "AUD < 0.85 USD", size =3)+
+  geom_text(x = as.numeric(sheet_340101$Date[date_change - 10]), y = 5000000, label =  "AUD below 
+            0.85 USD", size =3)+
   labs(title = "All Arrivals and Departures")+
   scale_y_continuous("Monthly Movements")+
   scale_y_continuous(labels = scales::comma) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 100, r = 100))
+  layout(margin=list(l=100, t = 100, b = 70, r = 100),
+         legend = list(y = 0.9, x = 0.1))
 
 ```
 
@@ -426,7 +438,7 @@ plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date), y = Net.O
   scale_y_continuous(labels = scales::percent) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 100, r = 100))
+  layout(margin=list(l=100, t = 100, b = 70, r = 100))
 
 
 ```
@@ -445,7 +457,7 @@ plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date), y = net.m
   scale_y_continuous(labels = scales::percent) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 100, r = 100))
+  layout(margin=list(l=100, t = 100, b = 70, r = 100))
 
 
 ```
@@ -467,12 +479,14 @@ plot <-ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
   labs(title = "Discrepancy")+
   geom_vline(xintercept = as.numeric(sheet_340101$Date[date_change]), linetype = 4, size = 0.4) +
   scale_y_continuous("Number")+
-  geom_text(x = as.numeric(sheet_340101$Date[date_change - 70]), y = 750000, label =  "Break in Methodology", size =3)+
+  geom_text(x = as.numeric(sheet_340101$Date[date_change - 350]), y = 750000, label =  "Break in 
+            Methodology", size =3)+
   scale_y_continuous(labels = scales::comma) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
   
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 100, r = 100))
+  layout(margin=list(l=100, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
 
 ```
 
@@ -485,17 +499,19 @@ plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
   geom_line(aes(y = net.movements.Pre.12m, col = "Net Movements Prev 12 Months"), size = .8)+
   #geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m, col = "Net Overseas Migration Prev 12 Months"), size = .8)+
   #geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in Estimated Resident Population Prev 12 Months"), size = .8)+
-  geom_line(aes(y = net.movements.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in Physically Present Population Prev 12 Months"), size = .8)+
+  geom_line(aes(y = net.movements.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in PPP Prev 12 Months"), size = .8)+
   scale_colour_manual("", 
-                      breaks = c("Natural Increase Prev 12 Months", "Net Movements Prev 12 Months", "Increase in Physically Present Population Prev 12 Months"),
+                      breaks = c("Natural Increase Prev 12 Months", "Net Movements Prev 12 Months", "Increase in PPP Prev 12 Months"),
                       values = c("black", "green", "blue"))+
-  labs(title = "Annual Change in PPP by Component, and Combined")+
+  labs(title = "Annual Change in Physically Present Population (PPP) 
+       by Component, and Combined")+
   scale_y_continuous("Number")+
-  scale_y_continuous(labels = scales::comma) +
+  scale_y_continuous(labels = scales::comma, limits = c(-30000, 600000)) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 100, r = 100))
+  layout(margin=list(l=100, t = 100, b = 70, r = 70),
+         legend = list(y = 0.95, x = 0.2))
   
 ```
 
@@ -507,17 +523,19 @@ plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
   geom_line(aes(y = Nat.Inc.Aus.Pre.12m, col = "Natural Increase Prev 12 Months"), size = .8)+
   #geom_line(aes(y = net.movements.Pre.12m, col = "Net Movements Prev 12 Months"), size = .8)+
   geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m, col = "Net Overseas Migration Prev 12 Months"), size = .8)+
-  geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in Estimated Resident Population Prev 12 Months"), size = .8)+
+  geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in ERP Prev 12 Months"), size = .8)+
   #geom_line(aes(y = net.movements.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in Physically Present Population Prev 12 Months"), size = .8)+
   scale_colour_manual("", 
-                      breaks = c("Natural Increase Prev 12 Months", "Net Overseas Migration Prev 12 Months", "Increase in Estimated Resident Population Prev 12 Months"),
+                      breaks = c("Natural Increase Prev 12 Months", "Net Overseas Migration Prev 12 Months", "Increase in ERP Prev 12 Months"),
                       values = c("black", "green", "red"))+
-  labs(title = "Annual Change in ABS's ERP by Component, and Combined")+
-  scale_y_continuous(labels = scales::comma) +
+  labs(title = "Annual Change in Estimated Resident Population (ERP) 
+       by Component, and Combined")+
+  scale_y_continuous(labels = scales::comma, limits = c(-30000, 600000)) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 100, r = 100))
+  layout(margin=list(l=100, t = 100, b = 70, r = 70),
+         legend = list(y = 0.95, x = 0.1))
   
 
 ```
@@ -544,21 +562,22 @@ joint_sheet_310101 <- joint_sheet_310101 %>%
   mutate(old.ERP.rate = case_when(Date < "2000-01-01 GMT" ~ oldERPrate))
 
 plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = (Net.Ove.Mig.Aus.Pre.12m + Nat.Inc.Aus.Pre.12m)/Est.Res.Pop.ERP.Aus, col = "Increase in Estimated Resident Population Annual Rate"), size = .8)+
-  geom_line(aes(y = (net.movements.Pre.12m + Nat.Inc.Aus.Pre.12m)/Phy.Pre.Pop.PPP.Aus, col = "Increase in Physically Present Population Annual Rate"), size = .8)+
-  geom_line(aes(y = mod.PPP.rate, col = "Average 2000-2017 PPP growth rate"), size = 1, linetype = 4)+
-  geom_line(aes(y = mod.ERP.rate, col = "Average 2000-2017 ERP growth rate"), size = .8, linetype = 3)+
-  geom_line(aes(y = old.PPP.rate, col = "Average 1982-1999 PPP growth rate"), size = 1, linetype = 4)+
-  geom_line(aes(y = old.ERP.rate, col = "Average 1982-1999 ERP growth rate"), size = .8, linetype = 3)+
+  geom_line(aes(y = (Net.Ove.Mig.Aus.Pre.12m + Nat.Inc.Aus.Pre.12m)/Est.Res.Pop.ERP.Aus, col = "Increase in ERP Annual Rate"), size = .8)+
+  geom_line(aes(y = (net.movements.Pre.12m + Nat.Inc.Aus.Pre.12m)/Phy.Pre.Pop.PPP.Aus, col = "Increase in PPP Annual Rate"), size = .8)+
+  geom_line(aes(y = mod.PPP.rate, col = "Average 2000-17 PPP growth rate"), size = 1, linetype = 4)+
+  geom_line(aes(y = mod.ERP.rate, col = "Average 2000-17 ERP growth rate"), size = .8, linetype = 3)+
+  geom_line(aes(y = old.PPP.rate, col = "Average 1982-99 PPP growth rate"), size = 1, linetype = 4)+
+  geom_line(aes(y = old.ERP.rate, col = "Average 1982-99 ERP growth rate"), size = .8, linetype = 3)+
   scale_colour_manual("", 
-                      breaks = c("Increase in Estimated Resident Population Annual Rate", "Increase in Estimated Resident Population Annual Rate", "Average 2000-2017 ERP growth rate", "Average 2000-2017 PPP growth rate", "Average 1982-1999 PPP growth rate", "Average 1982-1999 ERP growth rate"),
+                      breaks = c("Increase in PPP Annual Rate", "Increase in ERP Annual Rate", "Average 2000-2017 ERP growth rate", "Average 2000-2017 PPP growth rate", "Average 1982-1999 PPP growth rate", "Average 1982-1999 ERP growth rate"),
                       values = c("orange", "turquoise",  "orange3", "turquoise3", "red", "blue"))+
   labs(title = "Comparison of Alternative Population Growth Rates")+
-  scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent, limits = c(0.0054, 0.033)) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 100, r = 100))
+  layout(margin=list(l=70, t = 100, b = 70, r = 60),
+         legend = list( x = 100))
 
 ```
 
@@ -600,7 +619,8 @@ plot<- ggplot(joint_sheet_310101, aes(x = Date, y = Est.Res.Pop.ERP.Aus, text = 
        with ABS 'Estimated Resident Population (ERP)")
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 100, r = 100))
+  layout(margin=list(l=100, t = 100, b = 100, r = 100),
+         legend = list(y = 0.95, x = 0.1))
 
 
 ```
