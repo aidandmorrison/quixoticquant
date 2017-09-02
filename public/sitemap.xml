@@ -23,6 +23,12 @@
   </url>
   
   <url>
+    <loc>/tags/ausecon/</loc>
+    <lastmod>2017-08-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/categories/</loc>
     <priority>0</priority>
   </url>
@@ -44,7 +50,19 @@
   </url>
   
   <url>
+    <loc>/categories/economics/</loc>
+    <lastmod>2017-08-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/tags/immigration/</loc>
+    <lastmod>2017-08-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/migration/</loc>
     <lastmod>2017-08-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
@@ -57,6 +75,12 @@
   
   <url>
     <loc>/</loc>
+    <lastmod>2017-08-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/statistics/</loc>
     <lastmod>2017-08-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
