@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Quixotic Quant</title>
-    <link>/post/</link>
-    <description>Recent content in Posts on Quixotic Quant</description>
+    <title>Migration on Quixotic Quant</title>
+    <link>/categories/migration/</link>
+    <description>Recent content in Migration on Quixotic Quant</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 29 Aug 2017 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/categories/migration/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -18,16 +18,6 @@
       
       <guid>/post/the-missing-million/</guid>
       <description>It’s time that someone took a proper tilt at Australia’s high migration rate. No, I don’t mean like Dick Smith, splashing millions on an advertising campaign arguing that such a high rate is unsustainable and that we should return down to previous levels. I mean taking a few hours with the data source (the Australian Bureau of Statistics website) and an R session to figure out whether Australia’s migration rate actually is any higher than it was at previous levels.</description>
-    </item>
-    
-    <item>
-      <title>About the Quixotic Quant Blog</title>
-      <link>/post/opening-remarks/</link>
-      <pubDate>Sun, 20 Aug 2017 00:00:00 +0000</pubDate>
-      
-      <guid>/post/opening-remarks/</guid>
-      <description>I think it’s worth a short post to explain where the name ‘Quixotic Quant’ came from.
-Quixotic This word sums up my intent to use this blog to ‘tilt at windmills’, as inspired by Don Qixote. By ‘tilt’ I mean it as it’s meant in jousting. Take a direct charge against your opponent and try to knock them off their horse, hopefully have some fun and amuse onlookers while you’re at it.</description>
     </item>
     
   </channel>
