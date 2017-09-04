@@ -2,7 +2,7 @@ baseurl = "/"
 relativeurls = true
 languageCode = "en-us"
 title = "Quixotic Quant"
-googleAnalytics = ""
+googleAnalytics = "UA-93223622-2"
 disqusShortname = "quixoticquant"
 ignoreFiles = ["\\.Rmd$", "_files$", "_cache$"]
 

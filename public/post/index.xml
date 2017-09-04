@@ -6,28 +6,28 @@
     <description>Recent content in Posts on Quixotic Quant</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 29 Aug 2017 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 04 Sep 2017 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>The Missing Million</title>
+      <title>The Missing Million: Is Australia&#39;s migration rate actually high?</title>
       <link>/post/the-missing-million/</link>
-      <pubDate>Tue, 29 Aug 2017 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 04 Sep 2017 00:00:00 +0000</pubDate>
       
       <guid>/post/the-missing-million/</guid>
-      <description>It’s time that someone took a proper tilt at Australia’s high migration rate. No, I don’t mean like Dick Smith, splashing millions on an advertising campaign arguing that such a high rate is unsustainable and that we should return down to previous levels. I mean taking a few hours with the data source (the Australian Bureau of Statistics website) and an R session to figure out whether Australia’s migration rate actually is any higher than it was at previous levels.</description>
+      <description>It’s time that someone took a proper tilt at Australia’s high migration rate. No, I don’t mean like Dick Smith, splashing millions on an advertising campaign arguing that such a high rate is unsustainable and that we should return down to previous levels. I mean taking a few hours with the data source to figure out whether Australia’s migration rate actually is any higher than it was at previous levels.</description>
     </item>
     
     <item>
       <title>About the Quixotic Quant Blog</title>
       <link>/post/opening-remarks/</link>
-      <pubDate>Sun, 20 Aug 2017 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 25 Aug 2017 00:00:00 +0000</pubDate>
       
       <guid>/post/opening-remarks/</guid>
       <description>I think it’s worth a short post to explain where the name ‘Quixotic Quant’ came from.
-Quixotic This word sums up my intent to use this blog to ‘tilt at windmills’, as inspired by Don Qixote. By ‘tilt’ I mean it as it’s meant in jousting. Take a direct charge against your opponent and try to knock them off their horse, hopefully have some fun and amuse onlookers while you’re at it.</description>
+Quixotic This word sums up my intent to use this blog to ‘tilt at windmills’, as inspired by Don Quixote. By ‘tilt’ I mean it as it’s meant in jousting. Take a direct charge against an idea and try to topple it, or at least have an exciting clash of intellectual arms, and hopefully have some fun and amuse onlookers while you’re at it.</description>
     </item>
     
   </channel>
