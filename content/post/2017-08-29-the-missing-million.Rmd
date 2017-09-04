@@ -3,7 +3,7 @@ title: "The Missing Million: Is Australia's migration rate actually high?"
 author: Aidan
 date: '2017-09-04'
 slug: the-missing-million
-thumbnail: "images/flatline.png"
+thumbnail: "images/flatline2.png"
 categories:   
   - Demographics
   - Economics
@@ -593,7 +593,7 @@ The mind boggles at the slew of other statistics that this could seriously affec
 
 It's also perfectly possible that plenty of other developed countries have also been effectively double-counting an increasing part of their populations.  In my searching of ABS definitions, I found no mention of needing to adhere to any international rules or standards to ensure that the world's population added up.  Perhaps the miscounting of populations could be added to the [list](https://www.vox.com/2016/8/1/12131216/theories-gdp-growth-slow) of possible explanations of low-growth in the Western World.
 
-But before signing off for now, I'll give the ABS one final lashing, this time for a nasty twist that emerged late in my research for this post, when trying to get confirmation of my hypothesis from the recent Census.  Yes, it turned out I was naive again, nothing with an ABS stat is going to be quick.  The obvious numbers from [ABS Quickstat](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/036) for 2016 and 2011 ("Persons count based on place of usual residence on Census night" known as PURP, which I've plotted below) actually aren't directly comparable to either the ERP or PPP.  But finding the ones that are turned out to be, well, not that easy, particularly if you don't trust ABS estimates or imputation.  Let's just say that ABS knows what it's like to realise they've been over-estimating population by a few hundred thousand people. [Last time that happened](http://www.abs.gov.au/AUSSTATS/abs@.nsf/Previousproducts/3101.0Feature%20Article3Jun%202012?opendocument&tabname=Summary&prodno=3101.0&issue=Jun%202012&num=&view=) (in 2011) they smeared the error out over the previous two decades so that no-one would notice. Unpicking the possible distortions that that might have sewn into all these figures, and relating it to the observations above will occupy the subject of another post soon.
+But before signing off for now, I'll have one more dig at the ABS, this time for a nasty twist that emerged late in my research for this post, when trying to get confirmation of my hypothesis from the recent Census.  Yes, it turned out I was naive again, nothing with an ABS stat is going to be quick.  The obvious numbers from [ABS Quickstat](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/036) for 2016 and 2011 ("Persons count based on place of usual residence on Census night" known as PURP, which I've plotted below) actually aren't directly comparable to either the ERP or PPP.  But finding the ones that are turned out to be, well, not that easy, particularly if you don't trust ABS estimates or imputation.  Let's just say that ABS knows what it's like to realise they've been over-estimating population by a few hundred thousand people. [Last time that happened](http://www.abs.gov.au/AUSSTATS/abs@.nsf/Previousproducts/3101.0Feature%20Article3Jun%202012?opendocument&tabname=Summary&prodno=3101.0&issue=Jun%202012&num=&view=) (in 2011) they smeared the error out over the previous two decades so that no-one would notice. Unpicking the possible distortions that that might have sewn into all these figures, and relating it to the observations above will occupy the subject of another post soon.
 
 QQ.
 
