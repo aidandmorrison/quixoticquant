@@ -3,6 +3,9 @@ title: "About the Author"
 date: '2017-08-20'
 thumbnail: "images/image13.jpg"
 ---
+
+## Aidan Morrison
+
 Originally trained as a physicist, I think these days I'm best described as an entrepreneur, with interests in data analytics, military technology, and hospitality.
 
 Born and raised in Launceston, Tasmania, I attended Launceston Church Grammar School before moving to Canberra to study at the Australian National University.  I completed a Bachelor of Science with First Class Honours.  My majors were in Physics and Theoretical Physics, and my thesis was in Theoretical Particle Physics, on Kaon Decay in the Generation Model.  I took up a Ph.D. scholarship to the University of Melbourne were I worked on experimental particle physics, on the ATLAS experiment at CERN.

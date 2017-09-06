@@ -79,7 +79,7 @@ sheet_340102 <- prev_12_month(sheet_340102, meta)
 ```
 
 ## Why the NOM graph matters more than most
-As far as graphs go, Net Overseas Migration, (NOM) would have to be one of the rising-stars in Australian economic policy debates.  The significance of NOM to housing (hence banking, hence sharemarket) is pretty obvious. It also it makes a crucial contribution to 'Estimated Resident Population', perhaps one of the most important statistics that's relied on for imputing, scaling and basing a host of other crucial statistics.  
+As far as graphs go, Net Overseas Migration, (NOM) would have to be one of the rising-stars in Australian economic policy debates.  The significance of NOM to housing (hence banking, hence sharemarket) is pretty obvious. It also makes a crucial contribution to 'Estimated Resident Population', perhaps one of the most important statistics that's relied on for imputing, scaling and basing a host of other crucial statistics.  
 
 But this particular graph's influence has also risen the tide of confusion swamping the world's economists, who are floundering to explain the new low-inflation, low-growth new-normal paradigm that has beset the Western World.  Everyone's casting around for a theory. With a slightly selective date-range (say from around 1991 onwards), this graph gives some Australian pundits and commentators exactly what they want: some substantial level-shift that occurs somewhere around the GFC, and hasn't returned to old normal levels. (Use the zoom/selector tool to cut out the pre-1991 part to soak in the less-than-full picture.)
 
