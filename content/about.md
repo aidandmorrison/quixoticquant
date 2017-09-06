@@ -7,7 +7,7 @@ Originally trained as a physicist, I think these days I'm best described as an e
 
 Born and raised in Launceston, Tasmania, I attended Launceston Church Grammar School before moving to Canberra to study at the Australian National University.  I completed a Bachelor of Science with First Class Honours.  My majors were in Physics and Theoretical Physics, and my thesis was in Theoretical Particle Physics, on Kaon Decay in the Generation Model.  I took up a Ph.D. scholarship to the University of Melbourne were I worked on experimental particle physics, on the ATLAS experiment at CERN.
 
-I left my PhD uncomplete to start life as an entrepreneur, setting ambitious goals that were in some ways also akin to tilting at windmills.
+I left my PhD uncompleted to start life as an entrepreneur, setting ambitious goals that were in some ways also akin to tilting at windmills.
 
 My first venture, [Rubber Ducky Defence](http://rubberduckydefence.com.au/), was inspired and informed by my experience calculating collision cross-sections of subatomic particles. Certain principals applied well at other scales, and I decided to challenge the idea that bigger ships were better at winning naval battles.  Rubber Ducky has advanced designs for a small boat and torpedo optimised for swarming tactics, including one granted patent in the US.
 
