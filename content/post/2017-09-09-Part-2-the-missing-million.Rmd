@@ -21,14 +21,112 @@ tags:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-This post is a follow-on from my first post on this topic, where I suggested that an alternative statistic "Physicaly Present Population" suggested Australia's migration rate might be overstated by "Net Overseas Migration.
+##The Brawl Begins
 
-That particular tilt certainly had the intended effect, and provoked quite a response.  I've had plenty of tweets, as well as direct emails and phone calls from experienced people wanting to discuss with me the findings.  Two reactions in particular exceeded all my expectations.  The first was that another accomplished respected and measured economist immediately published a thoughtful response.  Please see [here](http://www.fresheconomicthinking.com/2017/09/finding-australias-missing-million.html) for Cameron Stewart's excellent reply.  He used some data to suggest that much of the missing million was probably comprised of jet-setting boomers having holidays to places like Bali, for around a month or two at a time.  I'll reflect on that here in more detail.
+This post is a follow-on from my [first post](http://www.quixoticquant.com/post/the-missing-million/) on this topic, where I suggested that an alternative statistic "Physicaly Present Population" suggested Australia's migration rate might be overstated by "Net Overseas Migration" and the derived "Estimated Resident Population".  I'm glad that the piece had the intended effect, and provoked two published responses from [Dr. Cameron Murray](http://www.fresheconomicthinking.com/2017/09/finding-australias-missing-million.html) and [Leith van Onselen](https://www.macrobusiness.com.au/2017/09/apparently-no-immigration-boom/). which I'll address in some detail later on.  I'm particularly flattered that Leith responded by re-pasting all four of the graphs from Dr Murray's so-called 'rebuke', five more of his own tired old favourites, but wasn't game to re-paste his darling NOM chart I'd focussed my attention on, nor a single one of the fourteen original plots which I'd produced directly from ABS data in the process.
 
- But nothing could eclipse the compliment that Leith Van Onselen gave me in his rebuke on Macrobusiness.  I had hoped that he might publish some kind of response, and assumed of course that it would be a biased, misrepresentative selection of my argument. Above that, which I didn't bet on was him publishing every sentence of the 'rebuke' by Cameron Murray except the one where he described my work as brilliant, which was welcome. He made room for every graph which Cameron had thoughfully selected and explained, to directly address my arguments. He even went to the effort of re-pasting the same stale old graphs he puts on ever second post on MB interspersed with a dash of rhetoric. But that he couldn't produce a SINGLE graph from my own post just made my day.  Econ bloggers don't stoop that low unless they've really be kicked in the balls.
- 
-(which included 15 orginal charts, derived directly from source, in an interactive plot which allowed you
- 
+But before posting the results of another deep dive in response, I thought keep the eyes on the horizon for a little to examine some broader context. It might help to clarify why I was keen to open my blog with an assault on the common usage of Net Overseas Migration (NOM), and why I'm happy to tilt just a little further.
+
+The first perhaps is that I find myself unceasingly amazed by how little people understand data and it's sources.  Even if the professionals in planning and economic analysis who use it and create these graphs are aware of the nuance and subtelty that underlies it, the people that consumer their work undoubtedly aren't.  Last weekend the AFR's Jacob Greber [published](http://www.afr.com/news/economy/the-great-wage-squeeze--the-economy-picks-up-but-wage-growth-remains-at-a-low-20170825-gy3yg9) this un-speakably appalling abuse of data, apparently produced originally by the investment bank UBS:
+
+```{r, fig.align="center", out.width = 500, fig.cap="The Australian Financial Review plumbs new depths in quality of data presentation"}
+
+
+knitr::include_graphics("images/AFRGreberUBS.jpg")
+
+```
+
+Not only does this chart include Net Overseas Migration without the slightest acknowledgement of a definition change, but stacks it on-top of another entirely unrelated data series.  That data series is apparently of subset of one-way movements, (arrivals) and has no definition of length of stay whatsoever, which makes whatever it's presenting absolutely entirely uncomparable to Net Overseas Migration. Sure, just stack it up, see it reach 3% of population, and put 'Population Growth' in the heading.  No-one could possibly misinterpret that.  
+
+For the record, here's the short term arrivals data, annualised, presented monthly:
+
+
+As you'd expect education and employment are such a tiny fraction of short-term arrivals that they're really not worth considering on their own, they're completely swamped by other movements.  And because of the way our definitions work, (indicated intent on cards) there's nothing preventing a short-term movement becoming long-term, or remainging short term, and still becoming migration under the 12/16 rule, or vice-versa with long-term movements becoming short-term aswell.  Then there's the fact that all the short-term incoming movements inwards together are swamped by the all outgoing short-term movements, and possibly also swamped by the movements for these categories that are classified as long-term. (Though we don't have the data to know.)
+
+Of course, if you zoom in on the relevant data-series and add up the numbers you'll see that you actually get a far higher number than the 500,000 in the article, as it turns out UBS has probably actually netted off departures aswell, which they make no mention of, nor do they mention that the levels in their graph is an annual movement, but reported as a trend quarterly. 
+
+My point is, it's theoretically possible that UBS could have a sophisticated audience who wanted to answer an obscure question that this extremely irregular superposition of uncomparable, potentially overlapping, inconsistently recorded data might still provide the best available answer to.  If I was in the audience I'd still demand they tighten up their presentation (or at least label it right) so I could interpret it properly before I paid them anything for it. 
+
+But if I wasn't a deep-diving data-junkie, and more of regular punter reading this sort of thing in the paper, I'd probably start freaking out about high migration, which looks like it's about to top 3% of population per annum.  That's not helpful.
+
+
+Cameron Murray's conclusion, and the spin that Leith van Onselen puts on it, highlights true target of my charge:
+
+>Overall, after a lot of thinking on this topic, I suspect that the ABS data, although imperfect, and although >hiding a series break, is probably the ‘better’ metric to use in planning and economic analysis.
+
+Since when did economists start to economise on metrics to keep track of? It's ridiculous choose just one 'better' metric for a massive swathe of planning an anlysis.  Surely the cost of running another column in a spreadsheet isn't so high that we should deny ourselves an alternative metric that reveals new insights?  People write books about GDP and it's foibles, and people debate furiously about what it means, and doesn't.  But most would accept (sometimes grudgingly) different versions of it are useful for limited purposes.  For example growth in real GDP per capita is better mark of living standards improving than nominal GDP growth, which you might use to forecast income tax revenue.  
+
+Why is that such a hard concept for people to grasp on population metrics? For allocating GST payments for health and education purposes, Estimated Resident Population, derived from NOM, might well be as good as it gets.  People who are away, but likely to be back, might need just as much health and education here in Australia.  But if you're trying to figure out how much gross revenue the GST is going to earn, you'd be stupid not to try to get a figure on what's happening to the Physically Present Population.  Being a million people out there is a substantial and preventable error, as it would be for a host of other factors.
+
+The entire world of economics revolves around critiqueing and re-working hundreds of alternative metrics for all sorts of things, some tangible, some entirely abstract and continually changing, and debating which is the better to use, in which circumstance, to answer each particular policy or investment question. No serious economist takes the latest figures on any other topic without slinging in their share of accusations or probing questions, or at least breaking out a few component parts to figure out what other story might be hidden behind the headline.  Debate is vigorous, rowdy, and rolls on, like the clamour in a crowded bar.  And so it should be.
+
+Except on migration.  On this single metric, it's as if the entire world converges into a deafeningly silent consensus.  Population!  At last a hard number. Something tangible, physical, consistent. The cacophony of economic debate subsides as everyone gather's around to pay homage at the alter of the purest, simplest driver of demand, production, and everything else.  The one undisputed back-stop to debate.
+
+Bullshit. Perhaps once it was a hard and clean number, but today it isn't. It's about as arbitrary, inconsistent, ill-defined, confusing, volatile, politically sensitive, unpredictable, and hard-to-measure as any figure can be.  And not treating it like that is doing tremendous damage to debate.  Instead of absorbing information through the clamour of economic contention (think federal deficit, house prices, terms of trade) the public at large consumes the migration statistics the same way they consume Justin Bieber or Beyonce.  It just permeates the airwaves.  Australia has high migration.  Fan or not, it's there, and accepted, people let it roll over them, or bop along.
+
+Until for whatever reason some over-enthusisastic fan-boy in the crowd tries to get everyone to get up and dance.  Enter Dick Smith, Macrobusiness, and many others. And here the debate around immigration enters the absurd. A group of otherwise well-meaning, capable, often intelligent people are quite vigorously running around promoting the following theorem:
+
+>Lemma 1: Present Migration > Past Migration
+>Lemma 2: Present Population < Future Population
+>Therefore bad.
+>Q.E.D.
+
+They all know that linking rising population with actual bad outcomes is ambitious and complicated task in the extreme.  There are dozens alternative more powerful contributors to high house prices, city congestion, poor school performance, environmental degradation, and they all know it.  Pushing population to the top of the pile of explanations for those phenomena is a mammoth task.  Not even the Productivity Commission's 700 page report claimed to get close.  But the spruikers of the ponzi narrative get such tremendous momentum pointing authoritatively to the evidence backing Lemma 1 and Lemma 2 that they don't have to even seriously make the case. Somehow the logical leap is simply taken in their stride.  (Note, that doesn't make the opposite leap any easier, which many also attempt.)
+
+Even worse is the reaction of some on the other side of the debate.  When confronted with seemingly irrefutable statistics being used to draw entirely unrelated conclusions, they just stammer for explantions, turn red, and start calling the other guys racist.  Or if they're in office just stammer some more, maybe try to say something politically correct and meaningless about the contribution of migrants, ageing, and hope the question goes away.  Everyone's stumped when trying to explain what appears to be a level-shift.  What underlies the change, and why is it justified?
+
+So I'm delighted to find that my initial attack on NOM has got the kind of response that it did. I should point out I've got no interest in landing a knock-out punch to Net Overseas Migration, and having someone raise my fist and declare Physically Present Population the champion migration number.  I want to pick a fight to start a bar brawl, as economics seems to have raging (as it should) over essentially every other important metric.
+
+Cameron Murray made a welcome foray, and dove further into additional data from 3401 to try to find a plausible explanation for the divergence I outlined in my first post.  He suggests that the missing million could substantially comprise Australian boomers in or approaching retirement taking holidays in Bali.  I'll address this in more detail in a later post, but finding insights like this is a perfect example of the need to explore components of the data.  If a million extra-bronzed baby-boomers finally drift back from Bali once they've spent their super to get sick and die in the comfort of the 4-bedroom homes in Australian suburbia while on the pension, that will create all sorts of pressures worth planning for.  Expelling a million of our young foreign students, backpackers, and skilled workers won't relieve any of them. 
+
+And then there's Leith Van Onselen, the consumate DJ for the camp that's tapping toes to the Ponzi story (literally, check the comments), who quickly cranks out the old MB beat: cut, paste, curse, post.  He quote's every sentence of Murray's "rebuke" except the one where he call my work brilliant, as well as all four graphs. Then shouts back something like "What??!! Am I meant to believe it's not really this simple??!!" And cranks up the volume some more with yet another re-posting of the same clutch of monotonous, rising-red-line graphs we've seen a thousand times before from him.  Lemma 1, Lemma 2, thanks, I got it.
+
+Yes Leith, that's exactly what I'm asking you to believe.  It's not that simple.  In economics it rarely is.  You can keep re-posting the same old graphs without any new analysis if you want.  But if you do it while shirking posting a single one of the 14 original graphs which supported my analysis, eventually people will figure that econ-bloggers don't stoop that low unless they've been hit where it hurts. Do what MB does so well on every other topic, and expose some complexity behind the superficial stats so people can get a clearer picture.  Maybe there's another important story that you're missing.
+
+## The simple story everyone missed:
+Trying to find a simple and defensible explanation of a complex issue isn't easy.  But for migration, I think there is one.  I'll describe it here in prose, and in a later post gather some of the graphs and data that support it.
+
+There has been a level shift.  But it hasn't been in 'migration', as everyone actually intends and understands the word.  The shift that we should be talking about has been in mobility.  International travel is roaring ahead at 6-7% growth per annum, and in its wake we're left with a frothy migration figure, which might have risen to 0.8%. 
+
+The total pace of movement of the world's population has accelerated.  Anecdotally people sense some pressure, and they're probably right to sense it.  But the true cause isn't that our system has been pumped full with more people.  The pressure actually comes from what one could think of as heat, the average pace of movement of all the people within and around the system.  The increasing scale and velocity of movements certainly causes pressure in various places as the accelerating flows converge, convulse and collide.  But to think of the main cause of this pressure as being an increasing accumulation of more people is to miss the bigger and more imporatant story.  You'll jump up and down about 1.5%, but miss the trend that's tracking closer to 6 or 7%.
+
+And it's this tremendous uptick in mobility that gets distorted by the lense of migration defintions, and the peculiarities of our geographic and political circumstances, which bizarre and unique:  We're reasonably sized, rich, English-speaking Western country, the populated parts of which are still a full day's flight away from the arse-end of Asia. No-one else is like that.
+
+This has important consequences for travel patterns.  In particular, we're a hard place to get to for a few days or a week or two, particularly for the rest of the Western World who might share our language.  However, for a couple of years we're definitely worth the journey.  As it happens we also have a lot on offer for couple-year type travellers: great place to back-pack around, excellent education opportunities, or cut your teeth in a new professional setting for a couple of years.
+
+And what's in our neighbourhood?  Asia, NZ, and the Pacific.  Great if you want to have an adventure for a few weeks/months, enjoy other beaches, cheaper food, better skiing.  But most of Asia is still developing.  That also means there are business opportunities there, but living in Asia long-term means contending with other languages, less good schools, and possibly less good medical facilities or other infrastructure. 
+
+In other words, Australia's a great place to come to for a couple of years, and a great place to leave from for a couple of weeks.  And that's what people do.  Students and backpackers alike treat Australia as something of a 'home-base' while they're here, but often visit other places in Asia, including for return visits home.  New Zealanders do the same, with hundreds of thousands of Kiwis coming here to work or study, and going home for regular visits.  Arrive long-term occasionally, leave short-term frequently, but be counted as 'resident' all the while. 
+
+So here's the rub.  Whilst we (and perhaps the rest of the world) have accepted the definition 'resident' as being 'here more on average than elsewhere', defined over a 16-month period Australia is bound to measure artificially high rates of migration.  That's beause we count almost all of the inbound visitors as 'resident' in our country, but we count all of our outbound visitors a still 'resident' here aswell, even while they're away, which increasingly they are.  In that regime, as 'visiting' rises, in all directions, for all the world, if flows that substantially net out (or net out more than some figures suggest) that definition inevitably means that Australia will register an increasing number of 'residents'.  
+
+Likewise a number of other countries might record artificially low 'migration', or negative migration, when their physically present populations remain bouyant.  Those countries would no-doubt include plenty of Asian countries, who's young middle-classes increasingly will spend a few years abroad to gain skills and experience in West (an increasing outflow of residents) but have their present populations butressed by hoards of short-term visitors enjoying exotic pleasures and cheaper currency on holidays, or making quick visits to set up business in new booming economies.  None of the inflows count as 'migration', but all the outflows do.
+
+## A quaint analogy - the restaurant
+I've battled trying to find an appropriate analogy to explain the concept.  The first that came to mind relate to different layers of quantum shells for electron orbits around different atoms embedded in somekind of semi-conductor exposed to a higher cross-current. But perhaps it's easier to think about a restaurant, like the one I have, which does both take-away coffees, beers at a bar, as well as dine-in table service food.  If you count number of people present at any moment, you'll have some ordering takeawy and waiting near the bar, or sipping a beer there, and some people sitting down with a menu getting table service.  But this hypothetically this restaurant only keeps count of 'patrons', which they might define as being just those people that sit down for table service and order food.
+
+Imagine the locality suddenly gentrifies, and a whole host of new hipster cafe/bars open up in the area, foot traffic increases massively, but so does competition. This particular restaurant finds they can't compete with the funky baristas and bartenders down the street.  But they hold their own in the full-table-service dining, and the dinner menu takes off.  Two things happen simultaneously.  Suddenly the queue for coffee seems to disappear, as do plenty of drinkers that used to be perched at the bar, which is looking oddly empty.  The dinner trade booms, and changes at the same time.  More customers are coming for dinner, but they're staying for shorter periods, often getting an aperativ down the street instead of entre, and skipping desert and coffee in favour of another cafe down the street. Or some even slip-out between courses to get a cocktail or digestive elsewhere.
+
+The business changes massively, and has to evolve and adapt to keep pace.  The peaks and troughs become more intense and unpredictable.  The movements in and out, changes in table arragements for different groups and couples become hard to manage.  It's a touch more noisy, and there's no doubt that things feel more 'busy', the business is still profitable, maybe slightly more, seemingly not in proportion to the increased pressure the staff are feeling.  But is it more 'full'? Well, that's complicated...  
+
+Just a few regular customers don't like the change, one even posts a review online saying as much.  Then a cranky chef barges out of the kitchen one night and starts hurling abuse at the poor girl who's the hostess, accusing her of hopelessly over-booking the restaurant.  He pulls out a bunch of statistics showing how sharply the growth in 'patrons' (dine-in) has increased, extrapolates fourty years into the future and says it can't possibly be sustained, bellowing that there'll be rowdy crowds and fist-fights before long.  He then demonstrates that the spend-per-table has decreased, and enters a furious rant about how the company's profits are imperilled by the reckless over-booking of the hostess.  Every possible mistake and error that the restaurant has encountered is laid at the feet of over-booking hostess.  More broken glassware, to mistakes made in the kitchen, every bad review, the paint peeling on the walls, last week's weather, you name it. Over-booking caused it all.
+
+The poor hostess is gobsmacked by the attack.  She stammers and stutters, trying to explain how walk-in have increased and people don't book any more, but still want to eat. But it all seems hopeless in the face of the hard-facts about rising patron numbers and diminished spend-per-head.  How to re-arrange the restaurant, use all the spare space around the bar, the loss of all the coffee trade, the idle bartenders, it all just seems too technical. Moreover, she hasn't looked at any hard numbers to prove the point, since the number of coffee and bar customers is recorded differently the 'patrons' that the chef is brandishing and she's not great at maths. She goes red in the face, calls the chef a bastard, and runs home to sulk, embarrassed that she swore at her colleague.
+
+Such is the state of the migration debate in Australia.  We need to do better than that. 
+
+Are Net Overseas Migration and Estimated Resident Population still useful, probably necessary numbers to keep track of?  Of course.
+
+But are they sufficient? Far from it, and further every year.  Adding 'Total Net Movements' and 'Physically Present Population' would be an easy and good place to start.
+
+
+
+That particular tilt certainly had the intended effect, and provoked quite a response.  I've had plenty of tweets, as well as direct emails and phone calls from people wanting to discuss with me the findings.  Two reactions in particular exceeded all my expectations.  The first was that a real accomplished economist immediately published a thoughtful response.  Please see [here](http://www.fresheconomicthinking.com/2017/09/finding-australias-missing-million.html) for Dr. Cameron Murray's excellent reply.  He used some data to suggest that much of the missing million was probably comprised of jet-setting boomers having holidays to places like Bali, for around a month or two at a time.  I'll reflect on that here in more detail.
+
+But nothing could eclipse the compliment that Leith Van Onselen gave me in his rebuke on Macrobusiness.  I was glad to get a reply, and assumed that if I did get one it would along the lines of the regular MB forumla: cut, paste, curse, post. I didn't expect the cutting and pasting to be particularly kind to my argument.  But Leith took things to new levels by taking the time to copy and paste all four of the chart's from Cameron's response, five of his favourite (which MB followers will be familiar/bored with), and not a SINGLE one of the 14 original graphs from my post. You know you've landed a blow where it hurts when econ-bloggers start stooping that low.
+
+Perhaps I should also take a moment to explain clearly that in my posts I'll often use [plotly](https://plot.ly/) graphs so that users can inspect the detail of the data behind the image, measure differences, exact numbers and dates, zoom in on areas of interest etc. If you hold your mouse over an image you'll also see a little button like a camera pop up, which allows you to download the plot as a png, so that anyone interested in re-posting my graphs can do so. (Acknowledgment would be appreciated.)
+
 
 
 
@@ -171,10 +269,51 @@ ggplotly(plot)
 sheet_arr_dep <- sheet_arr_dep %>% 
   mutate(month = month(Date), year = year(Date))
 
+sheet_arr_dep <- sheet_arr_dep %>% 
+  mutate(index = row_number())
+
+sheet_arr_dep <- sheet_arr_dep %>% 
+  group_by(year) %>% 
+  mutate(year.cum = cumsum(net.movements),
+         jan.flow = case_when(month == 1 ~ net.movements),
+         year.flow = case_when(month == 12 ~ year.cum))
+
+sheet_arr_dep <- sheet_arr_dep %>% 
+  fill(jan.flow)
+
+sheet_arr_dep <- sheet_arr_dep %>% 
+  ungroup() %>% 
+  mutate(cum.net.movements = cumsum(net.movements))
+
+sheet_arr_dep_dec <- sheet_arr_dep %>% 
+  filter(month == 12)
+
+sheet_arr_dep_dec <- sheet_arr_dep_dec %>% 
+  mutate(year.cum = 0)
+
+sheet_arr_dep_13m <- sheet_arr_dep %>% 
+  bind_rows(sheet_arr_dep_dec) %>% 
+  arrange(index)
+
+sheet_arr_dep_13m <- sheet_arr_dep_13m %>% 
+  mutate(lag.month = lag(month,1)) %>% 
+  filter(index > 1)
+         
+sheet_arr_dep_13m <- sheet_arr_dep_13m %>% 
+  mutate(new.month = case_when(
+           month == lag.month ~ 0,
+           month != lag.month ~ month),
+         new.year = case_when(
+           month == lag.month ~ year + 1,
+           month != lag.month ~year))
+
+sheet_arr_dep_13m <- sheet_arr_dep_13m %>% 
+  fill(year.flow)
+
 plot <- sheet_arr_dep %>% 
   filter(Date > "2009-12-02 GMT") %>% 
   ggplot(aes(x = month))+
-  geom_line(aes(y = Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep, col = as.factor(year)))+
+  geom_line(aes(y = Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep, col = year))+
   labs(title = "Net Arr and Dep")
 
 ggplotly(plot)
@@ -183,14 +322,26 @@ ggplotly(plot)
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Checking3"}
 
-sheet_arr_dep <- sheet_arr_dep %>% 
-  mutate(month = month(Date), year = year(Date))
 
 plot <- sheet_arr_dep %>% 
   filter(Date > "1999-12-02 GMT", Date <= "2010-01-02 GMT") %>% 
-  ggplot(aes(x = month))+
-  geom_line(aes(y = Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep, col = as.factor(year)))+
+  ggplot(aes(x = as.numeric(month), y = Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep, group = as.factor(year), col = year))+
+  geom_line()+
+  #stat_smooth(method = 'lm', formula = y ~ poly(x,6),  se= FALSE)+
   labs(title = "Net Arr and Dep")
+
+ggplotly(plot)
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Checking3"}
+
+
+plot <- sheet_arr_dep_13m %>% 
+  filter(new.year >= 2010) %>% 
+  ggplot(aes(x = new.month))+
+  geom_line(aes(y = year.cum, col = as.factor(new.year)))+
+  labs(title = "Cumulative Arr and Dep")
 
 ggplotly(plot)
 
@@ -199,11 +350,38 @@ ggplotly(plot)
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Checking3"}
 
+
+plot <- sheet_arr_dep_13m %>% 
+  filter(new.year >= 2010) %>% 
+  ggplot(aes(x = new.month))+
+  geom_line(aes(y = cum.net.movements - (head(cum.net.movements, n = 1)), col = as.factor(new.year)))+
+  labs(title = "Cumulative Arr and Dep")
+
+ggplotly(plot)
+
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Checking3"}
+
+
+plot <- sheet_arr_dep_13m %>% 
+  filter(new.year >= 2000, new.year <= 2009) %>% 
+  ggplot(aes(x = new.month))+
+  geom_line(aes(y = cum.net.movements - (head(cum.net.movements, n = 1)), col = as.factor(new.year)))+
+  labs(title = "Cumulative Arr and Dep")
+
+ggplotly(plot)
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Checking3"}
+
 plot <- sheet_arr_dep %>% 
   filter(Date > "2009-12-02 GMT") %>% 
-  ggplot(aes(x = Date, y = cumsum(net.movements)))+
+  ggplot(aes(x = Date, y = cumsum(net.movements), col = as.factor(year)))+
   geom_line()+
-  stat_smooth(method = 'lm', formula = y ~ poly(x,1), se= FALSE, colour = "red")+
+  stat_smooth(method = 'lm', formula = y ~ poly(x,1), se= FALSE, colour = "black")+
   labs(title = "Cumulative Net Movements")
 
 ggplotly(plot)
@@ -211,25 +389,438 @@ ggplotly(plot)
 ```
 
 
-This demanded the question: how did the ABS decide just how many of those net movements that were classified in one series as 'short-term' to blend in with the 'long-term' ones to conclude what constituted 'migration'? I expected somewhere deep inside the explanatory notes that I'd find some arbitrary rule that had to be followed.  The [explanatory notes](http://www.abs.gov.au/AUSSTATS/abs@.nsf/Lookup/3412.0Explanatory%20Notes12014-15?OpenDocument) had two, with the switch between them occurring just before the 'level shift'. Here are the direct quotes:
 
->22 The ABS developed and introduced an improved method, called the '12/16 month rule' methodology, for estimating NOM. It has been used in calculating Australia's official ERP since September quarter 2006. The '12/16 month rule' methodology is a result of reviewing the treatment of temporary migrants (both long-term and short-term) who are away from or resident in Australia for a period of 12 months or more.
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
 
->23 Estimates of NOM based on the previous methods and those based on the '12/16 month rule' methodology are not comparable. The key change is the introduction of the '12/16 month rule' for measuring a person's residency in Australia, replacing the previous '12/12 month rule'.
+sheet_340106 <- readxl::read_xls("data/340106.xls", sheet = 2)
 
-"Not comparable" is the correct (one would hope unavoidable) conclusion about such a substantial change in method.  But overall I think my gratitude for the ABS spelling out the obvious is overwhelmed by my dismay at their burying this insight in paragraph 23 of the 'Explanatory Notes' tab, where only the most determined and tireless of data consumers are likely to encounter it.  
+sheet_340106 <- good_names(sheet = sheet_340106)
+meta3 <- stash_meta(sheet_340106)
+meta3 <- good_names(meta3, meta = TRUE)
+meta <- bind_rows(meta, meta3)
+sheet_340106 <- cut_meta(sheet_340106)
+sheet_340106 <- good_date(sheet_340106)
+sheet_340106 <- to_numeric(sheet_340106)
+sheet_340106 <- nom_units(sheet_340106, meta)
+sheet_340106 <- inst_ann(sheet_340106, meta)
+sheet_340106 <- prev_12_month(sheet_340106, meta)
 
-Not the slightest mention, flag, warning, column change, name change, or label can be seen anywhere near the actual spreadsheets available for download. So with almost no exceptions users tend to string it together on one axis, in sequence, in one line, in one colour, blithely ignorant of the fact that they're plotting two different bits of data which are "not comparable" according to the producer of the data.   
 
-It's hard to overstate how bad that really is. It's the kind of slop which hung-over first-year uni students cobble together on the bus on the way to a tutorial which requires attendance but doesn't grade exercises.  If they do it in assignments, they fail.  Yet all of Australia's leading economists are doing it relentlessly, if accidentally.
+plot <- sheet_340106 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon, col = "6 to 12 months"))+
+  
+  labs(title = "Short Term Movements Arrivals")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
 
 
-## How one should, or should not present "not comparable" data
-Let's be geeky and consider how to properly present the data. (Feel free to borrow my [code](https://github.com/aidandmorrison/quixoticquant/blob/master/content/post/2017-08-29-the-missing-million.Rmd) if you've been unwittingly guilty of the misdemeanor and would like to produce some better plots.)  
 
-Undoubtedly the best way is to just plot two different graphs, and lament the fact that the ABS hasn't recorded something through the long sweep of time that we can usefully compare.  That would get good marks for integrity in your quantitative methods course.  It would alert the consumers to the risks and complexities that will arise in drawing conclusions about long-term trends, and doing [long-term projections and policy planning](https://www.treasury.gov.au/~/media/Treasury/Publications%20and%20Media/Publications/2015/2015%20Intergenerational%20Report/Downloads/PDF/2015_IGR.ashx), when the ABS doesn't have consistent measure of population over the long-term. (Spoiler alert: it does, it's just not giving it to us.)
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
 
-Or, you could maybe accept a 'B' grade for integrity, and string all the data together on the same plot and axis, but use some other clear devices (like lines and colours) to indicate that the data is in fact not a single continuous series, like this:
+plot <- sheet_340106 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
+  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
+  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
+  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
+  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
+  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
+  
+  labs(title = "Short Term Movements Arrivals")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+sheet_3401010 <- readxl::read_xls("data/3401010.xls", sheet = 2)
+
+sheet_3401010 <- good_names(sheet = sheet_3401010)
+meta4 <- stash_meta(sheet_3401010)
+meta4 <- good_names(meta4, meta = TRUE)
+meta <- bind_rows(meta, meta4)
+sheet_3401010 <- cut_meta(sheet_3401010)
+sheet_3401010 <- good_date(sheet_3401010)
+sheet_3401010 <- to_numeric(sheet_3401010)
+sheet_3401010 <- nom_units(sheet_3401010, meta)
+sheet_3401010 <- inst_ann(sheet_3401010, meta4)
+sheet_3401010 <- prev_12_month(sheet_3401010, meta4)
+
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon, col = "6 to 12 months"))+
+  labs(title = "Short Term Movements Resident Departures")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements out annual"}
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee.Pre.12m, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee.Pre.12m, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon.Pre.12m, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m, col = "6 to 12 months"))+
+  labs(title = "Short Term Movements Resident Departures")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements out impact"}
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m*22/365, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee.Pre.12m*11/365, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee.Pre.12m*4/365, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon.Pre.12m*46/365, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m*77/365, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m*165/365, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m*273/365, col = "6 to 12 months"))+
+  labs(title = "Short Term Movements Resident Departures")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
+  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
+  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
+  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
+  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
+  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
+  
+  labs(title = "Short Term Movements Departures")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+sheet_340109 <- readxl::read_xls("data/340109.xls", sheet = 2)
+
+sheet_340109 <- good_names(sheet = sheet_340109, trunc_length = 4)
+meta5 <- stash_meta(sheet_340109)
+meta5 <- good_names(meta5, meta = TRUE, trunc_length = 4)
+meta <- bind_rows(meta, meta5)
+sheet_340109 <- cut_meta(sheet_340109)
+sheet_340109 <- good_date(sheet_340109)
+sheet_340109 <- to_numeric(sheet_340109)
+sheet_340109 <- nom_units(sheet_340109, meta5)
+sheet_340109 <- inst_ann(sheet_340109, meta5)
+sheet_340109 <- prev_12_month(sheet_340109, meta5)
+
+topcountries <- sheet_340109 %>% 
+  filter(Date > "2014-01-01 GMT") %>% 
+  select(Numb.of.move.Norf.Isla:Numb.of.move.Tota.Coun.of.stay) %>% 
+  gather(country, movements, Numb.of.move.Norf.Isla:Numb.of.move.Tota.Coun.of.stay)
+  
+topcountriessum <- topcountries %>% 
+  group_by(country) %>% 
+  summarise(ave_mov = mean(movements)) %>% 
+  arrange(ave_mov, desc(ave_mov)) %>% 
+  filter(str_detect(country, ".Tota.") == FALSE) %>% 
+  tail(n = 15)
+
+topregionssum <- topcountries %>% 
+  group_by(country) %>% 
+  summarise(ave_mov = mean(movements)) %>% 
+  arrange(ave_mov, desc(ave_mov)) %>% 
+  filter(str_detect(country, ".Tota.") == TRUE) %>% 
+  tail(n = 10)
+
+plot <- sheet_340109 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col = "NZ"))+
+  geom_line(aes(y = Numb.of.move.Indo, col = "Indonesia"))+
+  geom_line(aes(y = Numb.of.move.Unit.Stat.of.Amer, col = "USA"))+
+  geom_line(aes(y = Numb.of.move.UK.CIs.IOM, col = "UK"))+
+  geom_line(aes(y = Numb.of.move.Thai, col = "Thailand"))+
+  geom_line(aes(y = Numb.of.move.Chin, col = "China"))+
+  geom_line(aes(y = Numb.of.move.Sing, col = "Singapore"))+
+  geom_line(aes(y = Numb.of.move.Fiji, col = "Fiji"))+
+  geom_line(aes(y = Numb.of.move.Japa, col = "Japan"))+
+  
+  labs(title = "Short Term Movements Departures")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+
+plot <- sheet_340109 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.Tota.Sout.East.Asia, col = "SE Asia"))+
+  geom_line(aes(y = Numb.of.move.Tota.Ocea.and.Anta, col = "Oceana"))+
+  geom_line(aes(y = Numb.of.move.Tota.Amer, col = "America"))+
+  geom_line(aes(y = Numb.of.move.Tota.Nort.East.Asia, col = "NE Asia"))+
+  geom_line(aes(y = Numb.of.move.Tota.Nort.West.Euro, col = "NW Europe"))+
+  geom_line(aes(y = Numb.of.move.Tota.Sout.and.East.Euro, col = "SE Europe"))+
+  geom_line(aes(y = Numb.of.move.Tota.Sout.and.Cent.Asia, col = "Sourth Cent Asia"))+
+  geom_line(aes(y = Numb.of.move.Tota.Nort.Afri.and.the.Midd.East, col = "North Africa Middle East"))+
+  geom_line(aes(y = Numb.of.move.Tota.Sub.Saha.Afri, col = "Sub Saharan Africa"))+
+  
+  labs(title = "Short Term Movements Departures")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NOM Breakdown"}
+
+sheet_NOM <- readxl::read_xls("data/NOM_by_visa.xls", sheet = 1)
+sheet_NOM <- t(sheet_NOM) %>%  
+  as_tibble()
+#sheet_NOM <-data.frame(sheet_NOM) %>% as_tibble()
+rownames(sheet_NOM) <- NULL
+sheet_NOM <- sheet_NOM[-1,]
+
+dates <- c("2007-06-30", "2008-06-30", "2009-06-30", "2010-06-30",
+           "2011-06-30", "2012-06-30", "2013-06-30", "2014-06-30",
+           "2015-06-30") %>% ymd() %>% as.numeric()
+
+dates_vec <- tibble(dates)
+
+sheet_NOM <- bind_cols(sheet_NOM, dates_vec)
+sheet_NOM <- select(sheet_NOM, dates, everything())
+colnames(sheet_NOM) <- c("Date", "Student", "Subclass 457", "Working Holiday", "Visitor", 
+                         "Other Temp.", "Skilled", "Family", "Humanitarian",
+                         "Other Perm.", "Aus Citizen", "NZ Citizen", "Other Visas")
+
+sheet_NOM <- sheet_NOM %>% 
+  good_names() %>% 
+  good_date(Origin = "1970-01-01") %>% 
+  to_numeric() %>% 
+  nom_units(meta = meta, manual = "000")
+
+sheet_NOM <- sheet_NOM %>% 
+  mutate(Tot.Temp = (Stu + Sub.457 + Wor.Hol + Vis + Oth.Tem),
+         Tot.Perm = (Ski + Fam + Hum + Oth.Per),
+         Tot.Oth = (Aus.Cit + NZ.Cit + Oth.Vis))
+
+sheet_NOM_long <- sheet_NOM %>% 
+  gather(key = "Visa.cat", value = "flow", -Date)
+
+sheet_NOM_long <- sheet_NOM_long %>% 
+  mutate(Type = case_when(Visa.cat %in% c("Stu", "Sub.457", "Wor.Hol", "Vis","Oth.Tem") ~ "Temporary",
+                          Visa.cat %in% c("Ski", "Fam", "Hum", "Oth.Per") ~ "Permanent",
+                          Visa.cat %in% c("Aus.Cit", "NZ.Cit", "Oth.Vis") ~ "Other",
+                          Visa.cat %in% c("Tot.Temp", "Tot.Perm", "Tot.Oth") ~ "Totals"))
+    
+    
+    
+pre_plot <- sheet_NOM_long %>% 
+  filter(str_detect(Visa.cat, "Tot.") == FALSE) %>% 
+  arrange(Type)
+
+lvls <- unique(pre_plot$Visa.cat)
+
+
+ plot<- pre_plot %>% 
+    mutate(Visa.cat = factor(Visa.cat, levels = lvls)) %>% 
+   ggplot(aes(x = Date, text = as_date(Date), y = flow, fill = Visa.cat, colour = Type))+
+    geom_bar(position = "stack", stat = "identity")+
+   scale_colour_manual("",
+                      breaks = c("Temporary", "Permanent", "Other"),
+                      values = c("grey", "black", "white"))
+
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NOM Breakdown By Category"}
+
+plot <- sheet_NOM_long %>% 
+  filter(str_detect(Visa.cat, "Tot.") == TRUE) %>% 
+  ggplot(aes(x = Date, text = as_date(Date), y = flow, fill = Visa.cat))+
+  geom_bar(position = "stack", stat = "identity")
+
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Calcs on Census"}
+
+nat.growth.count.sheet <- sheet_310101 %>% 
+  filter(Date > "2011-08-31 GMT") %>% 
+  filter(Date < "2016-08-31 GMT") 
+
+nat.growth.count <- sum(nat.growth.count.sheet$Nat.Inc.Aus)
+
+net.mov.count.sheet <- sheet_arr_dep %>% 
+  filter(Date > "2011-08-31 GMT") %>% 
+  filter(Date < "2016-08-31 GMT") 
+
+net.mov.count <- sum(net.mov.count.sheet$net.movements)
+
+growth.ppp <- net.mov.count + nat.growth.count
+
+nat.growth.count.sheet2 <- sheet_310101 %>% 
+  filter(Date > "2006-08-31 GMT") %>% 
+  filter(Date < "2011-08-31 GMT") 
+
+nat.growth.count2 <- sum(nat.growth.count.sheet2$Nat.Inc.Aus)
+
+net.mov.count.sheet2 <- sheet_arr_dep %>% 
+  filter(Date > "2006-08-31 GMT") %>% 
+  filter(Date < "2011-08-31 GMT") 
+
+net.mov.count2 <- sum(net.mov.count.sheet2$net.movements)
+
+growth.ppp2 <- net.mov.count2 + nat.growth.count2
+
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis"}
+kiwis <- sheet_340109 %>% 
+  select(Date, Numb.of.move.New.Zeal)
+kiwi_regressor <- inner_join(sheet_3401010, kiwis, by = "Date")
+kiwi_regressor <- select(kiwi_regressor, Date, Numb.of.move.New.Zeal,  everything ())
+kiwi_length_regressor <- kiwi_regressor %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+
+mod <- lm(Numb.of.move.New.Zeal ~ . - Date, data = kiwi_length_regressor)  # Regress y on everything (but Year)
+summary(mod)
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis"}
+kiwis <- sheet_340109 %>% 
+  select(Date, Numb.of.move.New.Zeal)
+kiwi_regressor <- inner_join(sheet_3401010, kiwis, by = "Date")
+kiwi_regressor <- select(kiwi_regressor, Date, Numb.of.move.New.Zeal,  everything ())
+kiwi_length_regressor <- kiwi_regressor %>% 
+  select(Date, Numb.of.move.New.Zeal, Num.of.mov.Con:Num.of.mov.Oth.not.sta)
+
+mod <- lm(Numb.of.move.New.Zeal ~ . - Date, data = kiwi_length_regressor)  # Regress y on everything (but Year)
+summary(mod)
+
+model <- tibble(fit =mod$fitted.values)
+  
+
+
+model <- bind_cols(model, kiwi_length_regressor %>% select(Date, Numb.of.move.New.Zeal ))
+
+plot <- ggplot(model, aes(x = Date))+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+#plot(mod)
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Poms"}
+poms <- sheet_340109 %>% 
+  select(Date, Numb.of.move.UK.CIs.IOM)
+poms_regressor <- inner_join(sheet_3401010, poms, by = "Date")
+poms_regressor <- select(poms_regressor, Date, Numb.of.move.UK.CIs.IOM,  everything ())
+poms_length_regressor <- poms_regressor %>% 
+  select(Date, Numb.of.move.UK.CIs.IOM, Num.of.mov.Con:Num.of.mov.Oth.not.sta)
+
+mod <- lm(Numb.of.move.UK.CIs.IOM ~ . - Date, data = poms_length_regressor)  # Regress y on everything (but Year)
+summary(mod)
+
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Indo"}
+balis <- sheet_340109 %>% 
+  select(Date, Numb.of.move.Indo)
+bali_regressor <- inner_join(sheet_3401010, balis, by = "Date")
+bali_regressor <- select(bali_regressor, Date, Numb.of.move.Indo,  everything ())
+bali_length_regressor <- bali_regressor %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+
+mod <- lm(Numb.of.move.Indo ~ . - Date, data = bali_length_regressor)  # Regress y on everything (but Year)
+summary(mod)
+
+
+mod <- lm(Numb.of.move.Indo ~ . - Date, data = bali_length_regressor)  # Regress y on everything (but Year)
+summary(mod)
+
+model <- tibble(fit =mod$fitted.values)
+  
+
+
+model <- bind_cols(model, bali_length_regressor %>% select(Date, Numb.of.move.Indo ))
+
+plot <- ggplot(model, aes(x = Date))+
+  geom_line(aes(y = Numb.of.move.Indo, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The bare minimum to accurately represent a series break"}
 
@@ -260,19 +851,9 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-At least here the idea of a 'level shift' occurring in migration in the mid-2000s starts to appear like it could be illusory due to the definition change.  
-
-But if you're happy to slum it with a 'C-' for data visualising data with integrity, you could do what the [Productivity Commission](http://www.pc.gov.au/inquiries/completed/migrant-intake/report/migrant-intake-report.pdf) does.  String it all together with the same colours, but add a footnote that you hope people read.
-
-```{r, fig.align="center", out.width = 500, fig.cap="Figure 2.5, page 68, Productivity Commission Inquiry into Migrant Intake into Australia, 2016"}
 
 
-knitr::include_graphics("images/pc_plot_1.jpg")
 
-```
-
-
-Or, if you're the dunce of the class and aiming for a 'D', then you could do what the Australian Bureau of Statistics do themselves in their official [pdf explanation](http://www.abs.gov.au/AUSSTATS/abs@.nsf/DetailsPage/3101.0Jun%202016?OpenDocument) for Series 3101 on Australian Demographic Statistics. They just use a tiny little gap in the line, as well as adding a footnote at the bottom of two other footnotes.  Why is that a D?  Because for anyone who has a modicum of common-sense about them (let alone those of us who paid attention when studying science, or stats) would know exactly what a gap in a line in a graph should represent.  You got it, a gap.  A missing data-point in an otherwise consistently recorded and defined stream of data.  So when normal people read ABS charts that have been cut-and-pasted by unscrupulous journalists at trashy magazines (in this case [David Scutt at Business Insider Australia](https://www.businessinsider.com.au/australian-population-growth-picks-up-as-immigration-hits-a-4-year-high-2017-3)) we all get absolutely the wrong impression.
 
 ```{r, fig.align="center", out.width = 600, fig.cap="ABS excerpt published in Business Insider, 2017"}
 
@@ -281,42 +862,7 @@ knitr::include_graphics("images/ABS-population-increase.jpg")
 
 ```
 
-Of course, Business Insider isn't actually that trashy, and I doubt David Scutt is always so unscrupulous. But in this case they've let readers down, since journalism should be about holding authorities to account, not mindlessly regurgitating the most careless of their work.
 
-But they're hardly the worst. A step worse than failing would be absolutely not caring (or realising?), and presenting the data without even the slightest gap, footnote, or explanation.  Like the Reserve Bank of Australia did in [August 2015](http://www.rba.gov.au/publications/smp/2015/aug/graphs/graph-d1.html), in the Statement on Monetary Policy. The National Australia Bank does exactly the same thing when they produce [reports on Population Growth](http://business.nab.com.au/wp-content/uploads/2017/03/nab-thematic-population-growth-strengthens.pdf), as did Gareth Aird from [Commonwealth Bank recently](http://www.abc.net.au/news/2017-07-12/population-growth-masking-australian-economic-weakness/8700288).  Just as wrong and definitely not caring about it are all the property market data traders, like [Core Logic](https://www.corelogic.com.au/news/migration-remains-the-key-driver-of-population-growth#.WZ9vbncjG8U), who produce graphs like this all the time:
-
-
-```{r, fig.align="center", out.width = 600, fig.cap="Core Logic Blog, 2017"}
-
-
-knitr::include_graphics("images//CLCameronKusher.png")
-
-```
-
-[Bernard Salt](https://assets.kpmg.com/content/dam/kpmg/pdf/2014/11/population-housing-infographic.pdf), the KPMG partner who specialises in demography (and frequent demographic columnist for The Australian) also falls in the 'don't realise, or don't care' category. Happy to footnote an annual estimate made on three quarters of data, but no mention of the definition shift in 2006.
-
-```{r, fig.align="center", out.width = 700, fig.cap="Extract from KPMG Immigration Infographic"}
-
-knitr::include_graphics("images/kpmg.png")
-
-```
-
-
-
-And even worse than being accidentally oblivious to the error once or twice, you could be really loud obnoxious, and incessant about repeating the error, and all the incorrect conclusions you could draw from it.  Here the gong has to go to Leith Van Onselen from Macrobusiness, who has to be the head cheer-leader for the very small clutch of economists indulging in this dalliance with the 'Population Ponzi' explanation for the mediocre economic performance of our economy.  In a trend that saddens me for a fun, insightful business blog which I otherwise love reading and pay money to subscribe to, Leith is slowly turning half of Macrobuiness into a thinly econo-veiled anti-immigration rant.  And he wheels out this graph and state-based ones (and longer ones with even more, larger definition shifts) [again](https://www.macrobusiness.com.au/2017/06/dick-smith-attacks-lucy-turnbulls-population-ponzi-scheme/), and [again](https://www.macrobusiness.com.au/2017/06/immigration-no-golden-goose-economy/), and [again](https://www.macrobusiness.com.au/2017/03/busting-immigrations-biggest-economic-myth/), and [again](https://www.macrobusiness.com.au/2017/04/even-domainfax-questioning-population-ponzi/) to explain every imaginable economic ailment from [low wages](https://www.macrobusiness.com.au/2017/03/evidence-clear-immigration-reduces-wages/) to [crowded trains](https://www.macrobusiness.com.au/2017/07/population-ponzi-overruns-melbournes-trains/). 
-
-```{r, fig.align="center", out.width = 500, fig.cap="Macrobusiness reposting a NAB graphic, 2017"}
-
-knitr::include_graphics("images/MacroNab.png")
-
-```
-
-## If it's broke, should we fix it? The statistician's dilemma.
-So apart from being sloppy, this definition shift conceals something pretty serious, a divergence from a more important series which Australians ought to know about.
-
-It's worth asking what motivated the ABS to make the change in the first place.  Changing a definition in the middle of a series is pretty mortifying to serious analysts trying to draw conclusions from it.  There must have been something pretty traumatic going on to justify such drastic measures. 
-
-In their defence, arguably there was.  Here's the monthly arrival and departure series showing tremendous growth, almost doubling in ten years, around 7% compound rate:
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The exponential growth in monthly overseas movements"}
 
@@ -344,7 +890,6 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-And here's how that nets out:
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The increasing volatility of net monthly overseas movements"}
 
@@ -359,11 +904,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-The mid-2000s saw a gear shift in the amplitude of seasonal fluctuations in what I might call the 'physically present population' (PPP), as well as acceleration in the total number of trips.  People were traveling more frequently, and that meant that the 12/12 rule, which required people stay here (or stay abroad) for 12 months continually wasn't being triggered as reliably.
 
-In theory, a new migrant to Australia could go home for a couple of weeks every Christmas, they'd never actually 'arrive' according to the definition used in ABS's 310101 series, because they never spend a continuous 12 months in Australia.  Surely that's a loophole worth closing right?  If that was happening with a substantially increasing frequency, (and one could see how new droves of international students, working holiday makers, and 457 workers in the mid 2000s that it might) then you'd think that we'd run the risk of recording a substantially smaller 'resident' population than we actually physically have here in the medium and even longer term.  That could be problematic, and the ABS [sensed the issue](http://www.abs.gov.au/ausstats/abs@.nsf/mf/3412.0.55.001) before making the change.
-
-Having already crossed the data-wrangling moat around the Arrivals and Departures comparison, we can easily extract consistently recorded time-series of net movements, expressed as an annual rate, recorded quarterly, which we can compare with the Net Overseas Migration Number in 3101. As at June 2006, you can see what the ABS was worried about:
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The link between NOM and Movements was clearly broken by 2006"}
 
@@ -389,14 +930,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-The striking thing here is that the two series had indeed departed, but in the opposite way that one might suspect.  Contrary to what I might have guessed, in the early 2000s, Net Overseas Migration began substantially *over estimating* the actual net change in people present in Australia.  To simplify and stereotype, the new migrants who flew home for Christmas and never officially 'arrived' according to the 12/12 rule were starting to be heavily outweighed by the Australian expats who flew back every Christmas, and never 'departed'.  
 
-Why did we ever start with a minimum stay incorporated in the definition of 'migration'?  Arguably it might be useful if it helps to iron out some of the volatility.  If travel patterns are reasonably stable, you could draw a line somewhere that might work.  And up until 2001, that's broadly what the NOM measure achieved, reduced the peaks and troughs a bit. But travel patterns were not stable in the long-term, and by 2006 with the 'physically present population' was now a hefty quarter of a million people smaller than what the official 'Estimated Resident Population' recorded in 3101. With no sign of a reversion occurring, it might have seemed necessary to shift the definition to maintain the credibility and usefulness of the series.
-
-So by shifting the definition of what constituted an 'arrival' or 'departure' for migration purposes to include 
-any movement that was followed by a *cumulative* total of 12 months in the next 16 spent in or out of Australia (including multiple trips) the ABS hoped that the rapid accumulation people who are theoretically 'resident' but in practice not present. 
-
-Did the definition shift have the desired effect?  Well, fleetingly, before it failed even worse than ever...
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The gap between NOM and Movements widens after the definition change and the GFC"}
 
@@ -426,7 +960,6 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-Arguably it might have helped, for a moment, to at least stem the explosion of the discrepancy between the two series.  But what's obvious in hindsight has come back to bite: travel patterns had to stabilise somewhat for any arbitrary definition to work.  Which is why it did work, fleetingly, when travel growth did stall for a moment, at the peak of the Global Financial Crisis when the Aussie Dollar plummeted, as you can see from this graph smoothing out arrivals and departures over 12 months.  (Zoom in on the bottom to check the difference between the two line, plotted in bars at the bottom.  I think appreciating the scale difference is important.)
 
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "International travel slows during the GFC, even more for departures"}
@@ -455,23 +988,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-But afterwards it accelerated again with new vigour, and the gulf between net movements and official 'Net Overseas Migration' opened wider than ever before.  Even if the ABS was catching the expats who came home for Christmas, they were being rapidly overwhelmed by the droves of people spending months in the year away for all sorts of exchanges, holidays, business trips, secondments, backpacking, GAP years, conferences, family visits etc, but still managing to clock up more than four months in any given 16 back in Aus.
 
-##The sojourn-slump we call a migration spike
-It's also worthwhile just noting how that graph up-ends the common narrative of an immigration spike.  There wasn't an influx of new unfamiliar faces flooding into Australia.  The new 'immigration' was driven by all the familiar faces who stuck around much more than they might have otherwise.
-
-That's hardly surprising given that Australia's was the only Western Economy which wasn't in recession at the time.  Earning money elsewhere would be hard.  And with the dollar sharply depressed, spending it elsewhere would be dangerously easy. Little wonder plenty of Aussies would have postponed trips overseas for work and pleasure alike. Similarly, foreign students and backpackers might have decided against taking holiday breaks home to join their families in deeply depressed economies.  Spending some foreign currency on a cheap summer in Aus would have been a pretty appealing alternative.
-
-## The fallout from a failed rescue
-So what's the upshot of the ABS persisting in using the arbitrary and inadequate definition of Net Overseas Migration? Simply that no-one is keeping track of a far more reliable, rigorous, and consistently defined alternative: Net Overseas Movements.  
-
-Guessing about what people's travel plans are is ambitious.  Guessing where people will actually travel is vastly more so.  So trying to define 'migration' on the basis of some rule that gives an indication of where people will probably be, more often than not on average, for the medium-ish-term future is utter folly.  The ABS has been trying to pour concrete around their code for tea-leaf reading.  It's necessarily arbitrary, subjective, and continually subject to the tides of change in human behaviour.  Every few years they'll have to break up the concrete and pour it again, like they did in 2006, and try to do it quietly enough that we won't notice.  Apart from the waste, the casualty is the quality of our nation's economic planning and analysis, which is anchored to a tenuous, distorted time-series.
-
-On the other hand, being an island nation makes the act of crossing a border one of the easiest, most clear-cut, comprehensively collected statistics that we could ever hope to encounter.  Unless we believe that thousands of people are leaping past the customs gates at airports, or that the thousands of boat people land on our shores (and integrate into society) completely unnoticed, or that every trade-ship is packed full of stow-aways, then movement numbers collected by our border authorities should be about as hard and fast as statistics can come.  And unlike almost every other stat collected by ABS, we actually measure every one of them, not just imputing from a sample that we asked to fill in a survey.
-
-And if we take Net Overseas Movements as a metric for migration, a very different story about migration rates in Australia emerges.
-
-Here's the Net Overseas Migration rate, with a polynomial, and linear trend fitted:
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The official NOM figure shows long-term acceleration of inward migration"}
 plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date), y = Net.Ove.Mig.Aus.Pre.12m.per.ERP))+
@@ -488,9 +1005,6 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-It's easy to see how people would still attain the impression that Net Migration has increased.  Taking a linear trend you would assume that we've risen from an average migration rate of under half a percent to nearly one percent of population.  That's quite something.
-
-And here's the Net Overseas Movements:
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The figures on total Movements shows no long-term trend"}
 plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date), y = net.movements.Pre.12m.per.PPP))+
@@ -507,9 +1021,6 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-No, your eyes aren't deceiving you, that's actually a slight downward slope.  It's a volatile, cyclic series that is essentially unchanged in terms of level for nearly 40 years.
-
-The consequence of such a shift is also pretty dramatic when you consider how that might impact the overall population. The cumulated impact of this variance is now enormous, about a million people, who are officially counted as being 'resident' but physically aren't here in Australia:
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The cumulative discrepancy between official NOM and the population actually in Australia has exploded"}
 
@@ -536,10 +1047,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 ```
 
 
-## The Missing Million
-This also has a pretty dramatic impact if you calculate an alternative population, which would be the "Physically Present Population" (PPP). Using the arbitrarily defined estimate we call ERP is the equivalent of pretending that we have another two Tasmanias worth of people dangling unnoticed somewhere off the coast of Australia.  But those two Tasmania's worth of people will be roughly as rich and productive as the average Australian, i.e. much more like New South Wales and Victoria.  
 
-I can't see any reason why we shouldn't pay more attention to that the PPP number.  Combining the rigorous, cleanly defined, universally collected Net Overseas Movements with Births and Deaths (also binary, one hopes comprehensively recorded) would produce a time series we could all have confidence in.  Furthermore, we could release it monthly or quarterly with almost no delay, rather than waiting for the full 16 months required for Net Overseas Migration to be calculated and amusing ourselves in the fog of confusion created by all of ABS's opaque estimates and projections in the time-being.  Here's what such a series would look like, plotted quarterly, but calculated as the sum of the previous 12 months:
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Natural growth actually comprises over half of our population growth"}
 
@@ -564,7 +1072,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
   
 ```
 
-This suggests that in recent times 'natural' growth (births and deaths) has actually outstripped migration as a contribution to our overall population growth.  In stark contrast to the story which is usually told from the graph below:
+
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The assumption that migration drives population growth arises from arbitrary, inconsistent definitions of Net Overseas Migration"}
 
@@ -590,7 +1098,6 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-And here's the comparison the two when expressed as a rate, side by side, with some period averages calculated:
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The population growth rate may actually have fallen since 2000"}
 joint_21st <- joint_sheet_310101 %>% 
@@ -631,19 +1138,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-Now the baselessness of the Population Ponzi story is exposed.  We're not importing masses of people just to delay the impacts of population aging, so that a later generation can deal with that problem.  We're getting new people on long-term visas to replace the rising fraction of Australian's population who are possibly still long term - but increasingly 'part-time' - residents. The Net Overseas Migration metrics have completely failed to capture the correct story.
 
-In a generous moment, I might concede that the arbitrarily defined NOM might still be interesting to track for some purposes, for example in property prices. Aussies are likely to hold onto their homes even while they spend more time overseas (often leaving them empty), and an investor who spends little time here can push up property prices. But the moment someone starts claiming that immigrants are congesting our roads and there's no way we can build enough infrastructure can keep up with their rate of arrival, (see Cory Bernardi and Mark Latham [here](https://www.youtube.com/watch?v=28ZO4BXRq-Q)) it's time to grip your sides and start rolling around in the aisles in laughter. *That* particular rate of growth has unequivocally slowed.  People who are overseas don't drive their cars on the M4 in Sydney, or cram up the train stations in Melbourne.  
-
-It's also ridiculous that the million officially resident - but presently absent - people constitute a ["growing reserve army of labour"](http://www.abc.net.au/news/2017-07-12/population-growth-masking-australian-economic-weakness/8700288) who are bidding down the wages of local workers.  The army that exists in the real statistics is the million non-present residents, many of whom are probably busy chasing higher incomes (or spending them) - but overseas. 
-
-The mind boggles at the slew of other statistics that this could seriously affect if the ERP was replaced with PPP.  It might explain the consistently disappointing nominal GDP growth that Australia has been experiencing for some time, which assumes that a comfy 1.5% growth can come from population increases before any productivity is added. Plenty of labour statistics are bound to be out as well, since surveys of local addresses wouldn't tell us much about how hard all non-present residents actually work (or what they earn) while they're not here.  But ABS scales up the results, [using ERP](http://www.abs.gov.au/AUSSTATS/abs@.nsf/Lookup/6202.0Explanatory%20Notes1Jul%202017?OpenDocument), effectively including them in the labour force. Lacklustre wage growth, productivity figures, poor tax revenue, almost everything that the government relies on to make proper policy decisions could be woefully distorted. Exploring that mess will also have to wait until a later post.
-
-It's also perfectly possible that plenty of other developed countries have also been effectively double-counting an increasing part of their populations.  In my searching of ABS definitions, I found no mention of needing to adhere to any international rules or standards to ensure that the world's population added up.  Perhaps the miscounting of populations could be added to the [list](https://www.vox.com/2016/8/1/12131216/theories-gdp-growth-slow) of possible explanations of low-growth in the Western World.
-
-But before signing off for now, I'll have one more dig at the ABS, this time for a nasty twist that emerged late in my research for this post, when trying to get confirmation of my hypothesis from the recent Census.  Yes, it turned out I was naive again, nothing with an ABS stat is going to be quick.  The obvious numbers from [ABS Quickstat](http://www.censusdata.abs.gov.au/census_services/getproduct/census/2016/quickstat/036) for 2016 and 2011 ("Persons count based on place of usual residence on Census night" known as PURP, which I've plotted below) actually aren't directly comparable to either the ERP or PPP.  But finding the ones that are turned out to be, well, not that easy, particularly if you don't trust ABS estimates or imputation.  Let's just say that ABS knows what it's like to realise they've been over-estimating population by a few hundred thousand people. [Last time that happened](http://www.abs.gov.au/AUSSTATS/abs@.nsf/Previousproducts/3101.0Feature%20Article3Jun%202012?opendocument&tabname=Summary&prodno=3101.0&issue=Jun%202012&num=&view=) (in 2011) they smeared the error out over the previous two decades so that no-one would notice. Unpicking the possible distortions that that might have sewn into all these figures, and relating it to the observations above will occupy the subject of another post soon.
-
-QQ.
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "An assortment of alternative population measurements"}
 Date <- c(as.POSIXct(as_date( "2011-09-09 GMT")))
@@ -673,4 +1168,4 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-The .Rmd file for this post can be accessed [here](https://github.com/aidandmorrison/quixoticquant/blob/master/content/post/2017-08-29-the-missing-million.Rmd), which will require the installation of this [package](https://github.com/aidandmorrison/UtilsQQ) to run. 
+The .Rmd file for this post can be accessed which will require the installation of this [package](https://github.com/aidandmorrison/UtilsQQ) to run. 
