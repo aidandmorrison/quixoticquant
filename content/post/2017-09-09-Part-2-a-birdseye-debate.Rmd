@@ -2,7 +2,7 @@
 title: "The state of debate: A bird's-eye on migration"
 author: Aidan
 date: '2017-09-18'
-slug: the-missing-million
+slug: birdseye
 thumbnail: "images/Emojis2.png"
 categories:   
   - Demographics
