@@ -6,10 +6,19 @@
     <description>Recent content on Quixotic Quant</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 04 Sep 2017 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 18 Sep 2017 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>The state of debate: A bird’s-eye on migration</title>
+      <link>/post/the-state-of-debate-a-bird-s-eye-on-migration/</link>
+      <pubDate>Mon, 18 Sep 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/post/the-state-of-debate-a-bird-s-eye-on-migration/</guid>
+      <description>This post is a follow-on from my first post on this topic. In that post I pointed to a couple of alternative statistics which can be derived from ABS data, including “Net Overseas Movements”, and “Physically Present Population”. I suggested Australia’s migration rate might be substantially overstated by “Net Overseas Migration” (NOM), and the derived “Estimated Resident Population” (ERP) might also look bit frothy, or even a million people frothy according to ABS data.</description>
+    </item>
     
     <item>
       <title>The Missing Million: Is Australia&#39;s migration rate actually high?</title>
