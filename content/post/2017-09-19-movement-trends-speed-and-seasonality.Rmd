@@ -77,7 +77,8 @@ sheet_340102 <- inst_ann(sheet_340102, meta)
 sheet_340102 <- prev_12_month(sheet_340102, meta)
 
 ```
-The following one shows clearly how Australia has become a place to arrive long-term, and leave from short-term, which is the core contention of my thesis.  It also shows how Net Overseas Migration tends to very closely resemble the long-term movements, where as the actual total movements net out to a far lower figure.
+## Stay long, but leave a lot
+The following one shows clearly how Australia has become a place to arrive long-term, and leave from short-term, which is the core contention of my thesis.  It also shows how Net Overseas Migration tends to very closely resemble the long-term movements, whereas the actual total movements net out to a far lower figure.
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Net Movements diverged after 2001, with Short Term Movements becoming strongly negative, and long term movments more positive."}
 
@@ -167,7 +168,8 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-To put things into perspective, since 2000 there have been over 200 million arrivals, and over 200 milion departures.  The total differece between the two, or cumulative net arrivals, is just over 2 million during that period.  About 1%. I think that's worth just keeping in mind when we dive into this data, as it's easy to miss the forest for the trees. For any and all definitions of migration, it is tracked through movements, which is two orders of magnitude larger.  We're already looking through a microscope at movements when we start to discuss migration.
+## Speed of movement
+To put things into perspective, since 2000 there have been over 200 million arrivals, and over 200 million departures.  The total difference between the two, or cumulative net arrivals, is just over 2 million during that period.  About 1%. I think that's worth just keeping in mind when we dive into this data, as it's easy to miss the forest for the trees. For any and all definitions of migration, it is tracked through movements, which is two orders of magnitude larger.  We're already looking through a microscope at movements when we start to discuss migration.
 
 In the following chart I suggest you select the view option that looks like two tabs above one another, and read off the precise numbers for these two series at any point along the line.  The difference between these two numbers is represents the total increase in Australia's physically present population, since we started recording in 1976. 
 
@@ -317,9 +319,9 @@ plot <- ggplot(sheet_arr_dep_late, aes(x = Date, text = as_date(Date)))+
 
 ```
 
-However this hasn't changed the most important conlcusion, which invariably is that the growth rate is still extraordinarily high when compared to the growth of the population.  Expressed here as an an annual number of movements divided by the Estimated Resident Population, we can see that the rise in 'mobility' is still rising relentlessly.
+However, this hasn't changed the most important conclusion, which invariably is that the growth rate is still extraordinarily high when compared to the growth of the population.  Expressed here as an annual number of movements divided by the Estimated Resident Population, we can see that the rise in 'mobility' is still rising relentlessly.
 
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements Per Capita demonstrate tremedous growth"}
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements Per Capita demonstrate continuous growth"}
 
 plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
   geom_line(aes(y = (Num.of.mov.Tot.Arr.Pre.12m + Num.of.mov.Tot.Dep.Pre.12m)/Est.Res.Pop.ERP.Aus))+
@@ -335,9 +337,10 @@ plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
 
 ```
 
-Officially, we've had more than one overseas movement per person since 2005.  Whilst it's important to consider the distribution of these movements amongst the different types of people coming in and out of the population, the potential for us to have a very significant 'part-time' population is clear. 
+Officially, we've had more than one overseas movement per person since 2005.  Whilst it's important to consider the distribution of these movements amongst the different types of people coming in and out of the population, the potential for us to have a very significant 'part-time' population is clear.  Whilst it's tempting to simply say that this only reflects short-term visits, Figure 1 demonstrates how short-term and long-term visits are no longer separable in terms of their impact on migration.  A significant and increasing fraction of our population is only here part-time, and attempts to get a clear grasp on our demographics that don't appreciate that will be persistently miss their mark.
 
-This unremmitting increase in mobility that should be cause for consideration for policymakers and economists.  The pace of movement is picking up, and this is likely to create pressure that is quite independent from the gradual accumulation of more 'resident' people.  Perhaps one of the clearest ways in which this is likely to manifiest itself in in seasonality. As can be seen from earlier charts, the dots are spreading out, and intra-year variance is increasing.  The following graph shows net movements, (arrivals less departures) by month, for every year we have data on.
+## Seasonality of movement
+This unremitting increase in mobility that should be cause for consideration for policymakers and economists.  The pace of movement is picking up, and this is likely to create pressure that is quite independent from the gradual accumulation of more 'resident' people.  Perhaps one of the clearest ways in which this is likely to manifest itself in in seasonality. As can be seen from earlier charts, the dots are spreading out, and intra-year variance is increasing.  The following graph shows net movements, (arrivals less departures) by month, for every year we have data on.
 
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Net Movements by month show increasingly extreme seasonal fluctuations"}
@@ -402,7 +405,7 @@ plot <- sheet_arr_dep %>%
 
 ```
 
-The unmistakeable trend is that net seasonal fluctuations are increasing massively.  In both July and December, Australia physically drains itself of more than 1% of it's population.  To see how that pans out cumulatively in any given individual year, I've replicated the previous december result as month zero, to track how the population actually fluctuates throughout the year.
+The unmistakeable trend is that net seasonal fluctuations are increasing massively.  In both July and December, Australia physically drains itself of more than 1% of its population.  To see how that pans out cumulatively in any given individual year, I've replicated the previous December result as month zero, to track how the population actually fluctuates throughout the year.
 
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Australia's Physically Present Population peaks every February and October"}
@@ -423,7 +426,7 @@ plot <- sheet_arr_dep_13m %>%
 
 ```
 
-This tells an important, and a very different story about Australia's physically present population, which has been largely overshadowed by superficial discussions of a single, monolithic migration figure (NOM).  The fluctuation in our population is rising dramatically, far more dramatically than migration itself.  However, at years end, only a couple of years have actually resulted in a net cumulative movement which is noticeably higher than we've had for a very long time.  2008 and 2016 are those two yeras, but almost every other recent year has landed back down at a net cumulative movement that is not altogether unlike we've had in the 80s and 90s. 
+This tells an important, and a very different story about Australia's physically present population, which has been largely overshadowed by superficial discussions of a single, monolithic migration figure (NOM).  The fluctuation in our population is rising dramatically, far more dramatically than migration itself.  However, at years end, only a couple of years have actually resulted in a net cumulative movement which is noticeably higher than we've had for a very long time.  2008 and 2016 are those two years, but almost every other recent year has landed back down at a net cumulative movement that is not altogether unlike we've had in the 80s and 90s. 
 
 To see how that stacks up over time, let's look the data we have in two time-periods, 2000 and later, compared to everything before (from mid 1976).
 
@@ -492,10 +495,10 @@ plot <- sheet_arr_dep %>%
 
 ```
 
-I should point out that the line has an R squared value over 0.98, not to be dismissed lightly in terms of it's fit to the data.  You can see here that the impression that Australia's migration rate has suddenly ramped up to extraordinary new heights relies on a definition that doesn't incorporate the impact of our increasingly part-time population, and a pretty selective view of history that focusses on a short-lived 'Golden Era' of particularly low net movments during a few years in the early 2000s. 
+I should point out that the line has an R squared value over 0.98, not to be dismissed lightly in terms of its fit to the data.  You can see here that the impression that Australia's migration rate has suddenly ramped up to extraordinary new heights relies on a definition that doesn't incorporate the impact of our increasingly part-time population, and a pretty selective view of history that focusses on a short-lived 'Golden Era' of particularly low net movements during a few years in the early 2000s. 
 
-It also brings into focus the real complexity around things like infrastructure. Is there likely to be heavier traffic in February than in June?  I'm haven't yet looked to find out, but it's quite possible that it isn't.  Our sense of traffic is dominated by the intensity of the peaks and troughs in its fluctuations on a daily or weekly basis, rather than it's long-term aggregated average. It's perfectly plausible that the people making up the net increase aren't predominantly adding to peak-hour commutes, as they might be on holiday, or staying in hotels close to their work, ot not yet enrolled in their course, or on their way out of town for an adventure, or seasonal work in the country. It's also possible that enrolling in a course, or getting out of town, might put especially concentrated demand on certain pieces of infrastructure at exactly the worst times. 
+It also brings into focus the real complexity around things like infrastructure. Is there likely to be heavier traffic in February than in June?  I'm haven't yet looked to find out, but it's quite possible that it isn't.  Our sense of traffic is dominated by the intensity of the peaks and troughs in its fluctuations on a daily or weekly basis, rather than its long-term aggregated average. It's perfectly plausible that the people making up the net increase aren't predominantly adding to peak-hour commutes, as they might be on holiday, or staying in hotels close to their work, or not yet enrolled in their course, or on their way out of town for an adventure, or seasonal work in the country. It's also possible that enrolling in a course, or getting out of town, might put especially concentrated demand on certain pieces of infrastructure at exactly the worst times. 
 
-My point is that it's really impossible to discuss this intelligently without diving a little further into the data to discover what really constitutes the movements, and the behaviour of people makeing them. Insistent claims that "Australia will need to add a Canberra-worth of infastructure and housing every year" because of our high migration rate, (see [here](https://www.macrobusiness.com.au/2017/06/immigration-no-golden-goose-economy/)) are pure simplistic nonsense.  Australia adds a Canberra-and-a-half to population in a matter of weeks between December and February every year. But over the course of any given year we average much less than a third of Canberra from migration. The infrastructure requirements for meeting that could be trivialy easy, completely impossible, or anywhere in-between, depending on the more detailed sub-structure of these flows. 
+My point is that it's really impossible to discuss this intelligently without diving a little further into the data to discover what really constitutes the movements, and the behaviour of people making them. Insistent claims that "Australia will need to add a Canberra-worth of infrastructure and housing every year" because of our high migration rate, (see [here](https://www.macrobusiness.com.au/2017/06/immigration-no-golden-goose-economy/)) are pure simplistic nonsense.  Australia adds a Canberra-and-a-half to population in a matter of weeks between December and February every year. But over the course of any given year we average much less than a third of Canberra from migration. The infrastructure requirements for meeting that could be trivially easy, completely impossible, or anywhere in-between, depending on the more detailed sub-structure of these flows. 
 
 To speak intelligently about how/whether our population is growing, whether or how we should try to change that type of growth,  one really has to understand more about our increasingly mobile part-time population. In later posts I'll follow Dr Cameron Murray's [lead](http://www.fresheconomicthinking.com/2017/09/finding-australias-missing-million.html) and further explore where in the world they are in any given time of year, whether and how they'll collectively come back, and what we can or should do to prepare for it.
