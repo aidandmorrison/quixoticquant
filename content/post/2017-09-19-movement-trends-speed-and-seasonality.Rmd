@@ -1,0 +1,455 @@
+---
+title: 'Discovering the Part-Time Population: Speed and Seasonality'
+author: Aidan
+date: '2017-09-19'
+slug: movement-trends-speed-and-seasonality
+thumbnail: "images/spaghettimonstercover.png"
+categories:
+  - Economics
+  - Demographics
+  - Migration
+tags:
+  - ABS
+  - Ausecon
+  - Immigration
+  - Statistics
+
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+##Introduction
+This post is a follow-on from my [first post](http://www.quixoticquant.com/post/the-missing-million/) on this topic. [Dr. Cameron Murray](http://www.fresheconomicthinking.com/2017/09/finding-australias-missing-million.html) and [Leith van Onselen](https://www.macrobusiness.com.au/2017/09/apparently-no-immigration-boom/).  further.
+
+
+
+```{r get_data, include=FALSE}
+library(tidyverse)
+library(stringr)
+library(gdata)
+library(lubridate)
+library(plotly)
+library(UtilsQQ)
+library(ggplot2)
+
+
+sheet_310101 <- readxl::read_xls("data/310101.xls", sheet = 2)
+sheet_310101 <- good_names(sheet = sheet_310101)
+meta <- stash_meta(sheet_310101)
+meta <- good_names(meta, meta = TRUE)
+sheet_310101 <- cut_meta(sheet_310101)
+sheet_310101 <- good_date(sheet_310101)
+sheet_310101 <- to_numeric(sheet_310101)
+sheet_310101 <- nom_units(sheet_310101, meta)
+sheet_310101 <- inst_ann(sheet_310101, meta)
+sheet_310101 <- prev_12_month(sheet_310101, meta)
+
+sheet_340101 <- readxl::read_xls("data/340101.xls", sheet = 2)
+
+sheet_340101 <- good_names(sheet = sheet_340101)
+meta1 <- stash_meta(sheet_340101)
+meta1 <- good_names(meta1, meta = TRUE)
+meta <- bind_rows(meta, meta1)
+sheet_340101 <- cut_meta(sheet_340101)
+sheet_340101 <- good_date(sheet_340101)
+sheet_340101 <- to_numeric(sheet_340101)
+sheet_340101 <- nom_units(sheet_340101, meta)
+sheet_340101 <- inst_ann(sheet_340101, meta)
+sheet_340101 <- prev_12_month(sheet_340101, meta)
+
+sheet_340102 <- readxl::read_xls("data/340102.xls", sheet = 2)
+
+sheet_340102 <- good_names(sheet = sheet_340102)
+meta2 <- stash_meta(sheet_340102)
+meta2 <- good_names(meta2, meta = TRUE)
+meta <- bind_rows(meta, meta2)
+sheet_340102 <- cut_meta(sheet_340102)
+sheet_340102 <- good_date(sheet_340102)
+sheet_340102 <- to_numeric(sheet_340102)
+sheet_340102 <- nom_units(sheet_340102, meta)
+sheet_340102 <- inst_ann(sheet_340102, meta)
+sheet_340102 <- prev_12_month(sheet_340102, meta)
+
+```
+
+Really only a couple of charts are required to substantiated the mobility thesis outlined earlier in the previous post.  The following one shows clearly how Australia has become a place to arrive long-term, and leave from short-term, which is the core contention of my thesis.  It also shows how Net Overseas Migration tends to very closely resemble the long-term movements.
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Net Movements diverged after 2001, with Short Term Movements becoming strongly negative, and long term movments more positive."}
+
+
+
+sheet_310101 <- sheet_310101 %>% 
+  mutate(NOM.12.12.Pre.12 = (case_when(Date < "2006-09-01 GMT" ~ Net.Ove.Mig.Aus.Pre.12m)),
+         NOM.12.16.Pre.12 = (case_when(Date >= "2006-09-01 GMT" ~ Net.Ove.Mig.Aus.Pre.12m)))
+
+sheet_arr_dep <- bind_cols(sheet_340101, sheet_340102)
+sheet_arr_dep <- sheet_arr_dep %>% 
+  mutate(net.movements = (Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep),
+         net.per.long.term = (Num.of.mov.Per.and.Lon.ter.Arr - Num.of.mov.Per.and.Lon.ter.Dep),
+         net.movements.Pre.12m = (Num.of.mov.Tot.Arr.Pre.12m - Num.of.mov.Tot.Dep.Pre.12m)
+  )
+
+match_sheet_arr_dep <- sheet_arr_dep %>% 
+  filter(Date %in% sheet_310101$Date)
+
+joint_sheet_310101 <- sheet_310101 %>% 
+  inner_join(match_sheet_arr_dep, by = "Date")
+
+joint_sheet_310101 <- joint_sheet_310101 %>% 
+  mutate(Net.Ove.Mig.Aus.Pre.12m.per.ERP = (Net.Ove.Mig.Aus.Pre.12m/Est.Res.Pop.ERP.Aus),
+         net.movements.Pre.12m.per.ERP = (net.movements.Pre.12m/Est.Res.Pop.ERP.Aus),
+         cum.net.movements = cumsum(net.movements.Pre.12m/4),
+         cum.Net.Ove.Mig.Aus = cumsum(Net.Ove.Mig.Aus),
+         cum.discrepancy = cum.Net.Ove.Mig.Aus - cum.net.movements,
+         Phy.Pre.Pop.PPP.Aus = Est.Res.Pop.ERP.Aus - cum.discrepancy,
+         Net.Ove.Mig.Aus.Pre.12m.per.PPP = Net.Ove.Mig.Aus.Pre.12m/Phy.Pre.Pop.PPP.Aus,
+         net.movements.Pre.12m.per.PPP = net.movements.Pre.12m/Phy.Pre.Pop.PPP.Aus
+  )
+
+plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
+  # geom_line(aes(y = Num.of.mov.Per.and.Lon.ter.Dep.Pre.12m, col = "Perm and Long Term Dep"))+
+  # geom_line(aes(y = Num.of.mov.Per.and.Lon.ter.Arr.Pre.12m, col = "Perm and Long Term Arr")) +
+  geom_line(aes(y = (Num.of.mov.Sho.ter.les.tha.one.yea.Res.ret.Pre.12m -
+                       Num.of.mov.Sho.ter.les.tha.one.yea.Res.dep.Pre.12m +
+                       Num.of.mov.Sho.ter.les.tha.one.yea.Vis.arr.Pre.12m -
+                       Num.of.mov.Sho.ter.les.tha.one.yea.Vis.dep.Pre.12m), col = "Net Short Term Movements"), size = 0.8)+
+  geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m, col = "Net Overseas Migration"), size = 0.8)+
+  geom_line(aes(y = Num.of.mov.Per.and.Lon.ter.Arr.Pre.12m - Num.of.mov.Per.and.Lon.ter.Dep.Pre.12m, col = "Net Permanent and Long Term"), size = 0.8)+
+  geom_line(aes(y = net.movements.Pre.12m, col = "Net Movements"), size = 0.8)+
+  scale_colour_manual("", 
+                      breaks = c("Net Short Term Movements", "Net Overseas Migration", "Net Permanent and Long Term", "Net Movements"),
+                      values = c("red", "black", "green", "blue"))+
+  labs(title = "Net Overseas Migration with Net Short and Long Term Movements, Annual")+
+  scale_y_continuous(labels = scales::comma, limits = c(-300000, 460000)) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 100, b = 70, r = 60),
+         legend = list(x = 0.01, y = 0.99))
+
+
+```
+
+Up until about 2001 Short Term Movements netted out to zero.  Long Term Movements roughly equalled Net Overseas Migration, which roughly equalled Net Movements.  So what changed after about 2000? I'm arguing it's the scale and pace of movements globally, which has served Australia a strange and unique hand, being hard to get to and from.  So we're great to visit long-term, and leave short term.  Sometimes I like to do a rough-order-or-magnituded check on how things add up over time.  To put things into perspective, since 2000 there have been over 200 million arrivals, and over 200 milion departures.  The total differece between the two, or cumulative net arrivals, is just over 2 million.  About 1%. I think that's worth just keeping in mind when we dive into this data.  I suggest you select the view option that looks like two tabs above one another, and read off the precise numbers for these two series at any point along the line.
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="The amount of travel taking place has skyrocketed"}
+
+plot <- sheet_arr_dep %>% 
+  #filter(Date > "1999-12-02 GMT") %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = cumsum(Num.of.mov.Tot.Dep), col = "Cumulative Departures"))+
+  geom_line(aes(y = cumsum(Num.of.mov.Tot.Arr), col = "Cumulative Arrivals"))+
+    scale_colour_manual("",
+                      breaks = c("Total Cumulative Departures", "Total Cumulative Arrivals"),
+                      values = c("green", "blue"))+
+  labs(title = "Cumulative Arrivals and Departures since 2000")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 80, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+But of course, it's important to get a sense of how the movements actually happen, month to month:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Monthly Movements have risen, and are showing far greater variance"}
+
+plot <- sheet_arr_dep %>% 
+  #filter(Date > "1999-12-02 GMT") %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Tot.Dep, col = "Departures"))+
+  geom_line(aes(y = Num.of.mov.Tot.Arr, col = "Arrivals"), alpha = 0.9)+
+
+     scale_colour_manual("",
+                      breaks = c("Departures", "Arrivals"),
+                      values = c("green", "blue"))+
+  labs(title = "Exact Arrivals and Departures, Monthly")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 80, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+Apart from the increasing volatility and seasonality, which I'll dive into shortly, it's worth checking out the growth travel overall.  Adding the two together, and fitting an exponential model, we find a growth path that looks pretty impressive:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements Exhibit long-term growth about 6% per annum"}
+
+sheet_arr_dep <- sheet_arr_dep %>% 
+  mutate(count = row_number(),
+         years = count/12,
+         month = as.factor(month(Date)))
+
+expmod = lm(log(sheet_arr_dep$Num.of.mov.Tot.Arr + sheet_arr_dep$Num.of.mov.Tot.Dep) ~ (sheet_arr_dep$years))
+ rate <- exp(expmod$coefficients[2])-1
+
+ plot <- ggplot(sheet_arr_dep, aes(x = Date, text = as_date(Date)))+
+  geom_point(aes(y = (Num.of.mov.Tot.Arr + Num.of.mov.Tot.Dep), col = month), alpha = 0.5)+
+  geom_line(aes(y = exp(expmod$coefficients[1])*(1+ rate)^years), col = "black")+
+  labs(title = paste0("Total Monthly Movements Growth Rate is ", round(rate*100, digits = 2), "%"))+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ 
+ 
+ ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 80, b = 70, r = 70))
+```
+
+However, it should be noted that the fit isn't that great, with what looks like overestimation recently, and under estimation in the late 1990s.  Taking a break in 2004, a tighter fit can be achieved, which curiously demonstrates that the growth rate has actually slowed in recent times.
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Historically movements have grown at a staggering 7%"}
+
+sheet_arr_dep_early <- sheet_arr_dep %>% 
+  filter(Date < "2004-01-01 GMT") %>% 
+  mutate(count = row_number(),
+         years = count/12,
+         month = as.factor(month(Date)))
+
+expmod = lm(log(sheet_arr_dep_early$Num.of.mov.Tot.Arr + sheet_arr_dep_early$Num.of.mov.Tot.Dep) ~ (sheet_arr_dep_early$years))
+ rate <- exp(expmod$coefficients[2])-1
+
+ plot <- ggplot(sheet_arr_dep_early, aes(x = Date, text = as_date(Date)))+
+  geom_point(aes(y = (Num.of.mov.Tot.Arr + Num.of.mov.Tot.Dep), col = month), alpha = 0.5)+
+  geom_line(aes(y = exp(expmod$coefficients[1])*(1+ rate)^years), col = "black")+
+  labs(title = paste0("Total Monthly Movements Growth Rate is ", round(rate*100, digits = 2), "%"))+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ 
+ ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 80, b = 70, r = 70))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Recently growth in movements has cooled, to a smoking 5.5%"}
+  
+ sheet_arr_dep_late <- sheet_arr_dep %>% 
+  filter(Date > "2004-01-01 GMT") %>% 
+  mutate(count = row_number(),
+         years = count/12,
+         month = as.factor(month(Date)))
+
+expmod = lm(log(sheet_arr_dep_late$Num.of.mov.Tot.Arr + sheet_arr_dep_late$Num.of.mov.Tot.Dep) ~ (sheet_arr_dep_late$years))
+
+sheet_arr_dep_late_low <- sheet_arr_dep_late %>% 
+  filter(month(Date) %in% c(5:6)) 
+expmodl = lm(log(sheet_arr_dep_late_low$Num.of.mov.Tot.Arr + sheet_arr_dep_late_low$Num.of.mov.Tot.Dep) ~ (sheet_arr_dep_late_low$years))
+
+sheet_arr_dep_late_high <- sheet_arr_dep_late %>% 
+  filter(month(Date) %in% c(1, 12)) 
+expmodh = lm(log(sheet_arr_dep_late_high$Num.of.mov.Tot.Arr + sheet_arr_dep_late_high$Num.of.mov.Tot.Dep) ~ (sheet_arr_dep_late_high$years))
+  
+rate <- exp(expmod$coefficients[2])-1
+ratel <- exp(expmodl$coefficients[2])-1
+rateh <- exp(expmodh$coefficients[2])-1
+
+
+plot <- ggplot(sheet_arr_dep_late, aes(x = Date, text = as_date(Date)))+
+  geom_point(aes(y = (Num.of.mov.Tot.Arr + Num.of.mov.Tot.Dep), col = month), alpha = 0.5)+
+  geom_line(aes(y = exp(expmod$coefficients[1])*(1+ rate)^years), col = "black")+
+  # geom_line(aes(y = exp(expmodl$coefficients[1])*(1+ ratel)^years), col = "blue")+
+  # geom_line(aes(y = exp(expmodh$coefficients[1])*(1+ rateh)^years), col = "green")+
+  labs(title = paste0("Total Monthly Movements Growth Rate is ", round(rate*100, digits = 2), "%"))+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ 
+ ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 80, b = 70, r = 70))
+
+# plot <- sheet_arr_dep %>% 
+#   #filter(Date > "1999-12-02 GMT") %>% 
+#   ggplot(aes(x = Date, y = (Num.of.mov.Tot.Dep + Num.of.mov.Tot.Arr), col = "Departures and Arrivals", text = as_date(Date)))+
+#   geom_line()+
+#   stat_smooth(method = 'lm', formula = y ~ exp(z), se= FALSE, colour = "black")+
+#      scale_colour_manual("",
+#                       breaks = c("Departures and Arrivals"),
+#                       values = c("grey"))+
+#   labs(title = "Sum of Arrivals and Departures, Monthly")+
+#   scale_y_continuous(labels = scales::comma) +
+#   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+# 
+# ggplotly(plot, tooltip = c("text", "y")) %>% 
+#   layout(margin=list(l=100, t = 80, b = 70, r = 70),
+#          legend = list(y = 0.9, x = 0.1))
+
+```
+
+However this hasn't changed the most important conlcusion, which invariably is that the growth rate is still extraordinarily high when compared to the growth of the population.  Expressed here as an an annual number of movements divided by the Estimated Resident Population, we can see that the rise in 'mobility' is still rising relentlessly.
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements Per Capita demonstrate tremedous growth"}
+
+plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = (Num.of.mov.Tot.Arr.Pre.12m + Num.of.mov.Tot.Dep.Pre.12m)/Est.Res.Pop.ERP.Aus))+
+  #geom_line(aes(y = (Num.of.mov.Tot.Arr.Pre.12m + Num.of.mov.Tot.Dep.Pre.12m)/Phy.Pre.Pop.PPP.Aus))+
+  labs(title = "Annual Movements per Head of Population (ERP)")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ 
+ ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 70, r = 70))
+
+
+
+```
+
+Officially, we've had more than one overseas movement per person since 2005. It is this unremmitting increase in mobility that should be cause for consideration for policymakers and economists.  The pace of movement is picking up, and this is likely to create pressure that is quite independent from the gradual accumulation of more 'resident' people.  Perhaps one of the clearest ways in which this is likely to manifiest itself. As can be seen from earlier charts, the dots are spreading out, and intra-year variance is increasing.  The following graph shows net movements, (arrivals less departures) by month, for every year we have data on.
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Net Movements by month show increasingly extreme seasonal fluctuations"}
+
+sheet_arr_dep <- sheet_arr_dep %>% 
+  mutate(month = month(Date), year = year(Date))
+
+sheet_arr_dep <- sheet_arr_dep %>% 
+  mutate(index = row_number())
+
+sheet_arr_dep <- sheet_arr_dep %>% 
+  group_by(year) %>% 
+  mutate(year.cum = cumsum(net.movements),
+         jan.flow = case_when(month == 1 ~ net.movements),
+         year.flow = case_when(month == 12 ~ year.cum))
+
+sheet_arr_dep <- sheet_arr_dep %>% 
+  fill(jan.flow)
+
+sheet_arr_dep <- sheet_arr_dep %>% 
+  ungroup() %>% 
+  mutate(cum.net.movements = cumsum(net.movements))
+
+sheet_arr_dep_dec <- sheet_arr_dep %>% 
+  filter(month == 12)
+
+sheet_arr_dep_dec <- sheet_arr_dep_dec %>% 
+  mutate(year.cum = 0)
+
+sheet_arr_dep_13m <- sheet_arr_dep %>% 
+  bind_rows(sheet_arr_dep_dec) %>% 
+  arrange(index)
+
+sheet_arr_dep_13m <- sheet_arr_dep_13m %>% 
+  mutate(lag.month = lag(month,1)) %>% 
+  filter(index > 1)
+         
+sheet_arr_dep_13m <- sheet_arr_dep_13m %>% 
+  mutate(new.month = case_when(
+           month == lag.month ~ 0,
+           month != lag.month ~ month),
+         new.year = case_when(
+           month == lag.month ~ year + 1,
+           month != lag.month ~year))
+
+sheet_arr_dep_13m <- sheet_arr_dep_13m %>% 
+  fill(year.flow)
+
+plot <- sheet_arr_dep %>% 
+  #filter(Date > "2009-12-02 GMT") %>% 
+  ggplot(aes(x = month, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep, col = year))+
+  labs(title = "Net Movements, Monthly")+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(1:12)) +
+  labs(x = "Month of Year", col = "Year")+
+  theme(axis.title.x = element_text(), axis.title.y = element_blank())
+ 
+ ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 70, r = 70))
+
+
+```
+
+The unmistakeable trend is that net seasonal fluctuations are increasing massively.  In both July and December, Australia physically drains itself of more than 1% of it's population.  To see how that pans out cumulatively in any given individual year, I've added replicated the previous december result as month zero, to track how the population actually fluctuates throughout the year.
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Australia's Physically Present Population peaks every February and October"}
+
+
+plot <- sheet_arr_dep_13m %>% 
+  #filter(new.year >= 2010) %>% 
+  ggplot(aes(x = new.month, text = as_date(Date)))+
+  geom_line(aes(y = year.cum, col = new.year))+
+  labs(title = "Cumulative net movements throughout each year")+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(0:12)) +
+  labs(x = "Month of Year", col = "Year")+
+  theme(axis.title.x = element_text(), axis.title.y = element_blank())
+ 
+ ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 70, r = 70))
+
+```
+
+This tells an important, and a very different story about Australia's physically present population, which has been largely overshadowed by superficial discussions of migration.  The fluctuation in our population is rising dramatically.  However, at years end, only a couple of years have actually resulted in a net cumulative movement which is noticeably higher than we've had for a very long time.  2008 and 2016 are those two yeras, but almost every other recent year has landed back down at a net cumulative movement that is not altogether unlike we've had in the 80s and 90s. 
+
+To see how that stacks up over time, let's look the data we have in two time-periods, 2000 and later, compared to everything before (from mid 1976).
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="The recent historical accumulation people is increasingly seasonal"}
+
+
+plot <- sheet_arr_dep_13m %>% 
+  filter(new.year >= 2000) %>% 
+  ggplot(aes(x = new.month, text = as_date(Date)))+
+  geom_line(aes(y = cum.net.movements - (head(cum.net.movements, n = 1)), col = new.year))+
+  labs(title = "Recent Cumulative Net Movements By Year")+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(0:12)) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ 
+ ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 70, r = 70))
+
+
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Past accumulations of people were less seasonal"}
+
+
+plot <- sheet_arr_dep_13m %>% 
+  filter(new.year < 2000) %>% 
+  ggplot(aes(x = new.month, text = as_date(Date)))+
+  geom_line(aes(y = cum.net.movements - (head(cum.net.movements, n = 1)), col = new.year))+
+  labs(title = "Cumulative Arr and Dep")+
+    scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(0:12)) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ 
+ ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 70, r = 70))
+
+
+```
+
+The net result is in pre 2000 it took about 23 years to add two million people to the population through net movements.  Since then it's taken 17 or 18, or maybe as few as 13 or 14, depending on whether you measure to peaks or an arbitrary equilibrium level.  The point is that that we didn't have peaks and troughs significant enough to care about in the past, but now we do.  If we run all of that together in a time series, and plot a straight line through it, we get the following:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Long-Term Cumulative Net Movements shows steady linear growth"}
+
+linmod = lm(cumsum(sheet_arr_dep$net.movements) ~ (sheet_arr_dep$years))
+#summary(linmod)
+rate <- linmod$coefficients[2]
+
+
+plot <- sheet_arr_dep %>% 
+  #filter(Date > "2009-12-02 GMT") %>% 
+  ggplot(aes(x = Date, y = cumsum(net.movements)))+
+  geom_line()+
+  stat_smooth(method = 'lm', formula = y ~ poly(x,1), se= FALSE, colour = "red", size = 0.5)+
+  labs(title = paste0("Cumulative Net Movements with line at ", round(rate, digits = 0), " per annum"))+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ 
+ ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 70, r = 70))
+
+```
+
+I should point out that the line has an R squared value over 0.98, not to be dismissed lightly.  You can see here that the impression that Australia's migration rate has suddenly ramped up to extraordinary new heights relies on a definition that doesn't incorporate the impact of our increasingly part-time population, and a pretty selective view of history that focusses on a short-lived 'golden era' of a few years in the early 2000s. 
+
+Whilst I'm yet to do a comprehensive survey of the data, I strongly suspect that the anecdotal evidence of the anti-migration lobby about crowded trains and heavy traffic are likely to be perennial, rather than seasonal. Is there likely to be heavier traffic in February than in June?  If so, I strongly suspect that no-one notices, because the impact of traffic, (as I'm arguing is increasingly the case for population flows), is dominated by the intensity of the peaks and troughs in its fluctuations, rather than it's long-term aggregated average. It's perfectly plausible that the people making up the net increase aren't predominantly adding to peak-hour commutes, as they might be on holiday, or staying in hotels close to their work, ot not yet enrolled in their course, or on their way out of town for an adventure, or seasonal work in the country.
+
+In any-case, insistent claims that "Australia will need to add a Canberra-worth of infastructure and housing every year", (see [here](https://www.macrobusiness.com.au/2017/06/immigration-no-golden-goose-economy/)) are pure simplistic nonsense.  Australia adds a Canberra-and-a-half of people in 60 days between December and February every year, but average much less than half a Canberra over the course of each year. The infrastructure requirements for meeting that could be trivialy easy, completely impossible, or anywhere in-between, depending on the more detailed sub-structure of these flows. 
