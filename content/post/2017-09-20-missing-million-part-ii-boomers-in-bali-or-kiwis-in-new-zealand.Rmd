@@ -1,0 +1,2925 @@
+---
+title: 'Missing Million Part II: Boomers in Bali or Kiwis In New Zealand?'
+author: Aidan Morrison
+date: '2017-09-20'
+slug: missing-million-part-ii-boomers-in-bali-or-kiwis-in-new-zealand
+categories:
+  - Demographics
+  - Economics
+  - Migration
+tags:
+  - Ausecon
+  - Census
+  - Immigration
+  - Statistics
+  - ABS
+draft: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+##Introduction
+This post is a follow-on from my [first post](http://www.quixoticquant.com/post/the-missing-million/) on this topic. [Dr. Cameron Murray](http://www.fresheconomicthinking.com/2017/09/finding-australias-missing-million.html) and [Leith van Onselen](https://www.macrobusiness.com.au/2017/09/apparently-no-immigration-boom/).  further.
+
+The first perhaps is that I find myself unceasingly amazed by how little people understand data and it's sources.  Even if the professionals in planning and economic analysis who use it and create these graphs are aware of the nuance and subtelty that underlies it, the people that consumer their work undoubtedly aren't.  Last weekend the AFR's Jacob Greber [published](http://www.afr.com/news/economy/the-great-wage-squeeze--the-economy-picks-up-but-wage-growth-remains-at-a-low-20170825-gy3yg9) this un-speakably appalling abuse of data, apparently produced originally by the investment bank UBS:
+
+```{r, fig.align="center", out.width = 500, fig.cap="The Australian Financial Review plumbs new depths in quality of data presentation"}
+
+
+knitr::include_graphics("images/AFRGreberUBS.jpg")
+
+```
+
+I barely know where to start with the litany of data sins here.  Not only does this chart include Net Overseas Migration without the slightest acknowledgement of a definition change, but stacks it on-top of another entirely unrelated data series.  That data series is apparently of subset of one-way movements, (arrivals) and has no definition of length of stay whatsoever, which makes whatever it's presenting absolutely entirely uncomparable to Net Overseas Migration. Sure, just stack it up, see it reach 3% of population, and put 'Population Growth' in the heading.  No-one could possibly misinterpret that.  
+
+I'll resist the temptation of posting up all the raw data, and replacating the steps they had to go through to get that graph, and contrasting what the data actually is with what it looks like and says it is.  I guess it's theoretically possible that UBS could have a sophisticated audience who wanted to answer an obscure question that this extremely irregular superposition of uncomparable, potentially overlapping, inconsistently recorded data might still provide the best available answer to. But if were in the audience I'd still demand they tighten up their presentation (or at least label it right) so I could interpret it properly before I paid them anything for it. 
+
+But if I wasn't a deep-diving data-junkie, and more of regular punter reading this sort of thing in the paper, I'd probably start freaking out about high migration, which looks like it's about to top 3% of population per annum.  The AFR can and should do better.
+
+Perhaps I should also take a moment to explain clearly that in my posts I'll often use [plotly](https://plot.ly/) graphs so that users can inspect the detail of the data behind the image, measure differences, exact numbers and dates, zoom in on areas of interest etc. If you hold your mouse over an image you'll also see a little button like a camera pop up, which allows you to download the plot as a png, so that anyone interested in re-posting my graphs can do so. (Acknowledgment would be appreciated.)
+
+
+
+
+```{r get_data, include=FALSE}
+library(tidyverse)
+library(stringr)
+library(gdata)
+library(lubridate)
+library(plotly)
+library(UtilsQQ)
+library(ggplot2)
+
+
+sheet_310101 <- readxl::read_xls("data/310101.xls", sheet = 2)
+sheet_310101 <- good_names(sheet = sheet_310101)
+meta <- stash_meta(sheet_310101)
+meta <- good_names(meta, meta = TRUE)
+sheet_310101 <- cut_meta(sheet_310101)
+sheet_310101 <- good_date(sheet_310101)
+sheet_310101 <- to_numeric(sheet_310101)
+sheet_310101 <- nom_units(sheet_310101, meta)
+sheet_310101 <- inst_ann(sheet_310101, meta)
+sheet_310101 <- prev_12_month(sheet_310101, meta)
+
+sheet_340101 <- readxl::read_xls("data/340101.xls", sheet = 2)
+
+sheet_340101 <- good_names(sheet = sheet_340101)
+meta1 <- stash_meta(sheet_340101)
+meta1 <- good_names(meta1, meta = TRUE)
+meta <- bind_rows(meta, meta1)
+sheet_340101 <- cut_meta(sheet_340101)
+sheet_340101 <- good_date(sheet_340101)
+sheet_340101 <- to_numeric(sheet_340101)
+sheet_340101 <- nom_units(sheet_340101, meta)
+sheet_340101 <- inst_ann(sheet_340101, meta)
+sheet_340101 <- prev_12_month(sheet_340101, meta)
+
+sheet_340102 <- readxl::read_xls("data/340102.xls", sheet = 2)
+
+sheet_340102 <- good_names(sheet = sheet_340102)
+meta2 <- stash_meta(sheet_340102)
+meta2 <- good_names(meta2, meta = TRUE)
+meta <- bind_rows(meta, meta2)
+sheet_340102 <- cut_meta(sheet_340102)
+sheet_340102 <- good_date(sheet_340102)
+sheet_340102 <- to_numeric(sheet_340102)
+sheet_340102 <- nom_units(sheet_340102, meta)
+sheet_340102 <- inst_ann(sheet_340102, meta)
+sheet_340102 <- prev_12_month(sheet_340102, meta)
+
+```
+
+Really only a couple of charts are required to substantiated the mobility thesis outlined earlier in the previous post.  The following one shows clearly how Australia has become a place to arrive long-term, and leave from short-term, which is the core contention of my thesis.  It also shows how Net Overseas Migration tends to very closely resemble the long-term movements.
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Net Movements diverged after 2001, with Short Term Movements becoming strongly negative, and long term movments more positive."}
+
+
+
+sheet_310101 <- sheet_310101 %>% 
+  mutate(NOM.12.12.Pre.12 = (case_when(Date < "2006-09-01 GMT" ~ Net.Ove.Mig.Aus.Pre.12m)),
+         NOM.12.16.Pre.12 = (case_when(Date >= "2006-09-01 GMT" ~ Net.Ove.Mig.Aus.Pre.12m)))
+
+sheet_arr_dep <- bind_cols(sheet_340101, sheet_340102)
+sheet_arr_dep <- sheet_arr_dep %>% 
+  mutate(net.movements = (Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep),
+         net.per.long.term = (Num.of.mov.Per.and.Lon.ter.Arr - Num.of.mov.Per.and.Lon.ter.Dep),
+         net.movements.Pre.12m = (Num.of.mov.Tot.Arr.Pre.12m - Num.of.mov.Tot.Dep.Pre.12m)
+  )
+
+match_sheet_arr_dep <- sheet_arr_dep %>% 
+  filter(Date %in% sheet_310101$Date)
+
+joint_sheet_310101 <- sheet_310101 %>% 
+  inner_join(match_sheet_arr_dep, by = "Date")
+
+joint_sheet_310101 <- joint_sheet_310101 %>% 
+  mutate(Net.Ove.Mig.Aus.Pre.12m.per.ERP = (Net.Ove.Mig.Aus.Pre.12m/Est.Res.Pop.ERP.Aus),
+         net.movements.Pre.12m.per.ERP = (net.movements.Pre.12m/Est.Res.Pop.ERP.Aus),
+         cum.net.movements = cumsum(net.movements.Pre.12m/4),
+         cum.Net.Ove.Mig.Aus = cumsum(Net.Ove.Mig.Aus),
+         cum.discrepancy = cum.Net.Ove.Mig.Aus - cum.net.movements,
+         Phy.Pre.Pop.PPP.Aus = Est.Res.Pop.ERP.Aus - cum.discrepancy,
+         Net.Ove.Mig.Aus.Pre.12m.per.PPP = Net.Ove.Mig.Aus.Pre.12m/Phy.Pre.Pop.PPP.Aus,
+         net.movements.Pre.12m.per.PPP = net.movements.Pre.12m/Phy.Pre.Pop.PPP.Aus
+  )
+
+plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
+  # geom_line(aes(y = Num.of.mov.Per.and.Lon.ter.Dep.Pre.12m, col = "Perm and Long Term Dep"))+
+  # geom_line(aes(y = Num.of.mov.Per.and.Lon.ter.Arr.Pre.12m, col = "Perm and Long Term Arr")) +
+  geom_line(aes(y = (Num.of.mov.Sho.ter.les.tha.one.yea.Res.ret.Pre.12m -
+                       Num.of.mov.Sho.ter.les.tha.one.yea.Res.dep.Pre.12m +
+                       Num.of.mov.Sho.ter.les.tha.one.yea.Vis.arr.Pre.12m -
+                       Num.of.mov.Sho.ter.les.tha.one.yea.Vis.dep.Pre.12m), col = "Net Short Term Movements"), size = 0.8)+
+  geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m, col = "Net Overseas Migration"), size = 0.8)+
+  geom_line(aes(y = Num.of.mov.Per.and.Lon.ter.Arr.Pre.12m - Num.of.mov.Per.and.Lon.ter.Dep.Pre.12m, col = "Net Permanent and Long Term"), size = 0.8)+
+  geom_line(aes(y = net.movements.Pre.12m, col = "Net Movements"), size = 0.8)+
+  scale_colour_manual("", 
+                      breaks = c("Net Short Term Movements", "Net Overseas Migration", "Net Permanent and Long Term", "Net Movements"),
+                      values = c("red", "black", "green", "blue"))+
+  labs(title = "Net Overseas Migration with Net Short and Long Term Movements, Annual")+
+  scale_y_continuous(labels = scales::comma, limits = c(-300000, 460000)) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 100, b = 70, r = 60),
+         legend = list(x = 0.01, y = 0.99))
+
+
+```
+
+
+
+#new data reads
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+sheet_340106 <- readxl::read_xls("data/340106.xls", sheet = 2)
+
+sheet_340106 <- good_names(sheet = sheet_340106)
+meta3 <- stash_meta(sheet_340106)
+meta3 <- good_names(meta3, meta = TRUE)
+meta <- bind_rows(meta, meta3)
+sheet_340106 <- cut_meta(sheet_340106)
+sheet_340106 <- good_date(sheet_340106)
+sheet_340106 <- to_numeric(sheet_340106)
+sheet_340106 <- nom_units(sheet_340106, meta)
+sheet_340106 <- inst_ann(sheet_340106, meta)
+sheet_340106 <- prev_12_month(sheet_340106, meta)
+
+
+plot <- sheet_340106 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon, col = "6 to 12 months"))+
+  
+  labs(title = "Short Term Movements Arrivals")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+plot <- sheet_340106 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
+  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
+  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
+  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
+  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
+  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
+  
+  labs(title = "Short Term Movements Arrivals")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+sheet_3401010 <- readxl::read_xls("data/3401010.xls", sheet = 2)
+
+sheet_3401010 <- good_names(sheet = sheet_3401010)
+meta4 <- stash_meta(sheet_3401010)
+meta4 <- good_names(meta4, meta = TRUE)
+meta <- bind_rows(meta, meta4)
+sheet_3401010 <- cut_meta(sheet_3401010)
+sheet_3401010 <- good_date(sheet_3401010)
+sheet_3401010 <- to_numeric(sheet_3401010)
+sheet_3401010 <- nom_units(sheet_3401010, meta)
+sheet_3401010 <- inst_ann(sheet_3401010, meta4)
+sheet_3401010 <- prev_12_month(sheet_3401010, meta4)
+
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon, col = "6 to 12 months"))+
+  labs(title = "Short Term Movements Resident Departures")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements out annual"}
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee.Pre.12m, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee.Pre.12m, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon.Pre.12m, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m, col = "6 to 12 months"))+
+  labs(title = "Short Term Movements Resident Departures Annual")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+
+# Impact of Departures by Time
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements out impact"}
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m*22/365, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee.Pre.12m*11/365, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee.Pre.12m*4/365, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon.Pre.12m*46/365, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m*77/365, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m*165/365, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m*273/365, col = "6 to 12 months"))+
+  labs(title = "Person-Year absent from Short Term Departures")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+days.vec <- c(4/365, 11/365, 22/365, 46/365, 77/365, 165/365, 273/365)
+days.tab <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee.Pre.12m" ,  "Num.of.mov.1.and.und.2.wee.Pre.12m", "Num.of.mov.2.wee.and.und.1.mon.Pre.12m",
+"Num.of.mov.1.and.und.2.mon.Pre.12m", "Num.of.mov.2.and.und.3.mon.Pre.12m", "Num.of.mov.3.and.und.6.mon.Pre.12m", "Num.of.mov.6.and.und.12.mon.Pre.12m")) %>% 
+  select(Component, days.vec) %>% 
+  mutate(monthly.vec = days.vec*12)
+
+end.vec <- sheet_3401010 %>% 
+  select(Num.of.mov.Und.1.wee.Pre.12m:Num.of.mov.6.and.und.12.mon.Pre.12m) %>% 
+  tail(n = 1) %>% 
+  t() %>% 
+  data.frame() %>% 
+  rownames_to_column(var = c("Component"))
+colnames(end.vec) <- c("Component", "Movement.end")
+
+mid.vec <- sheet_3401010 %>% 
+  filter(Date > "2001-12-30 GMT") %>% 
+  filter(Date < "2002-01-31 GMT") %>% 
+  select(Num.of.mov.Und.1.wee.Pre.12m:Num.of.mov.6.and.und.12.mon.Pre.12m) %>% 
+  t() %>% 
+  data.frame() %>% 
+  rownames_to_column(var = c("Component"))
+colnames(mid.vec) <- c("Component", "Movement.mid")
+
+days.tab <- days.tab %>% 
+  inner_join(end.vec, by = "Component") %>% 
+  inner_join(mid.vec, by = "Component")
+
+days.tab <- days.tab %>% 
+  mutate(mid.absent = Movement.mid*days.vec, end.absent = Movement.end*days.vec)
+
+absent.shift <- days.tab %>% 
+  summarise(absent2001 = sum(mid.absent), absent2017 = sum(end.absent))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
+  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
+  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
+  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
+  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
+  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
+  
+  labs(title = "Short Term Movements Departures by Purpose")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+sheet_340109 <- readxl::read_xls("data/340109.xls", sheet = 2)
+
+sheet_340109 <- good_names(sheet = sheet_340109, trunc_length = 4)
+meta5 <- stash_meta(sheet_340109)
+meta5 <- good_names(meta5, meta = TRUE, trunc_length = 4)
+meta <- bind_rows(meta, meta5)
+sheet_340109 <- cut_meta(sheet_340109)
+sheet_340109 <- good_date(sheet_340109)
+sheet_340109 <- to_numeric(sheet_340109)
+sheet_340109 <- nom_units(sheet_340109, meta5)
+sheet_340109 <- inst_ann(sheet_340109, meta5)
+sheet_340109 <- prev_12_month(sheet_340109, meta5)
+
+topcountries <- sheet_340109 %>% 
+  filter(Date > "2014-01-01 GMT") %>% 
+  select(Numb.of.move.Norf.Isla:Numb.of.move.Tota.Coun.of.stay) %>% 
+  gather(country, movements, Numb.of.move.Norf.Isla:Numb.of.move.Tota.Coun.of.stay)
+  
+topcountriessum <- topcountries %>% 
+  group_by(country) %>% 
+  summarise(ave_mov = mean(movements)) %>% 
+  arrange(ave_mov, desc(ave_mov)) %>% 
+  filter(str_detect(country, ".Tota.") == FALSE) %>% 
+  tail(n = 15)
+
+topregionssum <- topcountries %>% 
+  group_by(country) %>% 
+  summarise(ave_mov = mean(movements)) %>% 
+  arrange(ave_mov, desc(ave_mov)) %>% 
+  filter(str_detect(country, ".Tota.") == TRUE) %>% 
+  tail(n = 10)
+
+plot <- sheet_340109 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col = "NZ"))+
+  geom_line(aes(y = Numb.of.move.Indo, col = "Indonesia"))+
+  geom_line(aes(y = Numb.of.move.Unit.Stat.of.Amer, col = "USA"))+
+  geom_line(aes(y = Numb.of.move.UK.CIs.IOM, col = "UK"))+
+  geom_line(aes(y = Numb.of.move.Thai, col = "Thailand"))+
+  geom_line(aes(y = Numb.of.move.Chin, col = "China"))+
+  geom_line(aes(y = Numb.of.move.Sing, col = "Singapore"))+
+  geom_line(aes(y = Numb.of.move.Fiji, col = "Fiji"))+
+  geom_line(aes(y = Numb.of.move.Japa, col = "Japan"))+
+  
+  labs(title = "Short Term Movements Departures")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+
+plot <- sheet_340109 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.Tota.Sout.East.Asia, col = "SE Asia"))+
+  geom_line(aes(y = Numb.of.move.Tota.Ocea.and.Anta, col = "Oceana"))+
+  geom_line(aes(y = Numb.of.move.Tota.Amer, col = "America"))+
+  geom_line(aes(y = Numb.of.move.Tota.Nort.East.Asia, col = "NE Asia"))+
+  geom_line(aes(y = Numb.of.move.Tota.Nort.West.Euro, col = "NW Europe"))+
+  geom_line(aes(y = Numb.of.move.Tota.Sout.and.East.Euro, col = "SE Europe"))+
+  geom_line(aes(y = Numb.of.move.Tota.Sout.and.Cent.Asia, col = "Sourth Cent Asia"))+
+  geom_line(aes(y = Numb.of.move.Tota.Nort.Afri.and.the.Midd.East, col = "North Africa Middle East"))+
+  geom_line(aes(y = Numb.of.move.Tota.Sub.Saha.Afri, col = "Sub Saharan Africa"))+
+  
+  labs(title = "Short Term Movements Departures")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+# NOM by visas
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NOM Breakdown"}
+
+sheet_NOM <- readxl::read_xls("data/NOM_by_visa.xls", sheet = 1)
+sheet_NOM <- t(sheet_NOM) %>%  
+  as_tibble()
+#sheet_NOM <-data.frame(sheet_NOM) %>% as_tibble()
+rownames(sheet_NOM) <- NULL
+sheet_NOM <- sheet_NOM[-1,]
+
+dates <- c("2007-06-30", "2008-06-30", "2009-06-30", "2010-06-30",
+           "2011-06-30", "2012-06-30", "2013-06-30", "2014-06-30",
+           "2015-06-30") %>% ymd() %>% as.numeric()
+
+dates_vec <- tibble(dates)
+
+sheet_NOM <- bind_cols(sheet_NOM, dates_vec)
+sheet_NOM <- select(sheet_NOM, dates, everything())
+colnames(sheet_NOM) <- c("Date", "Student", "Subclass 457", "Working Holiday", "Visitor", 
+                         "Other Temp.", "Skilled", "Family", "Humanitarian",
+                         "Other Perm.", "Aus Citizen", "NZ Citizen", "Other Visas")
+
+sheet_NOM <- sheet_NOM %>% 
+  good_names() %>% 
+  good_date(Origin = "1970-01-01") %>% 
+  to_numeric() %>% 
+  nom_units(meta = meta, manual = "000")
+
+sheet_NOM <- sheet_NOM %>% 
+  mutate(Tot.Temp = (Stu + Sub.457 + Wor.Hol + Vis + Oth.Tem),
+         Tot.Perm = (Ski + Fam + Hum + Oth.Per),
+         Tot.Oth = (Aus.Cit + NZ.Cit + Oth.Vis))
+
+sheet_NOM_long <- sheet_NOM %>% 
+  gather(key = "Visa.cat", value = "flow", -Date)
+
+sheet_NOM_long <- sheet_NOM_long %>% 
+  mutate(Type = case_when(Visa.cat %in% c("Stu", "Sub.457", "Wor.Hol", "Vis","Oth.Tem") ~ "Temporary",
+                          Visa.cat %in% c("Ski", "Fam", "Hum", "Oth.Per") ~ "Permanent",
+                          Visa.cat %in% c("Aus.Cit", "NZ.Cit", "Oth.Vis") ~ "Other",
+                          Visa.cat %in% c("Tot.Temp", "Tot.Perm", "Tot.Oth") ~ "Totals"))
+    
+    
+    
+pre_plot <- sheet_NOM_long %>% 
+  filter(str_detect(Visa.cat, "Tot.") == FALSE) %>% 
+  arrange(Type)
+
+lvls <- unique(pre_plot$Visa.cat)
+
+
+ plot<- pre_plot %>% 
+    mutate(Visa.cat = factor(Visa.cat, levels = lvls)) %>% 
+   ggplot(aes(x = Date, text = as_date(Date), y = flow, fill = Visa.cat, colour = Type))+
+    geom_bar(position = "stack", stat = "identity")+
+   scale_colour_manual("",
+                      breaks = c("Temporary", "Permanent", "Other"),
+                      values = c("grey", "black", "white"))
+
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NOM Breakdown By Category"}
+
+plot <- sheet_NOM_long %>% 
+  filter(str_detect(Visa.cat, "Tot.") == TRUE) %>% 
+  ggplot(aes(x = Date, text = as_date(Date), y = flow, fill = Visa.cat))+
+  geom_bar(position = "stack", stat = "identity")
+
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+#census calcs
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Calcs on Census"}
+
+nat.growth.count.sheet <- sheet_310101 %>% 
+  filter(Date > "2011-08-31 GMT") %>% 
+  filter(Date < "2016-08-31 GMT") 
+
+nat.growth.count <- sum(nat.growth.count.sheet$Nat.Inc.Aus)
+
+net.mov.count.sheet <- sheet_arr_dep %>% 
+  filter(Date > "2011-08-31 GMT") %>% 
+  filter(Date < "2016-08-31 GMT") 
+
+net.mov.count <- sum(net.mov.count.sheet$net.movements)
+
+growth.ppp <- net.mov.count + nat.growth.count
+
+nat.growth.count.sheet2 <- sheet_310101 %>% 
+  filter(Date > "2006-08-31 GMT") %>% 
+  filter(Date < "2011-08-31 GMT") 
+
+nat.growth.count2 <- sum(nat.growth.count.sheet2$Nat.Inc.Aus)
+
+net.mov.count.sheet2 <- sheet_arr_dep %>% 
+  filter(Date > "2006-08-31 GMT") %>% 
+  filter(Date < "2011-08-31 GMT") 
+
+net.mov.count2 <- sum(net.mov.count.sheet2$net.movements)
+
+growth.ppp2 <- net.mov.count2 + nat.growth.count2
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="defining 12 month function"}
+  month_mutate <- function(sheet, expr) {
+    expr <- rlang::parse_quosure(expr)
+    pre_12_name <- paste0( quo_name(expr), ".Pre.12m")
+
+    mutate(sheet,
+           static.var = !!expr,
+           !!pre_12_name := (static.var + lag(static.var, n = 1) + lag(static.var, n = 2) + lag(static.var, n = 3) +
+                               lag(static.var, n = 4) + lag(static.var, n = 5) + lag(static.var, n = 6) +
+                               lag(static.var, n = 7) + lag(static.var, n = 8) + lag(static.var, n = 9) +
+                               lag(static.var, n = 10) + lag(static.var, n = 11) )
+    )
+  }
+```
+
+
+#Start Kiwi Regression
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Unconstrained"}
+
+#########
+kiwis <- sheet_340109 %>% 
+  select(Date, Numb.of.move.New.Zeal)
+kiwi_regressor <- inner_join(sheet_3401010, kiwis, by = "Date")
+kiwi_regressor <- select(kiwi_regressor, Date, Numb.of.move.New.Zeal,  everything ())
+kiwi_length_regressor <- kiwi_regressor %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+####
+
+mod <- lm(Numb.of.move.New.Zeal ~ . - Date, data = kiwi_length_regressor)  # Regress y on everything (but Year)
+#summary(mod)
+model <- tibble(fit =mod$fitted.values)
+model <- bind_cols(model, kiwi_length_regressor %>% select(Date, Numb.of.move.New.Zeal ))
+model <- model %>% 
+  month_mutate("Numb.of.move.New.Zeal") %>% 
+  month_mutate("fit")
+
+smoothlm <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =model) 
+smoothrsquared <- summary(smoothlm)$r.squared
+#smoothrsquared
+
+rsquared <- summary(mod)$r.squared
+
+plot <- ggplot(model, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.New.Zeal.Pre.12m/12, col = "12 Month Original"))+
+    scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Un-Constrained Model Short-Term Departures to New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+  geom_text(x = min(as.numeric(model$Date[50])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 70, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+#Kiwi Constrained
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Constrained"}
+library(nnls)
+
+
+
+regr.names <- kiwi_length_regressor %>% 
+  select(Num.of.mov.Und.1.wee:Num.of.mov.6.and.und.12.mon) %>% 
+  colnames() %>% 
+  as.vector()
+
+A <- as.matrix(kiwi_length_regressor[,regr.names])
+B <- kiwi_length_regressor$Numb.of.move.New.Zeal
+nnmod <- nnls(A,B)
+coef.nnmod <- coef(nnmod)
+pred.nnmod <- as.vector(coef.nnmod%*%t(A))
+#coef.nnmod
+
+nnmodel <- tibble(fit =nnmod$fitted[,1])
+nnmodel <- bind_cols(nnmodel, kiwi_length_regressor %>% select(Date, Numb.of.move.New.Zeal ))
+nnmodel <- nnmodel %>% 
+  month_mutate("Numb.of.move.New.Zeal") %>% 
+  month_mutate("fit")
+nndummy <- lm(nnmodel$fit ~ nnmodel$Numb.of.move.New.Zeal)
+#summary(nndummy)
+rsquared <- summary(nndummy)$r.squared
+
+smoothnnlm <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =nnmodel) 
+smoothrsquared <- summary(smoothnnlm)$r.squared
+#smoothrsquared
+
+plot <- ggplot(nnmodel, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.New.Zeal.Pre.12m/12, col = "12 Month Original"))+
+  scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Non-Negative Constrained Modeling of Short Term Departures to New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  geom_text(x = min(as.numeric(model$Date[50])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=80, t = 70, b = 60, r = 60),
+         legend = list(y = 0.9, x = 0.05))
+
+weights <- kiwi_length_regressor %>% 
+  select(-Date, -Numb.of.move.New.Zeal) %>% 
+  colMeans() %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon") )
+
+
+```
+
+
+
+#Uncon Kiwi Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients"}
+
+coefs <- summary(mod)$coefficients %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(rowname != "(Intercept)")
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Unconstrained Model New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Departure Estimates by Component New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Unconstrained Estimated Absentees in NZ"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+#Con Kiwi Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Positive Coefficients"}
+
+coefs <- coef.nnmod %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+colnames(coefs) <- c("Estimate", "Component")
+coefs <- coefs %>% 
+  select("Component", "Estimate")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Constrained Model")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Positive Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee","Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Monthly Departure Estimate for NZ by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Positive Estimated Absentees in NZ"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee", "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent in NZ Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+
+#Early Kiwi Regression
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Unconstrained"}
+
+#########
+kiwis <- sheet_340109 %>% 
+  filter(Date < "2000-01-01 GMT") %>% 
+  select(Date, Numb.of.move.New.Zeal)
+kiwi_regressor <- inner_join(sheet_3401010, kiwis, by = "Date")
+kiwi_regressor <- select(kiwi_regressor, Date, Numb.of.move.New.Zeal,  everything ())
+kiwi_length_regressor <- kiwi_regressor %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+####
+
+mod <- lm(Numb.of.move.New.Zeal ~ . - Date, data = kiwi_length_regressor)  # Regress y on everything (but Year)
+#summary(mod)
+model <- tibble(fit =mod$fitted.values)
+model <- bind_cols(model, kiwi_length_regressor %>% select(Date, Numb.of.move.New.Zeal ))
+model <- model %>% 
+  month_mutate("Numb.of.move.New.Zeal") %>% 
+  month_mutate("fit")
+
+smoothlm <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =model) 
+smoothrsquared <- summary(smoothlm)$r.squared
+#smoothrsquared
+
+rsquared <- summary(mod)$r.squared
+
+plot <- ggplot(model, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.New.Zeal.Pre.12m/12, col = "12 Month Original"))+
+    scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Un-Constrained Model Short-Term Departures to New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+  geom_text(x = min(as.numeric(model$Date[50])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 70, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+#Kiwi Constrained
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Constrained"}
+library(nnls)
+
+
+
+regr.names <- kiwi_length_regressor %>% 
+  select(Num.of.mov.Und.1.wee:Num.of.mov.6.and.und.12.mon) %>% 
+  colnames() %>% 
+  as.vector()
+
+A <- as.matrix(kiwi_length_regressor[,regr.names])
+B <- kiwi_length_regressor$Numb.of.move.New.Zeal
+nnmod <- nnls(A,B)
+coef.nnmod <- coef(nnmod)
+pred.nnmod <- as.vector(coef.nnmod%*%t(A))
+#coef.nnmod
+
+nnmodel <- tibble(fit =nnmod$fitted[,1])
+nnmodel <- bind_cols(nnmodel, kiwi_length_regressor %>% select(Date, Numb.of.move.New.Zeal ))
+nnmodel <- nnmodel %>% 
+  month_mutate("Numb.of.move.New.Zeal") %>% 
+  month_mutate("fit")
+nndummy <- lm(nnmodel$fit ~ nnmodel$Numb.of.move.New.Zeal)
+#summary(nndummy)
+rsquared <- summary(nndummy)$r.squared
+
+smoothnnlm <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =nnmodel) 
+smoothrsquared <- summary(smoothnnlm)$r.squared
+#smoothrsquared
+
+plot <- ggplot(nnmodel, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.New.Zeal.Pre.12m/12, col = "12 Month Original"))+
+  scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Non-Negative Constrained Modeling of Short Term Departures to New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  geom_text(x = min(as.numeric(model$Date[50])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=80, t = 70, b = 60, r = 60),
+         legend = list(y = 0.9, x = 0.05))
+
+weights <- kiwi_length_regressor %>% 
+  select(-Date, -Numb.of.move.New.Zeal) %>% 
+  colMeans() %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon") )
+
+
+```
+
+
+
+#Uncon Kiwi Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients"}
+
+coefs <- summary(mod)$coefficients %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(rowname != "(Intercept)")
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Unconstrained Model New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Departure Estimates by Component New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Unconstrained Estimated Absentees in NZ"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+#Con Kiwi Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Positive Coefficients"}
+
+coefs <- coef.nnmod %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+colnames(coefs) <- c("Estimate", "Component")
+coefs <- coefs %>% 
+  select("Component", "Estimate")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Constrained Model")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Positive Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee","Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Monthly Departure Estimate for NZ by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Positive Estimated Absentees in NZ"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee", "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent in NZ Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+
+#Mid Kiwi Regression
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Unconstrained"}
+
+#########
+kiwis <- sheet_340109 %>% 
+  filter(Date >= "2000-01-01 GMT", Date < "2010-01-01") %>% 
+  select(Date, Numb.of.move.New.Zeal)
+kiwi_regressor <- inner_join(sheet_3401010, kiwis, by = "Date")
+kiwi_regressor <- select(kiwi_regressor, Date, Numb.of.move.New.Zeal,  everything ())
+kiwi_length_regressor <- kiwi_regressor %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+####
+
+mod <- lm(Numb.of.move.New.Zeal ~ . - Date, data = kiwi_length_regressor)  # Regress y on everything (but Year)
+#summary(mod)
+model <- tibble(fit =mod$fitted.values)
+model <- bind_cols(model, kiwi_length_regressor %>% select(Date, Numb.of.move.New.Zeal ))
+model <- model %>% 
+  month_mutate("Numb.of.move.New.Zeal") %>% 
+  month_mutate("fit")
+
+smoothlm <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =model) 
+smoothrsquared <- summary(smoothlm)$r.squared
+#smoothrsquared
+
+rsquared <- summary(mod)$r.squared
+
+plot <- ggplot(model, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.New.Zeal.Pre.12m/12, col = "12 Month Original"))+
+    scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Un-Constrained Model Short-Term Departures to New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+  geom_text(x = min(as.numeric(model$Date[50])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 70, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+#Kiwi Constrained
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Constrained"}
+library(nnls)
+
+
+
+regr.names <- kiwi_length_regressor %>% 
+  select(Num.of.mov.Und.1.wee:Num.of.mov.6.and.und.12.mon) %>% 
+  colnames() %>% 
+  as.vector()
+
+A <- as.matrix(kiwi_length_regressor[,regr.names])
+B <- kiwi_length_regressor$Numb.of.move.New.Zeal
+nnmod <- nnls(A,B)
+coef.nnmod <- coef(nnmod)
+pred.nnmod <- as.vector(coef.nnmod%*%t(A))
+#coef.nnmod
+
+nnmodel <- tibble(fit =nnmod$fitted[,1])
+nnmodel <- bind_cols(nnmodel, kiwi_length_regressor %>% select(Date, Numb.of.move.New.Zeal ))
+nnmodel <- nnmodel %>% 
+  month_mutate("Numb.of.move.New.Zeal") %>% 
+  month_mutate("fit")
+nndummy <- lm(nnmodel$fit ~ nnmodel$Numb.of.move.New.Zeal)
+#summary(nndummy)
+rsquared <- summary(nndummy)$r.squared
+
+smoothnnlm <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =nnmodel) 
+smoothrsquared <- summary(smoothnnlm)$r.squared
+#smoothrsquared
+
+plot <- ggplot(nnmodel, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.New.Zeal.Pre.12m/12, col = "12 Month Original"))+
+  scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Non-Negative Constrained Modeling of Short Term Departures to New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  geom_text(x = min(as.numeric(model$Date[50])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=80, t = 70, b = 60, r = 60),
+         legend = list(y = 0.9, x = 0.05))
+
+weights <- kiwi_length_regressor %>% 
+  select(-Date, -Numb.of.move.New.Zeal) %>% 
+  colMeans() %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon") )
+
+
+```
+
+
+
+#Uncon Kiwi Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients"}
+
+coefs <- summary(mod)$coefficients %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(rowname != "(Intercept)")
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Unconstrained Model New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Departure Estimates by Component New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Unconstrained Estimated Absentees in NZ"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+#Con Kiwi Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Positive Coefficients"}
+
+coefs <- coef.nnmod %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+colnames(coefs) <- c("Estimate", "Component")
+coefs <- coefs %>% 
+  select("Component", "Estimate")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Constrained Model")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Positive Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee","Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Monthly Departure Estimate for NZ by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Positive Estimated Absentees in NZ"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee", "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent in NZ Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+
+#Late Kiwi Regression
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Unconstrained"}
+
+#########
+kiwis <- sheet_340109 %>% 
+  filter(Date >= "2010-01-01 GMT") %>% 
+  select(Date, Numb.of.move.New.Zeal)
+kiwi_regressor <- inner_join(sheet_3401010, kiwis, by = "Date")
+kiwi_regressor <- select(kiwi_regressor, Date, Numb.of.move.New.Zeal,  everything ())
+kiwi_length_regressor <- kiwi_regressor %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+####
+
+mod <- lm(Numb.of.move.New.Zeal ~ . - Date, data = kiwi_length_regressor)  # Regress y on everything (but Year)
+#summary(mod)
+model <- tibble(fit =mod$fitted.values)
+model <- bind_cols(model, kiwi_length_regressor %>% select(Date, Numb.of.move.New.Zeal ))
+model <- model %>% 
+  month_mutate("Numb.of.move.New.Zeal") %>% 
+  month_mutate("fit")
+
+smoothlm <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =model) 
+smoothrsquared <- summary(smoothlm)$r.squared
+#smoothrsquared
+
+rsquared <- summary(mod)$r.squared
+
+plot <- ggplot(model, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.New.Zeal.Pre.12m/12, col = "12 Month Original"))+
+    scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Un-Constrained Model Short-Term Departures to New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+  geom_text(x = min(as.numeric(model$Date[50])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 70, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+#Kiwi Constrained
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Constrained"}
+library(nnls)
+
+
+
+regr.names <- kiwi_length_regressor %>% 
+  select(Num.of.mov.Und.1.wee:Num.of.mov.6.and.und.12.mon) %>% 
+  colnames() %>% 
+  as.vector()
+
+A <- as.matrix(kiwi_length_regressor[,regr.names])
+B <- kiwi_length_regressor$Numb.of.move.New.Zeal
+nnmod <- nnls(A,B)
+coef.nnmod <- coef(nnmod)
+pred.nnmod <- as.vector(coef.nnmod%*%t(A))
+#coef.nnmod
+
+nnmodel <- tibble(fit =nnmod$fitted[,1])
+nnmodel <- bind_cols(nnmodel, kiwi_length_regressor %>% select(Date, Numb.of.move.New.Zeal ))
+nnmodel <- nnmodel %>% 
+  month_mutate("Numb.of.move.New.Zeal") %>% 
+  month_mutate("fit")
+nndummy <- lm(nnmodel$fit ~ nnmodel$Numb.of.move.New.Zeal)
+#summary(nndummy)
+rsquared <- summary(nndummy)$r.squared
+
+smoothnnlm <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =nnmodel) 
+smoothrsquared <- summary(smoothnnlm)$r.squared
+#smoothrsquared
+
+plot <- ggplot(nnmodel, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.New.Zeal.Pre.12m/12, col = "12 Month Original"))+
+  scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Non-Negative Constrained Modeling of Short Term Departures to New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  geom_text(x = min(as.numeric(model$Date[50])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=80, t = 70, b = 60, r = 60),
+         legend = list(y = 0.9, x = 0.05))
+
+weights <- kiwi_length_regressor %>% 
+  select(-Date, -Numb.of.move.New.Zeal) %>% 
+  colMeans() %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon") )
+
+
+```
+
+
+
+#Uncon Kiwi Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients"}
+
+coefs <- summary(mod)$coefficients %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(rowname != "(Intercept)")
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Unconstrained Model New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Departure Estimates by Component New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Unconstrained Estimated Absentees in NZ"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+#Con Kiwi Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Positive Coefficients"}
+
+coefs <- coef.nnmod %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+colnames(coefs) <- c("Estimate", "Component")
+coefs <- coefs %>% 
+  select("Component", "Estimate")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Constrained Model")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Positive Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee","Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Monthly Departure Estimate for NZ by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Positive Estimated Absentees in NZ"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee", "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent in NZ Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+#Start bali Regression
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of balis Unconstrained"}
+
+#########
+balis <- sheet_340109 %>% 
+  select(Date, Numb.of.move.Indo)
+bali_regressor <- inner_join(sheet_3401010, balis, by = "Date")
+bali_regressor <- select(bali_regressor, Date, Numb.of.move.Indo,  everything ())
+bali_length_regressor <- bali_regressor %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+####
+
+mod <- lm(Numb.of.move.Indo ~ . - Date, data = bali_length_regressor)  # Regress y on everything (but Year)
+#summary(mod)
+model <- tibble(fit =mod$fitted.values)
+model <- bind_cols(model, bali_length_regressor %>% select(Date, Numb.of.move.Indo ))
+model <- model %>% 
+  month_mutate("Numb.of.move.Indo") %>% 
+  month_mutate("fit")
+
+smoothlm <- lm(Numb.of.move.Indo.Pre.12m ~ fit.Pre.12m, data =model) 
+smoothrsquared <- summary(smoothlm)$r.squared
+#smoothrsquared
+
+rsquared <- summary(mod)$r.squared
+
+plot <- ggplot(model, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.Indo, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.Indo.Pre.12m/12, col = "12 Month Original"))+
+    scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Un-Constrained Model Short-Term Departures to Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+  geom_text(x = min(as.numeric(model$Date[150])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 70, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+#bali Constrained
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of balis Constrained"}
+library(nnls)
+
+
+
+regr.names <- bali_length_regressor %>% 
+  select(Num.of.mov.Und.1.wee:Num.of.mov.6.and.und.12.mon) %>% 
+  colnames() %>% 
+  as.vector()
+
+A <- as.matrix(bali_length_regressor[,regr.names])
+B <- bali_length_regressor$Numb.of.move.Indo
+nnmod <- nnls(A,B)
+coef.nnmod <- coef(nnmod)
+pred.nnmod <- as.vector(coef.nnmod%*%t(A))
+#coef.nnmod
+
+nnmodel <- tibble(fit =nnmod$fitted[,1])
+nnmodel <- bind_cols(nnmodel, bali_length_regressor %>% select(Date, Numb.of.move.Indo ))
+nnmodel <- nnmodel %>% 
+  month_mutate("Numb.of.move.Indo") %>% 
+  month_mutate("fit")
+nndummy <- lm(nnmodel$fit ~ nnmodel$Numb.of.move.Indo)
+#summary(nndummy)
+rsquared <- summary(nndummy)$r.squared
+
+smoothnnlm <- lm(Numb.of.move.Indo.Pre.12m ~ fit.Pre.12m, data =nnmodel) 
+smoothrsquared <- summary(smoothnnlm)$r.squared
+#smoothrsquared
+
+plot <- ggplot(nnmodel, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.Indo, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.Indo.Pre.12m/12, col = "12 Month Original"))+
+  scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Non-Negative Constrained Modeling of Short Term Departures to Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  geom_text(x = min(as.numeric(model$Date[150])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=80, t = 70, b = 60, r = 60),
+         legend = list(y = 0.9, x = 0.05))
+
+weights <- bali_length_regressor %>% 
+  select(-Date, -Numb.of.move.Indo) %>% 
+  colMeans() %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon") )
+
+
+```
+
+
+
+#Uncon bali Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Unconstrained Coefficients"}
+
+coefs <- summary(mod)$coefficients %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(rowname != "(Intercept)")
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Unconstrained Model Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Unconstrained Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Departure Estimates by Component Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Unconstrained Estimated Absentees in Indonesia"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+#Con bali Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Positive Coefficients"}
+
+coefs <- coef.nnmod %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+colnames(coefs) <- c("Estimate", "Component")
+coefs <- coefs %>% 
+  select("Component", "Estimate")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Constrained Model")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Positive Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee","Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Monthly Departure Estimate for Indonesia by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Positive Estimated Absentees in Indonesia"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee", "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent in Indonesia Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+
+
+#Early bali Regression
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of balis Unconstrained"}
+
+#########
+balis <- sheet_340109 %>% 
+  filter(Date < "2000-01-01 GMT") %>%
+  select(Date, Numb.of.move.Indo)
+bali_regressor <- inner_join(sheet_3401010, balis, by = "Date")
+bali_regressor <- select(bali_regressor, Date, Numb.of.move.Indo,  everything ())
+bali_length_regressor <- bali_regressor %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+####
+
+mod <- lm(Numb.of.move.Indo ~ . - Date, data = bali_length_regressor)  # Regress y on everything (but Year)
+#summary(mod)
+model <- tibble(fit =mod$fitted.values)
+model <- bind_cols(model, bali_length_regressor %>% select(Date, Numb.of.move.Indo ))
+model <- model %>% 
+  month_mutate("Numb.of.move.Indo") %>% 
+  month_mutate("fit")
+
+smoothlm <- lm(Numb.of.move.Indo.Pre.12m ~ fit.Pre.12m, data =model) 
+smoothrsquared <- summary(smoothlm)$r.squared
+#smoothrsquared
+
+rsquared <- summary(mod)$r.squared
+
+plot <- ggplot(model, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.Indo, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.Indo.Pre.12m/12, col = "12 Month Original"))+
+    scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Un-Constrained Model Short-Term Departures to Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+  geom_text(x = min(as.numeric(model$Date[60])), y=30000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 70, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+#bali Constrained
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of balis Constrained"}
+library(nnls)
+
+
+
+regr.names <- bali_length_regressor %>% 
+  select(Num.of.mov.Und.1.wee:Num.of.mov.6.and.und.12.mon) %>% 
+  colnames() %>% 
+  as.vector()
+
+A <- as.matrix(bali_length_regressor[,regr.names])
+B <- bali_length_regressor$Numb.of.move.Indo
+nnmod <- nnls(A,B)
+coef.nnmod <- coef(nnmod)
+pred.nnmod <- as.vector(coef.nnmod%*%t(A))
+#coef.nnmod
+
+nnmodel <- tibble(fit =nnmod$fitted[,1])
+nnmodel <- bind_cols(nnmodel, bali_length_regressor %>% select(Date, Numb.of.move.Indo ))
+nnmodel <- nnmodel %>% 
+  month_mutate("Numb.of.move.Indo") %>% 
+  month_mutate("fit")
+nndummy <- lm(nnmodel$fit ~ nnmodel$Numb.of.move.Indo)
+#summary(nndummy)
+rsquared <- summary(nndummy)$r.squared
+
+smoothnnlm <- lm(Numb.of.move.Indo.Pre.12m ~ fit.Pre.12m, data =nnmodel) 
+smoothrsquared <- summary(smoothnnlm)$r.squared
+#smoothrsquared
+
+plot <- ggplot(nnmodel, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.Indo, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.Indo.Pre.12m/12, col = "12 Month Original"))+
+  scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Non-Negative Constrained Modeling of Short Term Departures to Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  geom_text(x = min(as.numeric(model$Date[60])), y=30000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=80, t = 70, b = 60, r = 60),
+         legend = list(y = 0.9, x = 0.05))
+
+weights <- bali_length_regressor %>% 
+  select(-Date, -Numb.of.move.Indo) %>% 
+  colMeans() %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon") )
+
+
+```
+
+
+
+#Uncon bali Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Unconstrained Coefficients"}
+
+coefs <- summary(mod)$coefficients %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(rowname != "(Intercept)")
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Unconstrained Model Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Unconstrained Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Departure Estimates by Component Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Unconstrained Estimated Absentees in Indonesia"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+#Con bali Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Positive Coefficients"}
+
+coefs <- coef.nnmod %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+colnames(coefs) <- c("Estimate", "Component")
+coefs <- coefs %>% 
+  select("Component", "Estimate")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Constrained Model")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Positive Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee","Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Monthly Departure Estimate for Indonesia by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Positive Estimated Absentees in Indonesia"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee", "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent in Indonesia Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+
+#Mid bali Regression
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of balis Unconstrained"}
+
+#########
+balis <- sheet_340109 %>% 
+  filter(Date >= "2000-01-01 GMT", Date < "2010-01-01") %>%
+  select(Date, Numb.of.move.Indo)
+bali_regressor <- inner_join(sheet_3401010, balis, by = "Date")
+bali_regressor <- select(bali_regressor, Date, Numb.of.move.Indo,  everything ())
+bali_length_regressor <- bali_regressor %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+####
+
+mod <- lm(Numb.of.move.Indo ~ . - Date, data = bali_length_regressor)  # Regress y on everything (but Year)
+#summary(mod)
+model <- tibble(fit =mod$fitted.values)
+model <- bind_cols(model, bali_length_regressor %>% select(Date, Numb.of.move.Indo ))
+model <- model %>% 
+  month_mutate("Numb.of.move.Indo") %>% 
+  month_mutate("fit")
+
+smoothlm <- lm(Numb.of.move.Indo.Pre.12m ~ fit.Pre.12m, data =model) 
+smoothrsquared <- summary(smoothlm)$r.squared
+#smoothrsquared
+
+rsquared <- summary(mod)$r.squared
+
+plot <- ggplot(model, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.Indo, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.Indo.Pre.12m/12, col = "12 Month Original"))+
+    scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Un-Constrained Model Short-Term Departures to Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+  geom_text(x = min(as.numeric(model$Date[70])), y=50000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 70, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+#bali Constrained
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of balis Constrained"}
+library(nnls)
+
+
+
+regr.names <- bali_length_regressor %>% 
+  select(Num.of.mov.Und.1.wee:Num.of.mov.6.and.und.12.mon) %>% 
+  colnames() %>% 
+  as.vector()
+
+A <- as.matrix(bali_length_regressor[,regr.names])
+B <- bali_length_regressor$Numb.of.move.Indo
+nnmod <- nnls(A,B)
+coef.nnmod <- coef(nnmod)
+pred.nnmod <- as.vector(coef.nnmod%*%t(A))
+#coef.nnmod
+
+nnmodel <- tibble(fit =nnmod$fitted[,1])
+nnmodel <- bind_cols(nnmodel, bali_length_regressor %>% select(Date, Numb.of.move.Indo ))
+nnmodel <- nnmodel %>% 
+  month_mutate("Numb.of.move.Indo") %>% 
+  month_mutate("fit")
+nndummy <- lm(nnmodel$fit ~ nnmodel$Numb.of.move.Indo)
+#summary(nndummy)
+rsquared <- summary(nndummy)$r.squared
+
+smoothnnlm <- lm(Numb.of.move.Indo.Pre.12m ~ fit.Pre.12m, data =nnmodel) 
+smoothrsquared <- summary(smoothnnlm)$r.squared
+#smoothrsquared
+
+plot <- ggplot(nnmodel, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.Indo, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.Indo.Pre.12m/12, col = "12 Month Original"))+
+  scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Non-Negative Constrained Modeling of Short Term Departures to Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  geom_text(x = min(as.numeric(model$Date[70])), y=50000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=80, t = 70, b = 60, r = 60),
+         legend = list(y = 0.9, x = 0.05))
+
+weights <- bali_length_regressor %>% 
+  select(-Date, -Numb.of.move.Indo) %>% 
+  colMeans() %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon") )
+
+
+```
+
+
+
+#Uncon bali Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Unconstrained Coefficients"}
+
+coefs <- summary(mod)$coefficients %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(rowname != "(Intercept)")
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Unconstrained Model Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Unconstrained Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Departure Estimates by Component Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Unconstrained Estimated Absentees in Indonesia"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+#Con bali Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Positive Coefficients"}
+
+coefs <- coef.nnmod %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+colnames(coefs) <- c("Estimate", "Component")
+coefs <- coefs %>% 
+  select("Component", "Estimate")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Constrained Model")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Positive Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee","Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Monthly Departure Estimate for Indonesia by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Positive Estimated Absentees in Indonesia"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee", "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent in Indonesia Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+
+#Late bali Regression
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of balis Unconstrained"}
+
+#########
+balis <- sheet_340109 %>% 
+  filter(Date >= "2010-01-01 GMT") %>% 
+  select(Date, Numb.of.move.Indo)
+bali_regressor <- inner_join(sheet_3401010, balis, by = "Date")
+bali_regressor <- select(bali_regressor, Date, Numb.of.move.Indo,  everything ())
+bali_length_regressor <- bali_regressor %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+####
+
+mod <- lm(Numb.of.move.Indo ~ . - Date, data = bali_length_regressor)  # Regress y on everything (but Year)
+#summary(mod)
+model <- tibble(fit =mod$fitted.values)
+model <- bind_cols(model, bali_length_regressor %>% select(Date, Numb.of.move.Indo ))
+model <- model %>% 
+  month_mutate("Numb.of.move.Indo") %>% 
+  month_mutate("fit")
+
+smoothlm <- lm(Numb.of.move.Indo.Pre.12m ~ fit.Pre.12m, data =model) 
+smoothrsquared <- summary(smoothlm)$r.squared
+#smoothrsquared
+
+rsquared <- summary(mod)$r.squared
+
+plot <- ggplot(model, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.Indo, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.Indo.Pre.12m/12, col = "12 Month Original"))+
+    scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Un-Constrained Model Short-Term Departures to Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
+  geom_text(x = min(as.numeric(model$Date[48])), y=117000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 70, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+#bali Constrained
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of balis Constrained"}
+library(nnls)
+
+
+
+regr.names <- bali_length_regressor %>% 
+  select(Num.of.mov.Und.1.wee:Num.of.mov.6.and.und.12.mon) %>% 
+  colnames() %>% 
+  as.vector()
+
+A <- as.matrix(bali_length_regressor[,regr.names])
+B <- bali_length_regressor$Numb.of.move.Indo
+nnmod <- nnls(A,B)
+coef.nnmod <- coef(nnmod)
+pred.nnmod <- as.vector(coef.nnmod%*%t(A))
+#coef.nnmod
+
+nnmodel <- tibble(fit =nnmod$fitted[,1])
+nnmodel <- bind_cols(nnmodel, bali_length_regressor %>% select(Date, Numb.of.move.Indo ))
+nnmodel <- nnmodel %>% 
+  month_mutate("Numb.of.move.Indo") %>% 
+  month_mutate("fit")
+nndummy <- lm(nnmodel$fit ~ nnmodel$Numb.of.move.Indo)
+#summary(nndummy)
+rsquared <- summary(nndummy)$r.squared
+
+smoothnnlm <- lm(Numb.of.move.Indo.Pre.12m ~ fit.Pre.12m, data =nnmodel) 
+smoothrsquared <- summary(smoothnnlm)$r.squared
+#smoothrsquared
+
+plot <- ggplot(nnmodel, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Numb.of.move.Indo, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
+  geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
+  geom_line(aes(x = Date, y = Numb.of.move.Indo.Pre.12m/12, col = "12 Month Original"))+
+  scale_colour_manual("", 
+                      breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
+                      values = c("green", "blue", "red", "black"))+
+  labs(title = "Non-Negative Constrained Modeling of Short Term Departures to Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  geom_text(x = min(as.numeric(model$Date[48])), y=117000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
+                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=80, t = 70, b = 60, r = 60),
+         legend = list(y = 0.9, x = 0.05))
+
+weights <- bali_length_regressor %>% 
+  select(-Date, -Numb.of.move.Indo) %>% 
+  colMeans() %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon") )
+
+
+```
+
+
+
+#Uncon bali Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Unconstrained Coefficients"}
+
+coefs <- summary(mod)$coefficients %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(rowname != "(Intercept)")
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Unconstrained Model Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Unconstrained Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Departure Estimates by Component Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Unconstrained Estimated Absentees in Indonesia"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+#Con bali Coefs
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Positive Coefficients"}
+
+coefs <- coef.nnmod %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+colnames(coefs) <- c("Estimate", "Component")
+coefs <- coefs %>% 
+  select("Component", "Estimate")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Constrained Model")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Positive Coefficients Weighted"}
+
+coefs <- coefs %>% 
+  inner_join(weights) %>% 
+  inner_join(day.weights)
+
+colnames(coefs) <- c("Component", "Estimate", "Weight", "days.vec")
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee","Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Mean Monthly Departure Estimate for Indonesia by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Positive Estimated Absentees in Indonesia"}
+
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee", "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component))+
+  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Absent in Indonesia Person-Year Estimates by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+```
+
+
+
+
+#Old Stuff
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis"}
+kiwis <- sheet_340109 %>% 
+  select(Date, Numb.of.move.New.Zeal)
+kiwi_regressor <- inner_join(sheet_3401010, kiwis, by = "Date")
+kiwi_regressor <- select(kiwi_regressor, Date, Numb.of.move.New.Zeal,  everything ())
+kiwi_length_regressor <- kiwi_regressor %>% 
+  select(Date, Numb.of.move.New.Zeal, Num.of.mov.Con:Num.of.mov.Oth.not.sta)
+
+mod <- lm(Numb.of.move.New.Zeal ~ . - Date, data = kiwi_length_regressor)  # Regress y on everything (but Year)
+summary(mod)
+
+model <- tibble(fit =mod$fitted.values)
+  
+
+
+model <- bind_cols(model, kiwi_length_regressor %>% select(Date, Numb.of.move.New.Zeal ))
+
+plot <- ggplot(model, aes(x = Date))+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+#plot(mod)
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Poms"}
+poms <- sheet_340109 %>% 
+  select(Date, Numb.of.move.UK.CIs.IOM)
+poms_regressor <- inner_join(sheet_3401010, poms, by = "Date")
+poms_regressor <- select(poms_regressor, Date, Numb.of.move.UK.CIs.IOM,  everything ())
+poms_length_regressor <- poms_regressor %>% 
+  select(Date, Numb.of.move.UK.CIs.IOM, Num.of.mov.Con:Num.of.mov.Oth.not.sta)
+
+mod <- lm(Numb.of.move.UK.CIs.IOM ~ . - Date, data = poms_length_regressor)  # Regress y on everything (but Year)
+summary(mod)
+
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Indo"}
+balis <- sheet_340109 %>% 
+  select(Date, Numb.of.move.Indo)
+bali_regressor <- inner_join(sheet_3401010, balis, by = "Date")
+bali_regressor <- select(bali_regressor, Date, Numb.of.move.Indo,  everything ())
+bali_length_regressor <- bali_regressor %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+
+mod <- lm(Numb.of.move.Indo ~ . - Date, data = bali_length_regressor)  # Regress y on everything (but Year)
+summary(mod)
+
+
+mod <- lm(Numb.of.move.Indo ~ . - Date, data = bali_length_regressor)  # Regress y on everything (but Year)
+summary(mod)
+
+model <- tibble(fit =mod$fitted.values)
+  
+
+
+model <- bind_cols(model, bali_length_regressor %>% select(Date, Numb.of.move.Indo ))
+
+plot <- ggplot(model, aes(x = Date))+
+  geom_line(aes(y = Numb.of.move.Indo, col ="Original"))+
+  geom_line(aes(y = fit, col = "Fitted"))
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The bare minimum to accurately represent a series break"}
+
+datevec <- sheet_340101 %>% 
+  filter(Date < "2006-09-01 GMT")%>% 
+  select(Date)
+
+date_change <- length(datevec$Date) +1
+
+plot <- ggplot(sheet_310101, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = NOM.12.12.Pre.12, col = "12/12 Rule Definition of NOM"), size = .8)+
+  geom_line(aes(y = NOM.12.16.Pre.12, col = "12/16 Rule Definition of NOM"), size = .8)+
+  scale_colour_manual("", 
+                      breaks = c("12/12 Rule Definition of NOM", "12/16 Rule Definition of NOM"),
+                      values = c( "red", "magenta1"))+
+  geom_vline(xintercept = as.numeric(sheet_340101$Date[date_change]), linetype = 4, size = .8) +
+  geom_text(x = as.numeric(sheet_340101$Date[date_change - 60]), y = 300000, label =  "Break in 
+            Methodology", size =4)+
+  labs(title = "Net Overseas Migration (NOM)") +
+  ylab("asd")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 100, b = 100, r = 100),
+         legend = list(orientation = 'h',
+                       y = -0.2, x = 0.1))
+
+```
+
+
+
+
+
+```{r, fig.align="center", out.width = 600, fig.cap="ABS excerpt published in Business Insider, 2017"}
+
+
+knitr::include_graphics("images/ABS-population-increase.jpg")
+
+```
+
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The exponential growth in monthly overseas movements"}
+
+
+sheet_arr_dep <- bind_cols(sheet_340101, sheet_340102)
+sheet_arr_dep <- sheet_arr_dep %>% 
+  mutate(net.movements = (Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep),
+         net.per.long.term = (Num.of.mov.Per.and.Lon.ter.Arr - Num.of.mov.Per.and.Lon.ter.Dep),
+         net.movements.Pre.12m = (Num.of.mov.Tot.Arr.Pre.12m - Num.of.mov.Tot.Dep.Pre.12m)
+  )
+
+plot <- ggplot(sheet_arr_dep, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Tot.Arr, colour = "Total Arrivals Monthly" ))+
+  geom_line(aes(y = Num.of.mov.Tot.Dep, colour = "Total Departures Monthly"))+
+  scale_colour_manual("",
+                      breaks = c("Total Arrivals Monthly", "Total Departures Monthly"),
+                      values = c("green", "orange"))+
+  labs(title = "All Arrivals and Departures Monthly")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 100, b = 70, r = 100),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The increasing volatility of net monthly overseas movements"}
+
+
+plot <- ggplot(sheet_arr_dep, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep ))+
+  labs(title = "Net Monthly Movements (Positive is net Arrivals)")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 100, b = 70, r = 100))
+
+```
+
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The link between NOM and Movements was clearly broken by 2006"}
+
+
+plot <- joint_sheet_310101 %>% 
+  filter(Date < "2006-06-02 GMT") %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_col(aes(x = Date, y = cum.discrepancy, colour = "Cumulative Discrepancy"), fill = "grey", alpha = 0.6)+
+  geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m, colour = "Net Overseas Migration (NOM)"), size = .8)+
+  geom_line(aes(x = Date, y = net.movements.Pre.12m, colour = "Net Overseas Movements"), size = .8)+
+  scale_colour_manual("", 
+                      breaks = c("Cumulative Discrepancy", "Net Overseas Migration", "Net Overseas Movements"),
+                      values = c("grey", "red", "blue"))+
+  labs(title = "Net Movements vs NOM, with cumulative difference")+
+  scale_y_continuous("Number")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+  
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 100, b = 70, r = 50),
+         legend = list(y = 0.98, x = 0.4))
+
+
+```
+
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The gap between NOM and Movements widens after the definition change and the GFC"}
+
+plot <- joint_sheet_310101 %>% 
+  #filter(Date < "2006-06-02 GMT") %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+    geom_rect(xmin = as.numeric(as.POSIXct(as_date("2009-12-01 GMT"))), 
+              xmax = as.numeric(as.POSIXct(as_date("2016-06-01 GMT"))), 
+            ymin = 100000, ymax = 200000,
+            fill = "yellow", alpha = 0.1)+
+  geom_line(aes(y = NOM.12.12.Pre.12, col = "NOM 12/12 Definition"), size = .8)+
+  geom_line(aes(y = NOM.12.16.Pre.12, col = "NOM 12/16 Definition"), size = .8)+
+  geom_line(aes(y = net.movements.Pre.12m, col = "Net Movements"), size =.8)+
+  scale_colour_manual("", 
+                      breaks = c("12/12 Rule Definition of NOM", "12/16 Rule Definition of NOM", "Net Movements"),
+                      values = c( "blue", "red",  "magenta1"))+
+  labs(title = "Net Movements vs Net Overseas Migration")+
+  geom_vline(xintercept = as.numeric(sheet_340101$Date[date_change]), linetype = 4) +
+  scale_y_continuous("Number")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+  
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 100, b = 70, r = 100),
+         legend = list(y = 0.95, x = 0.3))
+
+
+```
+
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "International travel slows during the GFC, even more for departures"}
+
+
+plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
+  geom_rect(xmin = as.numeric(as.POSIXct(as_date("2008-09-05 GMT"))), 
+            xmax = as.numeric(as.POSIXct(as_date("2009-09-01 GMT"))), 
+            ymin = 350000, ymax = 20000000,
+            fill = "brown", alpha = 0.05)+
+  geom_line(aes(y = Num.of.mov.Tot.Arr.Pre.12m, colour = "Total Arrivals 12 Months" ))+
+  geom_line(aes(y = Num.of.mov.Tot.Dep.Pre.12m, colour = "Total Departures 12 Months"))+
+  geom_col(aes(x = Date, y = net.movements.Pre.12m, colour = "Net Movements 12 Months"), fill = "grey", alpha = 0.6)+
+  scale_colour_manual("",
+                      breaks = c("Total Arrivals 12 Months", "Total Departures 12 Months", "Net Movements 12 Months"),
+                      values = c("black", "green", "orange"))+
+  geom_text(x = as.numeric(sheet_340101$Date[date_change + 5]), y = 5000000, label =  "AUD below 
+            0.85 USD", size =3)+
+  labs(title = "All Arrivals and Departures")+
+  scale_y_continuous("Monthly Movements")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 100, b = 70, r = 100),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The official NOM figure shows long-term acceleration of inward migration"}
+plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date), y = Net.Ove.Mig.Aus.Pre.12m.per.ERP))+
+  geom_line(size = 1, col = "black")+
+  stat_smooth(method = 'lm', formula = y ~ poly(x,14), colour = "grey60", se= TRUE)+
+  stat_smooth(method = 'lm', formula = y ~ poly(x,1), se= FALSE, colour = "red")+
+  labs(title = "Net Overseas Migration as Rate, Trends Fitted")+
+  scale_y_continuous("Growth Rate")+
+  scale_y_continuous(labels = scales::percent) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70))
+
+
+```
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The figures on total Movements shows no long-term trend"}
+plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date), y = net.movements.Pre.12m.per.PPP))+
+  geom_line(size = 1, col = "black")+
+  stat_smooth(method = 'lm', formula = y ~ poly(x,14), colour = "grey60", se= TRUE)+
+  stat_smooth(method = 'lm', formula = y ~ poly(x,1), se= FALSE, colour = "blue")+
+  labs(title = "Net Overseas Movements as Rate, Trends Fitted")+
+  scale_y_continuous("Growth Rate")+
+  scale_y_continuous(labels = scales::percent) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70))
+
+
+```
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The cumulative discrepancy between official NOM and the population actually in Australia has exploded"}
+
+plot <-ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
+  geom_col(aes(x = Date, y = cum.discrepancy, colour = "Cumulative Discrepancy"), fill = "grey", alpha = 0.6)+
+  geom_line(aes(y = NOM.12.12.Pre.12, col = "NOM 12/12 Definition"), size = .8)+
+  geom_line(aes(y = NOM.12.16.Pre.12, col = "NOM 12/16 Definition"), size = .8)+
+  geom_line(aes(x = Date, y = net.movements.Pre.12m, colour = "Net Overseas Movements"), size = .8)+
+  scale_colour_manual("", 
+                      breaks = c("Cumulative Discrepancy", "Net Overseas Migration", "Net Overseas Movements"),
+                      values = c("grey30", "blue", "red", "magenta1" ))+
+  labs(title = "Net Overseas Migration vs Net Movements, and Cumulative Discrepancy")+
+  geom_vline(xintercept = as.numeric(sheet_340101$Date[date_change]), linetype = 4, size = 0.4) +
+  scale_y_continuous("Number")+
+  geom_text(x = as.numeric(sheet_340101$Date[date_change - 40]), y = 750000, label =  "Break in 
+            Methodology", size =3)+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+  
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Natural growth actually comprises over half of our population growth"}
+
+plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Nat.Inc.Aus.Pre.12m, col = "Natural Increase Prev 12 Months"), size = .8)+
+  geom_line(aes(y = net.movements.Pre.12m, col = "Net Movements Prev 12 Months"), size = .8)+
+  #geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m, col = "Net Overseas Migration Prev 12 Months"), size = .8)+
+  #geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in Estimated Resident Population Prev 12 Months"), size = .8)+
+  geom_line(aes(y = net.movements.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in PPP Prev 12 Months"), size = .8)+
+  scale_colour_manual("", 
+                      breaks = c("Natural Increase Prev 12 Months", "Net Movements Prev 12 Months", "Increase in PPP Prev 12 Months"),
+                      values = c("black", "green", "blue"))+
+  labs(title = "Annual Change in Physically Present Population (PPP) 
+       by Component, and Combined")+
+  scale_y_continuous("Number")+
+  scale_y_continuous(labels = scales::comma, limits = c(-30000, 600000)) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 100, b = 70, r = 70),
+         legend = list(y = 0.95, x = 0.2))
+  
+```
+
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The assumption that migration drives population growth arises from arbitrary, inconsistent definitions of Net Overseas Migration"}
+
+plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Nat.Inc.Aus.Pre.12m, col = "Natural Increase Prev 12 Months"), size = .8)+
+  #geom_line(aes(y = net.movements.Pre.12m, col = "Net Movements Prev 12 Months"), size = .8)+
+  geom_line(aes(y = NOM.12.12.Pre.12, col = "Net Overseas Migration 12/12"), size = .8)+
+  geom_line(aes(y = NOM.12.16.Pre.12, col = "Net Overseas Migration 12/16"), size = .8)+
+  geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in ERP Prev 12 Months"), size = .8)+
+  #geom_line(aes(y = net.movements.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in Physically Present Population Prev 12 Months"), size = .8)+
+  scale_colour_manual("", 
+                      breaks = c("Natural Increase Prev 12 Months", "Net Overseas Migration 12/12","Net Overseas Migration 12/16", "Increase in ERP Prev 12 Months"),
+                      values = c("black", "green", "red", "magenta"))+
+  labs(title = "Annual Change in Estimated Resident Population (ERP) 
+       by Component, and Combined")+
+  scale_y_continuous(labels = scales::comma, limits = c(-30000, 600000)) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 100, b = 70, r = 70),
+         legend = list(y = 0.95, x = 0.1))
+  
+
+```
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The population growth rate may actually have fallen since 2000"}
+joint_21st <- joint_sheet_310101 %>% 
+  filter(Date >= "2000-01-01 GMT") 
+
+joint_20th <- joint_sheet_310101 %>% 
+  filter(Date < "2000-01-01 GMT", Date >= "1982-03-01 GMT") 
+
+modPPPrate <- mean((joint_21st$net.movements.Pre.12m+ joint_21st$Nat.Inc.Aus.Pre.12m)/joint_21st$Phy.Pre.Pop.PPP.Aus)
+modERPrate <- mean((joint_21st$Net.Ove.Mig.Aus.Pre.12m + joint_21st$Nat.Inc.Aus.Pre.12m)/joint_21st$Est.Res.Pop.ERP.Aus)
+
+oldPPPrate <- mean((joint_20th$net.movements.Pre.12m+ joint_20th$Nat.Inc.Aus.Pre.12m)/joint_20th$Phy.Pre.Pop.PPP.Aus)
+oldERPrate <- mean((joint_20th$Net.Ove.Mig.Aus.Pre.12m + joint_20th$Nat.Inc.Aus.Pre.12m)/joint_20th$Est.Res.Pop.ERP.Aus)
+
+joint_sheet_310101 <- joint_sheet_310101 %>% 
+  mutate(mod.PPP.rate = case_when(Date >= "2000-01-01 GMT" ~ modPPPrate)) %>% 
+  mutate(mod.ERP.rate = case_when(Date >= "2000-01-01 GMT" ~ modERPrate)) %>% 
+  mutate(old.PPP.rate = case_when(Date < "2000-01-01 GMT" ~ oldPPPrate)) %>% 
+  mutate(old.ERP.rate = case_when(Date < "2000-01-01 GMT" ~ oldERPrate))
+
+plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = (Net.Ove.Mig.Aus.Pre.12m + Nat.Inc.Aus.Pre.12m)/Est.Res.Pop.ERP.Aus, col = "Increase in ERP Annual Rate"), size = .8)+
+  geom_line(aes(y = (net.movements.Pre.12m + Nat.Inc.Aus.Pre.12m)/Phy.Pre.Pop.PPP.Aus, col = "Increase in PPP Annual Rate"), size = .8)+
+  geom_line(aes(y = mod.PPP.rate, col = "Average 2000-17 PPP growth rate"), size = 1, linetype = 4)+
+  geom_line(aes(y = mod.ERP.rate, col = "Average 2000-17 ERP growth rate"), size = .8, linetype = 3)+
+  geom_line(aes(y = old.PPP.rate, col = "Average 1982-99 PPP growth rate"), size = 1, linetype = 4)+
+  geom_line(aes(y = old.ERP.rate, col = "Average 1982-99 ERP growth rate"), size = .8, linetype = 3)+
+  scale_colour_manual("", 
+                      breaks = c("Increase in PPP Annual Rate", "Increase in ERP Annual Rate", "Average 2000-2017 ERP growth rate", "Average 2000-2017 PPP growth rate", "Average 1982-1999 PPP growth rate", "Average 1982-1999 ERP growth rate"),
+                      values = c("orange", "turquoise",  "orange3", "turquoise3", "red", "blue"))+
+  labs(title = "Comparison of Alternative Population Growth Rates")+
+  scale_y_continuous(labels = scales::percent, limits = c(0.0054, 0.025)) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 60),
+         legend = list( x = 100))
+
+```
+
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "An assortment of alternative population measurements"}
+Date <- c(as.POSIXct(as_date( "2011-09-09 GMT")))
+Cen.Pop <- c( (10634012 + 10873706))
+Census_2011 <- tibble(Date, Cen.Pop)
+
+Date <- c(as.POSIXct(as_date("2016-09-09 GMT")))
+Cen.Pop <- c(23401892)
+Census_2016 <- tibble(Date, Cen.Pop)
+
+plot<- ggplot(joint_sheet_310101, aes(x = Date, y = Est.Res.Pop.ERP.Aus, text = as_date(Date)))+
+  #geom_vline(xintercept = as.numeric(sheet_340101$Date[date_change]), linetype = 4, size = 0.4) +
+  geom_line(aes(y = Est.Res.Pop.ERP.Aus, col = "ERP"), size =0.8)+
+  geom_line(aes(y = (Est.Res.Pop.ERP.Aus - cum.discrepancy), colour = "PPP"), linetype = 3, size = 1)+
+  geom_point(data = Census_2011, aes(x = Date, y = Cen.Pop, colour = "Census 2011 PURP"),  shape = 4, size = 3)+ 
+  geom_point(data = Census_2016, aes(x = Date, y = Cen.Pop, colour = "Census 2016 PURP"), shape = 4, size = 3)+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  labs(title = "Estimated Resident Population (ERP), 
+       Physically Present Population(PPP),
+Recent Census Place of Ususal Residence (PURP) Counts")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 100, b = 100, r = 100),
+         legend = list(y = 0.95, x = 0.1))
+
+
+```
+
+The .Rmd file for this post can be accessed which will require the installation of this [package](https://github.com/aidandmorrison/UtilsQQ) to run. 
