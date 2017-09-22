@@ -183,40 +183,10 @@ So it would be very tempting to conclude that the same set of travellers are dri
 Sadly, as is the case in scientific research, it tends to be the case that disproving things is easier than proving things. In this post I'll just make an opening foray into the data to demonstrate that the Missing Million is at least as likely to be composed by people (quite probably young Kiwi Citizens) travelling to New Zealand as it is Boomers in Bali. 
 
 
-Really only a couple of charts are required to substantiated the mobility thesis outlined earlier in the previous post.  The following one shows clearly how Australia has become a place to arrive long-term, and leave from short-term, which is the core contention of my thesis.  It also shows how Net Overseas Migration tends to very closely resemble the long-term movements.
-
-```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Net Movements diverged after 2001, with Short Term Movements becoming strongly negative, and long term movments more positive."}
 
 
 
-
-plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
-  # geom_line(aes(y = Num.of.mov.Per.and.Lon.ter.Dep.Pre.12m, col = "Perm and Long Term Dep"))+
-  # geom_line(aes(y = Num.of.mov.Per.and.Lon.ter.Arr.Pre.12m, col = "Perm and Long Term Arr")) +
-  geom_line(aes(y = (Num.of.mov.Sho.ter.les.tha.one.yea.Res.ret.Pre.12m -
-                       Num.of.mov.Sho.ter.les.tha.one.yea.Res.dep.Pre.12m +
-                       Num.of.mov.Sho.ter.les.tha.one.yea.Vis.arr.Pre.12m -
-                       Num.of.mov.Sho.ter.les.tha.one.yea.Vis.dep.Pre.12m), col = "Net Short Term Movements"), size = 0.8)+
-  geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m, col = "Net Overseas Migration"), size = 0.8)+
-  geom_line(aes(y = Num.of.mov.Per.and.Lon.ter.Arr.Pre.12m - Num.of.mov.Per.and.Lon.ter.Dep.Pre.12m, col = "Net Permanent and Long Term"), size = 0.8)+
-  geom_line(aes(y = net.movements.Pre.12m, col = "Net Movements"), size = 0.8)+
-  scale_colour_manual("", 
-                      breaks = c("Net Short Term Movements", "Net Overseas Migration", "Net Permanent and Long Term", "Net Movements"),
-                      values = c("red", "black", "green", "blue"))+
-  labs(title = "Net Overseas Migration with Net Short and Long Term Movements, Annual")+
-  scale_y_continuous(labels = scales::comma, limits = c(-300000, 460000)) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 70, r = 60),
-         legend = list(x = 0.01, y = 0.99))
-
-
-```
-
-
-
-```{r, warning=FALSE, message=FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+```{r, warning=FALSE, include=F, message=FALSE, fig.align="center", fig.cap="New Graph of Movements"}
 
 sheet_340106 <- readxl::read_xls("data/340106.xls", sheet = 2)
 
@@ -330,9 +300,9 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 
 
-# Impact of Departures by Time
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements out impact"}
 
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements out impact"}
+# Impact of Departures by Time
 plot <- sheet_3401010 %>% 
   ggplot(aes(x = Date, text = as_date(Date)))+
   geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m*22/365, col = "2 weeks to a month"))+
