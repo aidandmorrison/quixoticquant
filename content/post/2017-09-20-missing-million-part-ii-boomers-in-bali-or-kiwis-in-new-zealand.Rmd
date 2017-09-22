@@ -185,9 +185,25 @@ Sadly, as is the case in scientific research, it tends to be the case that dispr
 
 
 
+```{r get_data3, include=FALSE, warning=FALSE, message= FALSE}
 
-```{r, warning=FALSE, include=F, message=FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+sheet_3401010 <- readxl::read_xls("data/3401010.xls", sheet = 2)
 
+sheet_3401010 <- good_names(sheet = sheet_3401010)
+meta4 <- stash_meta(sheet_3401010)
+meta4 <- good_names(meta4, meta = TRUE)
+meta <- bind_rows(meta, meta4)
+sheet_3401010 <- cut_meta(sheet_3401010)
+sheet_3401010 <- good_date(sheet_3401010)
+sheet_3401010 <- to_numeric(sheet_3401010)
+sheet_3401010 <- nom_units(sheet_3401010, meta)
+sheet_3401010 <- inst_ann(sheet_3401010, meta4)
+sheet_3401010 <- prev_12_month(sheet_3401010, meta4)
+
+```
+
+
+```{r get_data2, include=FALSE, warning=FALSE, message= FALSE}
 sheet_340106 <- readxl::read_xls("data/340106.xls", sheet = 2)
 
 sheet_340106 <- good_names(sheet = sheet_340106)
@@ -201,6 +217,10 @@ sheet_340106 <- nom_units(sheet_340106, meta)
 sheet_340106 <- inst_ann(sheet_340106, meta)
 sheet_340106 <- prev_12_month(sheet_340106, meta)
 
+
+```
+
+```{r, warning=FALSE, include=F, message=FALSE, fig.align="center", fig.cap="New Graph of Movements"}
 
 plot <- sheet_340106 %>% 
   ggplot(aes(x = Date, text = as_date(Date)))+
@@ -218,9 +238,8 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
   layout(margin=list(l=70, t = 100, b = 70, r = 70),
          legend = list(y = 0.9, x = 0.1))
 
+
 ```
-
-
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
 
@@ -244,20 +263,6 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
 
-sheet_3401010 <- readxl::read_xls("data/3401010.xls", sheet = 2)
-
-sheet_3401010 <- good_names(sheet = sheet_3401010)
-meta4 <- stash_meta(sheet_3401010)
-meta4 <- good_names(meta4, meta = TRUE)
-meta <- bind_rows(meta, meta4)
-sheet_3401010 <- cut_meta(sheet_3401010)
-sheet_3401010 <- good_date(sheet_3401010)
-sheet_3401010 <- to_numeric(sheet_3401010)
-sheet_3401010 <- nom_units(sheet_3401010, meta)
-sheet_3401010 <- inst_ann(sheet_3401010, meta4)
-sheet_3401010 <- prev_12_month(sheet_3401010, meta4)
-
-
 plot <- sheet_3401010 %>% 
   ggplot(aes(x = Date, text = as_date(Date)))+
   geom_line(aes(y = Num.of.mov.Und.1.wee, col = "under 1 week"))+
@@ -276,6 +281,13 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
          legend = list(y = 0.9, x = 0.1))
 
 ```
+
+
+
+
+
+
+
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements out annual"}
 
@@ -377,7 +389,9 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 
 
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+
+```{r get_data4, include=FALSE, warning=FALSE, message= FALSE}
 
 sheet_340109 <- readxl::read_xls("data/340109.xls", sheet = 2)
 
@@ -411,6 +425,11 @@ topregionssum <- topcountries %>%
   filter(str_detect(country, ".Tota.") == TRUE) %>% 
   tail(n = 10)
 
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
 plot <- sheet_340109 %>% 
   ggplot(aes(x = Date, text = as_date(Date)))+
   geom_line(aes(y = Numb.of.move.New.Zeal, col = "NZ"))+
@@ -429,6 +448,7 @@ plot <- sheet_340109 %>%
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
   layout(margin=list(l=70, t = 100, b = 70, r = 70))
+
 
 ```
 
