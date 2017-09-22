@@ -14,7 +14,6 @@ tags:
   - Immigration
   - Statistics
   - ABS
-draft: yes
 ---
 
 
@@ -23,7 +22,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
-```{r get_data, include=FALSE, warning=FALSE, message= FALSE,}
+```{r get_data, include=FALSE, warning=FALSE, message= FALSE}
 library(tidyverse)
 library(stringr)
 library(gdata)
@@ -217,8 +216,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 
 
-#new data reads
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+```{r, warning=FALSE, message=FALSE, fig.align="center", fig.cap="New Graph of Movements"}
 
 sheet_340106 <- readxl::read_xls("data/340106.xls", sheet = 2)
 
