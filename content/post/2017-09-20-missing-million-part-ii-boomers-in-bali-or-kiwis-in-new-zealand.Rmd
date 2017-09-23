@@ -138,11 +138,99 @@ Cameron's response was to investigate some further data from ABS 3401 to see if 
 
 The investigation and further research is commendable, as it at least attempts to engage with some of the complexity surrounding migration measurement, which I've [lamented](https://www.quixoticquant.com/post/the-state-of-debate-a-bird-s-eye-on-migration/) is universally glossed-over.  And, as I've also [lamented](https://www.quixoticquant.com/post/the-state-of-debate-a-bird-s-eye-on-migration/) after the guys from [Macrobusiness](https://www.macrobusiness.com.au/2017/09/apparently-no-immigration-boom/) seized on it as a 'rebuke', even Cameron's narrative exposes how the details of migration could lead to completely counter-productive knee-jerk reactions, which Macrobusiness seems inclined to make.  A million boomers who will come back from holiday to get sick and die in Australia will lead to a completely different policy response to a million young 'migrants' getting jobs and starting families here  who spend a chunk of the year back in their other 'home'. 
 
-However, the four graphs that Cameron has produced provide a great example of how not to use data.  My first post was often called a 'deep-dive', and this one will be more of a 'splash'.  I'll demonstrate an entry point for a very deep dive with some enthusiasm for the purposes of exploring some analytic techniques, and assessing how well we know things, and what we can know we don't know.  
+However, the four graphs that Cameron has produced provide a great example of how not to use data.  He seizes on narrative which relies on committing the oldest data-interpretation error there is (confusing correlation with causation) four times over in quick succession, when a few simple techniques (like eye-balling the raw relevant data, or doing a back-of-the-envelope calculation to check orders of magnitude) show that the evidence doesn't stack up, or actually stacks up at least as well in favour of another narrative.
 
-The image he created of the Missing Million relied on four characteristics in short-term departures: reason for departure (holiday), length of stay (short), destination (Indonesia), and age (older).
+## Why we need to talk about Kiwis
+The alternative narrative that I'll champion here, is that a larger share of the Missing Million is actually Kiwis, probably relatively young ones, who have come to Australia to work or study, but spend rather significant amount of time (in various trip-lenghts) back in New Zealand.  I won't try to prove that it's the dominant component, since there isn't clear evidence for that either, in fact it appears that the Missing Million must comprise quite a variety of traveller types.  But it fits the data better than the Boomers in Bali story, so it's a reasonable angle to take to refute my 'rebuke'.
 
-Sure enough, he has a charg which says the highest level of growth comes from growth in holidays:
+It's also a fun narrative to choose because it contrasts so well in every sense with the Cameron's hypothesis in a policy sense.  Unlike Aussie Boomers returning from their retirement holidays, it's quite possible that the New Zealanders will actually make a general exodus at some point, and decide that New Zealand is at least as good a place to live in their next life stage, such as raising a family or retiring.  It's also possible that they might continue to use a significant number of services (like health-care) in New Zealand on their trips back home.  
+
+Perhaps best of all, the case of the Kiwis highlights the misnomer that 'Net Overseas Migration' being closely linked to "Permanent Migration Program", which small-Australia advocates like Macrobusiness continually urge the Federal Goverment to reduce.  Unless we want to tear up our reciprocal arrangement with our New Zealand brothers over the ditch, this significant component of migration isn't something that cutting the permanent migration program will have even the slightest impact on.  Kiwis don't need a permanent visa to live here permanently, and neither do we in New Zealand.
+
+As we can see here from the [Department of Immigration and Border Protection](https://www.border.gov.au/ReportsandPublications/Documents/statistics/temp-entrants-aus-31-dec-2016.pdf), there are more New Zealanders in Australia than any other type of temporary entrant.  Well over 600,000.  
+
+```{r, fig.align="center", out.width = 500, fig.cap="New Zealanders make up the largest share of 'Temporary Entrants' in Australia"}
+
+
+knitr::include_graphics("images/TempEnt.png")
+
+```
+
+However New Zealanders have reciprocal arrangements with Australia that allows them to remain 'temporary' permanently, and do all the things that we normally associate with permanent residents, like working, and coming and going as they please.  As a result, they actually constitute a surprising slab of the [official "Net Overseas Migration"](http://www.border.gov.au/ReportsandPublications/Documents/statistics/migration-trends-14-15-full.pdf) intake.  In fact, since 2008 when Australia's supposedly turbo-charged migration intake really started, New Zealanders have contributed just as much as almost any other category except students. 
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NOM Breakdown"}
+
+sheet_NOM <- readxl::read_xls("data/NOM_by_visa.xls", sheet = 1)
+sheet_NOM <- t(sheet_NOM) %>%  
+  as_tibble()
+#sheet_NOM <-data.frame(sheet_NOM) %>% as_tibble()
+rownames(sheet_NOM) <- NULL
+sheet_NOM <- sheet_NOM[-1,]
+
+dates <- c("2007-06-30", "2008-06-30", "2009-06-30", "2010-06-30",
+           "2011-06-30", "2012-06-30", "2013-06-30", "2014-06-30",
+           "2015-06-30") %>% ymd() %>% as.numeric()
+
+dates_vec <- tibble(dates)
+
+sheet_NOM <- bind_cols(sheet_NOM, dates_vec)
+sheet_NOM <- select(sheet_NOM, dates, everything())
+colnames(sheet_NOM) <- c("Date", "Student", "Subclass 457", "Working Holiday", "Visitor", 
+                         "Other Temp.", "Skilled", "Family", "Humanitarian",
+                         "Other Perm.", "Aus Citizen", "NZ Citizen", "Other Visas")
+
+sheet_NOM <- sheet_NOM %>% 
+  good_names() %>% 
+  good_date(Origin = "1970-01-01") %>% 
+  to_numeric() %>% 
+  nom_units(meta = meta, manual = "000")
+
+sheet_NOM <- sheet_NOM %>% 
+  mutate(Tot.Temp = (Stu + Sub.457 + Wor.Hol + Vis + Oth.Tem),
+         Tot.Perm = (Ski + Fam + Hum + Oth.Per),
+         Tot.Oth = (Aus.Cit + NZ.Cit + Oth.Vis))
+
+sheet_NOM_long <- sheet_NOM %>% 
+  gather(key = "Visa.cat", value = "flow", -Date)
+
+sheet_NOM_long <- sheet_NOM_long %>% 
+  mutate(Type = case_when(Visa.cat %in% c("Stu", "Sub.457", "Wor.Hol", "Vis","Oth.Tem") ~ "Temporary",
+                          Visa.cat %in% c("Ski", "Fam", "Hum", "Oth.Per") ~ "Permanent",
+                          Visa.cat %in% c("Aus.Cit", "NZ.Cit", "Oth.Vis") ~ "Other",
+                          Visa.cat %in% c("Tot.Temp", "Tot.Perm", "Tot.Oth") ~ "Totals"))
+    
+    
+    
+pre_plot <- sheet_NOM_long %>% 
+  filter(str_detect(Visa.cat, "Tot.") == FALSE) %>% 
+  arrange(Type)
+
+lvls <- unique(pre_plot$Visa.cat)
+
+
+ plot<- pre_plot %>% 
+    mutate(Visa.cat = factor(Visa.cat, levels = lvls)) %>% 
+   ggplot(aes(x = Date, text = as_date(Date), y = flow, fill = Visa.cat, colour = Type))+
+    geom_bar(position = "stack", stat = "identity")+
+   scale_colour_manual("",
+                      breaks = c("Temporary", "Permanent", "Other"),
+                      values = c("grey", "black", "white"))+
+    theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  labs(title = "Net Overseas Migration by Visa")+
+   scale_y_continuous(labels = scales::comma)
+
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 70, b = 60, r = 70))
+
+```
+
+I can't help but make further passing observation here, that all the permanent visa categories (in black boxes) during this period rarely add up much past 70,000, which is about the number that most of the small-Australia advocates advocate anyway.  It's the influx of temporary entrants that has really driven the appearance of extremely high migration during this period, which is consistent with the broad thesis I outlined in a [previous post](https://www.quixoticquant.com/post/the-state-of-debate-a-bird-s-eye-on-migration/) about 'mobility' rather than 'migration' having made a level-shift.  Eliminating the entire "Permanent Migration Program" from 100,000 to zero won't do anything to reduce two thirds of the migration we actually have, but I'll focus a full post on that charge another day, and focus here on the Missing Million, and where on earth they are.
+
+## The Boomers in Bali Narrative
+The image Cameron Murray created of the Missing Million relied on four characteristics in short-term departures: reason for departure (holiday), length of stay (short), destination (Indonesia), and age (older).
+
+Sure enough, he has a chart which says the highest level of growth comes from growth in holidays:
 
 ```{r, fig.align="center", out.width = 500, fig.cap="Holiday travel seems to have risen the fastest"}
 
@@ -178,12 +266,9 @@ knitr::include_graphics("images/agetravel.png")
 
 ```
 
-So it would be very tempting to conclude that the same set of travellers are driving the relevant trends in all of those cases, and that those travellers also constitute a significant share of the "Missing Million".  Correlation will be ascribed to causation, since that provides an easily graspable story to tell.  Essentially you would make a sweeping set of assumptions which have no basis and might be vulnerable to being disproven in a variety of ways.  The full conclusion is easily disproven, as I'll show shortly.  
+So it would be very tempting to conclude that the same set of travellers are driving the relevant trends in all of those cases, and that those travellers also constitute a significant share of the "Missing Million".  To do so would be to essentially make a whole sweeping set of assumptions which haven't even been discussed, let alone tested, and actaully can be proven false. 
 
-Sadly, as is the case in scientific research, it tends to be the case that disproving things is easier than proving things. In this post I'll just make an opening foray into the data to demonstrate that the Missing Million is at least as likely to be composed by people (quite probably young Kiwi Citizens) travelling to New Zealand as it is Boomers in Bali. 
-
-
-
+My first and favourite technique is to just have a look at relevant data with the Mk 1 eyeball.  Adding in the cumulative discrepancy between NOM and Net Movements, we can see how and when the Missing Million actually grows:
 
 ```{r get_data3, include=FALSE, warning=FALSE, message= FALSE}
 
@@ -219,177 +304,6 @@ sheet_340106 <- prev_12_month(sheet_340106, meta)
 
 
 ```
-
-```{r, warning=FALSE, include=F, message=FALSE, fig.align="center", fig.cap="New Graph of Movements"}
-
-plot <- sheet_340106 %>% 
-  ggplot(aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Num.of.mov.Und.1.wee, col = "under 1 week"))+
-  geom_line(aes(y = Num.of.mov.1.and.und.2.wee, col = "1 to 2 weeks"))+
-  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon, col = "2 weeks to a month"))+
-  geom_line(aes(y = Num.of.mov.1.and.und.2.mon, col = "1 to 2 months"))+
-  geom_line(aes(y = Num.of.mov.2.and.und.3.mon, col = "2 to 3 months"))+
-  geom_line(aes(y = Num.of.mov.3.and.und.6.mon, col = "3 to 6 months"))+
-  geom_line(aes(y = Num.of.mov.6.and.und.12.mon, col = "6 to 12 months"))+
-  
-  labs(title = "Short Term Movements Arrivals")
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 70),
-         legend = list(y = 0.9, x = 0.1))
-
-
-```
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
-
-plot <- sheet_340106 %>% 
-  ggplot(aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
-  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
-  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
-  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
-  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
-  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
-  
-  labs(title = "Short Term Movements Arrivals")
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 70),
-         legend = list(y = 0.9, x = 0.1))
-
-```
-
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
-
-plot <- sheet_3401010 %>% 
-  ggplot(aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Num.of.mov.Und.1.wee, col = "under 1 week"))+
-  geom_line(aes(y = Num.of.mov.1.and.und.2.wee, col = "1 to 2 weeks"))+
-  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon, col = "2 weeks to a month"))+
-  geom_line(aes(y = Num.of.mov.1.and.und.2.mon, col = "1 to 2 months"))+
-  geom_line(aes(y = Num.of.mov.2.and.und.3.mon, col = "2 to 3 months"))+
-  geom_line(aes(y = Num.of.mov.3.and.und.6.mon, col = "3 to 6 months"))+
-  geom_line(aes(y = Num.of.mov.6.and.und.12.mon, col = "6 to 12 months"))+
-  labs(title = "Short Term Movements Resident Departures")+
-  scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 70),
-         legend = list(y = 0.9, x = 0.1))
-
-```
-
-
-
-
-
-
-
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements out annual"}
-
-plot <- sheet_3401010 %>% 
-  ggplot(aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m, col = "2 weeks to a month"))+
-  geom_line(aes(y = Num.of.mov.1.and.und.2.wee.Pre.12m, col = "1 to 2 weeks"))+
-  geom_line(aes(y = Num.of.mov.Und.1.wee.Pre.12m, col = "under 1 week"))+
-  geom_line(aes(y = Num.of.mov.1.and.und.2.mon.Pre.12m, col = "1 to 2 months"))+
-  geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m, col = "2 to 3 months"))+
-  geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m, col = "3 to 6 months"))+
-  geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m, col = "6 to 12 months"))+
-  labs(title = "Short Term Movements Resident Departures Annual")+
-  scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 70),
-         legend = list(y = 0.9, x = 0.1))
-
-```
-
-
-
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Movements out impact"}
-# Impact of Departures by Time
-plot <- sheet_3401010 %>% 
-  ggplot(aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m*22/365, col = "2 weeks to a month"))+
-  geom_line(aes(y = Num.of.mov.1.and.und.2.wee.Pre.12m*11/365, col = "1 to 2 weeks"))+
-  geom_line(aes(y = Num.of.mov.Und.1.wee.Pre.12m*4/365, col = "under 1 week"))+
-  geom_line(aes(y = Num.of.mov.1.and.und.2.mon.Pre.12m*46/365, col = "1 to 2 months"))+
-  geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m*77/365, col = "2 to 3 months"))+
-  geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m*165/365, col = "3 to 6 months"))+
-  geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m*273/365, col = "6 to 12 months"))+
-  labs(title = "Person-Year absent from Short Term Departures")+
-  scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 70),
-         legend = list(y = 0.9, x = 0.1))
-
-days.vec <- c(4/365, 11/365, 22/365, 46/365, 77/365, 165/365, 273/365)
-days.tab <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee.Pre.12m" ,  "Num.of.mov.1.and.und.2.wee.Pre.12m", "Num.of.mov.2.wee.and.und.1.mon.Pre.12m",
-"Num.of.mov.1.and.und.2.mon.Pre.12m", "Num.of.mov.2.and.und.3.mon.Pre.12m", "Num.of.mov.3.and.und.6.mon.Pre.12m", "Num.of.mov.6.and.und.12.mon.Pre.12m")) %>% 
-  select(Component, days.vec) %>% 
-  mutate(monthly.vec = days.vec*12)
-
-end.vec <- sheet_3401010 %>% 
-  select(Num.of.mov.Und.1.wee.Pre.12m:Num.of.mov.6.and.und.12.mon.Pre.12m) %>% 
-  tail(n = 1) %>% 
-  t() %>% 
-  data.frame() %>% 
-  rownames_to_column(var = c("Component"))
-colnames(end.vec) <- c("Component", "Movement.end")
-
-mid.vec <- sheet_3401010 %>% 
-  filter(Date > "2001-12-30 GMT") %>% 
-  filter(Date < "2002-01-31 GMT") %>% 
-  select(Num.of.mov.Und.1.wee.Pre.12m:Num.of.mov.6.and.und.12.mon.Pre.12m) %>% 
-  t() %>% 
-  data.frame() %>% 
-  rownames_to_column(var = c("Component"))
-colnames(mid.vec) <- c("Component", "Movement.mid")
-
-days.tab <- days.tab %>% 
-  inner_join(end.vec, by = "Component") %>% 
-  inner_join(mid.vec, by = "Component")
-
-days.tab <- days.tab %>% 
-  mutate(mid.absent = Movement.mid*days.vec, end.absent = Movement.end*days.vec)
-
-absent.shift <- days.tab %>% 
-  summarise(absent2001 = sum(mid.absent), absent2017 = sum(end.absent))
-```
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
-
-plot <- sheet_3401010 %>% 
-  ggplot(aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
-  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
-  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
-  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
-  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
-  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
-  
-  labs(title = "Short Term Movements Departures by Purpose")+
-  scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 70),
-         legend = list(y = 0.9, x = 0.1))
-
-```
-
-
-
-
 
 ```{r get_data4, include=FALSE, warning=FALSE, message= FALSE}
 
@@ -427,30 +341,326 @@ topregionssum <- topcountries %>%
 
 ```
 
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="The cumulative missing million doesn't match "}
 
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_col(data = joint_sheet_310101 %>% filter(Date > "1991-12-01 GMT"), aes(x = Date, y = cum.discrepancy, colour = "Cumulative Discrepancy"), fill = "grey", alpha = 0.6, colour = "grey")+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee.Pre.12m, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee.Pre.12m, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon.Pre.12m, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m, col = "6 to 12 months"))+
+  labs(title = "Short Term Movements Resident Departures Previous 12 Months, and Missing Million")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70))
+
+```
+
+As we can clearly see there, the discrepancy between NOM and Net Movements seemed to have really become serious in the very early 2000s, quite possibly before the marked acceleration in Short-Term Departures. It does however appear that Short-Term Departures do seem to track somewhat with the cumulative discrepancy there after.  However, the same isn't the case with Departures by destination:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Travel to Indonesia was low while most of the Missing Million left."}
 
 plot <- sheet_340109 %>% 
   ggplot(aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Numb.of.move.New.Zeal, col = "NZ"))+
-  geom_line(aes(y = Numb.of.move.Indo, col = "Indonesia"))+
-  geom_line(aes(y = Numb.of.move.Unit.Stat.of.Amer, col = "USA"))+
-  geom_line(aes(y = Numb.of.move.UK.CIs.IOM, col = "UK"))+
-  geom_line(aes(y = Numb.of.move.Thai, col = "Thailand"))+
-  geom_line(aes(y = Numb.of.move.Chin, col = "China"))+
-  geom_line(aes(y = Numb.of.move.Sing, col = "Singapore"))+
-  geom_line(aes(y = Numb.of.move.Fiji, col = "Fiji"))+
-  geom_line(aes(y = Numb.of.move.Japa, col = "Japan"))+
-  
-  labs(title = "Short Term Movements Monthly Departures")+
+  geom_col(data = joint_sheet_310101 %>% filter(Date > "1991-12-01 GMT"), aes(x = Date, y = cum.discrepancy, colour = "Cumulative Discrepancy"), fill = "grey", alpha = 0.6, col = "grey")+
+  geom_line(aes(y = Numb.of.move.New.Zeal.Pre.12m, col = "NZ"))+
+  geom_line(aes(y = Numb.of.move.Indo.Pre.12m, col = "Indonesia"))+
+  geom_line(aes(y = Numb.of.move.Unit.Stat.of.Amer.Pre.12m, col = "USA"))+
+  geom_line(aes(y = Numb.of.move.UK.CIs.IOM.Pre.12m, col = "UK"))+
+  geom_line(aes(y = Numb.of.move.Thai.Pre.12m, col = "Thailand"))+
+  geom_line(aes(y = Numb.of.move.Chin.Pre.12m, col = "China"))+
+  geom_line(aes(y = Numb.of.move.Sing.Pre.12m, col = "Singapore"))+
+  geom_line(aes(y = Numb.of.move.Fiji.Pre.12m, col = "Fiji"))+
+  geom_line(aes(y = Numb.of.move.Japa.Pre.12m, col = "Japan"))+
+  labs(title = "Short Term Movements Monthly Departures Prev. 12 Months by Destination")+
   scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
   layout(margin=list(l=70, t = 100, b = 70, r = 70))
 
 
 ```
+
+Here it can be see that the accumulation of the first half occurred while travel to Indonesia was actually low, and not growing.  Furthermore, at precisely the time of the fastest acceleration in travel to Indonesia, NOM and Net Movements came closest to aligning. In contrast, travel to New Zealand grew consistently throughout this period, not to mention being higher throughout.  I'd argue that NZ looks more likely by far at this stage.
+
+My second favourite technique is to do just to a quick head-check of some numbers, to see whether things add-up even roughly.  Looking at the Short-Term-Departures by duration, we can multiply each series by an appropriate number to see what sort of impact each component might actually have on people actually absent from Australia.  Might need 30 or 40 more movements to add up to as many people being absent in the Missing Million sense if they're less than one week, versus over six months.  Not having any better information, I assumed that the distribution of movement lengths in each category was reasonably flat, and chose 4, 11, 22, 46, 77, 165, and 273 as the probable average number of person-days that each departure would reduce from Australia's Physically Present Population.  I then took the previous 12 month calculation and divided by 365 to find the total number of 'person-years' that each set of departures could contribute at any given point, to see which contributed the most. 
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Departures of longer than one month have the largest contribution to persons absent"}
+# Impact of Departures by Time
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m*22/365, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee.Pre.12m*11/365, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee.Pre.12m*4/365, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon.Pre.12m*46/365, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m*77/365, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m*165/365, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m*273/365, col = "6 to 12 months"))+
+  labs(title = "Person-Year absent from Short Term Departures")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70))
+
+days.vec <- c(4/365, 11/365, 22/365, 46/365, 77/365, 165/365, 273/365)
+days.tab <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee.Pre.12m" ,  "Num.of.mov.1.and.und.2.wee.Pre.12m", "Num.of.mov.2.wee.and.und.1.mon.Pre.12m",
+"Num.of.mov.1.and.und.2.mon.Pre.12m", "Num.of.mov.2.and.und.3.mon.Pre.12m", "Num.of.mov.3.and.und.6.mon.Pre.12m", "Num.of.mov.6.and.und.12.mon.Pre.12m")) %>% 
+  select(Component, days.vec) %>% 
+  mutate(monthly.vec = days.vec*12)
+
+end.vec <- sheet_3401010 %>% 
+  select(Num.of.mov.Und.1.wee.Pre.12m:Num.of.mov.6.and.und.12.mon.Pre.12m) %>% 
+  tail(n = 1) %>% 
+  t() %>% 
+  data.frame() %>% 
+  rownames_to_column(var = c("Component"))
+colnames(end.vec) <- c("Component", "Movement.end")
+
+mid.vec <- sheet_3401010 %>% 
+  filter(Date > "2001-12-30 GMT") %>% 
+  filter(Date < "2002-01-31 GMT") %>% 
+  select(Num.of.mov.Und.1.wee.Pre.12m:Num.of.mov.6.and.und.12.mon.Pre.12m) %>% 
+  t() %>% 
+  data.frame() %>% 
+  rownames_to_column(var = c("Component"))
+colnames(mid.vec) <- c("Component", "Movement.mid")
+
+days.tab <- days.tab %>% 
+  inner_join(end.vec, by = "Component") %>% 
+  inner_join(mid.vec, by = "Component")
+
+days.tab <- days.tab %>% 
+  mutate(mid.absent = Movement.mid*days.vec, end.absent = Movement.end*days.vec)
+
+absent.shift <- days.tab %>% 
+  summarise(absent2001 = sum(mid.absent), absent2017 = sum(end.absent))
+```
+
+We can see here that the impact of trips less than two weeks is very greatly diminished.  The largest contributor to the Missing Million is likely to be trips of over a month, hardly a fleeting holiday.
+
+But more interestingly, we can see that the short-term departures of all the trips under two months clearly can't add up to anything like a million people.  I did some calculations and found that in fact at the end of the data *all* the short-term departures probably only cumulatively add up to under 800,000.  I suspect the assumption of a flat distribution across all the categories is likely to overstate if anything.  Furthermore, at the end of 2001, before the Missing Million had left, those departures accounted for about 400,000 people absent.  So it really isn't plausible that all these departures listed actually account for anything like the full Missing Million, or pobably even half of that.  The sub-set of Boomers that Cameron Murray descrives is doomed to be a trival minority in any case.  
+
+The reason that this can be possible is that all the data we're looking at actually comes from 
+
+```{r, warning=FALSE, include=F, message=FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+plot <- sheet_340106 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon, col = "6 to 12 months"))+
+  scale_y_continuous(labels = scales::comma, limits = c(0, 420000)) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  labs(title = "Short Term Movements Arrivals")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70))
+
+
+```
+
+
+
+
+```{r, warning=FALSE, include=F, message=FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+plot <- sheet_340106 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee.Pre.12m, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee.Pre.12m, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon.Pre.12m, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m, col = "6 to 12 months"))+
+  #scale_y_continuous(labels = scales::comma, limits = c(0, 420000)) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  labs(title = "Short Term Movements Arrivals Previous 12 Months")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70))
+
+
+```
+
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+plot <- sheet_340106 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
+  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
+  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
+  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
+  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
+  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
+  
+  labs(title = "Short Term Movements Arrivals")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon, col = "6 to 12 months"))+
+  labs(title = "Short Term Movements Resident Departures")+
+  scale_y_continuous(labels = scales::comma, limits = c(0, 420000)) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70))
+
+```
+
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Seasonality of different time series"}
+sheet_3401010 <- sheet_3401010 %>% 
+  mutate(year = year(Date)) %>% 
+  mutate(month = month(Date))
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = month, text = as_date(Date)))+
+  geom_line(aes( y = Num.of.mov.3.and.und.6.mon, col = year))+
+  labs(title = "3 and 6 Month Departures")+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(1:12))+
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+layout(margin=list(l=70, t = 100, b = 70, r = 70),
+        legend = list(y = 0.9, x = 0.1))
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Seasonality of different time series"}
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = month, text = as_date(Date)))+
+  geom_line(aes( y = Num.of.mov.1.and.und.2.mon, col = year))+
+  labs(title = "2 weeks to a month Departures")+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(1:12))+
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+layout(margin=list(l=70, t = 100, b = 70, r = 70),
+        legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Seasonality of different time series"}
+sheet_340109 <- sheet_340109 %>% 
+  mutate(year = year(Date)) %>% 
+  mutate(month = month(Date))
+
+plot <- sheet_340109 %>% 
+  ggplot(aes(x = month, text = as_date(Date)))+
+  geom_line(aes( y = Numb.of.move.Indo, col = year))+
+  labs(title = "Short Term Departures to Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(1:12))+
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+layout(margin=list(l=70, t = 100, b = 70, r = 70),
+        legend = list(y = 0.9, x = 0.1))
+
+
+
+```
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Seasonality of different time series"}
+sheet_3401010 <- sheet_3401010 %>% 
+  mutate(year = year(Date)) %>% 
+  mutate(month = month(Date))
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = month, text = as_date(Date)))+
+  geom_line(aes( y = Num.of.mov.Hol, col = year))+
+  labs(title = "Holiday Movements")+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(1:12))+
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+layout(margin=list(l=70, t = 100, b = 70, r = 70),
+        legend = list(y = 0.9, x = 0.1))
+
+tsobj <- sheet_3401010$Num.of.mov.Hol %>% 
+  ts(frequency = 12)
+
+plot(stl(tsobj, s.window = "periodic"))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
+  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
+  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
+  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
+  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
+  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
+  
+  labs(title = "Short Term Movements Departures by Purpose")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+
+
+
+
+
+
+
+
 
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
@@ -543,19 +753,6 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NOM Breakdown By Category"}
-
-plot <- sheet_NOM_long %>% 
-  filter(str_detect(Visa.cat, "Tot.") == TRUE) %>% 
-  ggplot(aes(x = Date, text = as_date(Date), y = flow, fill = Visa.cat))+
-  geom_bar(position = "stack", stat = "identity")
-
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 70),
-         legend = list(y = 0.9, x = 0.1))
-
-```
 
 #census calcs
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Calcs on Census"}
@@ -2554,98 +2751,6 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 
 
-
-
-
-
-```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Natural growth actually comprises over half of our population growth"}
-
-plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Nat.Inc.Aus.Pre.12m, col = "Natural Increase Prev 12 Months"), size = .8)+
-  geom_line(aes(y = net.movements.Pre.12m, col = "Net Movements Prev 12 Months"), size = .8)+
-  #geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m, col = "Net Overseas Migration Prev 12 Months"), size = .8)+
-  #geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in Estimated Resident Population Prev 12 Months"), size = .8)+
-  geom_line(aes(y = net.movements.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in PPP Prev 12 Months"), size = .8)+
-  scale_colour_manual("", 
-                      breaks = c("Natural Increase Prev 12 Months", "Net Movements Prev 12 Months", "Increase in PPP Prev 12 Months"),
-                      values = c("black", "green", "blue"))+
-  labs(title = "Annual Change in Physically Present Population (PPP) 
-       by Component, and Combined")+
-  scale_y_continuous("Number")+
-  scale_y_continuous(labels = scales::comma, limits = c(-30000, 600000)) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 70, r = 70),
-         legend = list(y = 0.95, x = 0.2))
-  
-```
-
-
-
-```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The assumption that migration drives population growth arises from arbitrary, inconsistent definitions of Net Overseas Migration"}
-
-plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Nat.Inc.Aus.Pre.12m, col = "Natural Increase Prev 12 Months"), size = .8)+
-  #geom_line(aes(y = net.movements.Pre.12m, col = "Net Movements Prev 12 Months"), size = .8)+
-  geom_line(aes(y = NOM.12.12.Pre.12, col = "Net Overseas Migration 12/12"), size = .8)+
-  geom_line(aes(y = NOM.12.16.Pre.12, col = "Net Overseas Migration 12/16"), size = .8)+
-  geom_line(aes(y = Net.Ove.Mig.Aus.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in ERP Prev 12 Months"), size = .8)+
-  #geom_line(aes(y = net.movements.Pre.12m + Nat.Inc.Aus.Pre.12m, col = "Increase in Physically Present Population Prev 12 Months"), size = .8)+
-  scale_colour_manual("", 
-                      breaks = c("Natural Increase Prev 12 Months", "Net Overseas Migration 12/12","Net Overseas Migration 12/16", "Increase in ERP Prev 12 Months"),
-                      values = c("black", "green", "red", "magenta"))+
-  labs(title = "Annual Change in Estimated Resident Population (ERP) 
-       by Component, and Combined")+
-  scale_y_continuous(labels = scales::comma, limits = c(-30000, 600000)) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=100, t = 100, b = 70, r = 70),
-         legend = list(y = 0.95, x = 0.1))
-  
-
-```
-
-
-```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The population growth rate may actually have fallen since 2000"}
-joint_21st <- joint_sheet_310101 %>% 
-  filter(Date >= "2000-01-01 GMT") 
-
-joint_20th <- joint_sheet_310101 %>% 
-  filter(Date < "2000-01-01 GMT", Date >= "1982-03-01 GMT") 
-
-modPPPrate <- mean((joint_21st$net.movements.Pre.12m+ joint_21st$Nat.Inc.Aus.Pre.12m)/joint_21st$Phy.Pre.Pop.PPP.Aus)
-modERPrate <- mean((joint_21st$Net.Ove.Mig.Aus.Pre.12m + joint_21st$Nat.Inc.Aus.Pre.12m)/joint_21st$Est.Res.Pop.ERP.Aus)
-
-oldPPPrate <- mean((joint_20th$net.movements.Pre.12m+ joint_20th$Nat.Inc.Aus.Pre.12m)/joint_20th$Phy.Pre.Pop.PPP.Aus)
-oldERPrate <- mean((joint_20th$Net.Ove.Mig.Aus.Pre.12m + joint_20th$Nat.Inc.Aus.Pre.12m)/joint_20th$Est.Res.Pop.ERP.Aus)
-
-joint_sheet_310101 <- joint_sheet_310101 %>% 
-  mutate(mod.PPP.rate = case_when(Date >= "2000-01-01 GMT" ~ modPPPrate)) %>% 
-  mutate(mod.ERP.rate = case_when(Date >= "2000-01-01 GMT" ~ modERPrate)) %>% 
-  mutate(old.PPP.rate = case_when(Date < "2000-01-01 GMT" ~ oldPPPrate)) %>% 
-  mutate(old.ERP.rate = case_when(Date < "2000-01-01 GMT" ~ oldERPrate))
-
-plot <- ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = (Net.Ove.Mig.Aus.Pre.12m + Nat.Inc.Aus.Pre.12m)/Est.Res.Pop.ERP.Aus, col = "Increase in ERP Annual Rate"), size = .8)+
-  geom_line(aes(y = (net.movements.Pre.12m + Nat.Inc.Aus.Pre.12m)/Phy.Pre.Pop.PPP.Aus, col = "Increase in PPP Annual Rate"), size = .8)+
-  geom_line(aes(y = mod.PPP.rate, col = "Average 2000-17 PPP growth rate"), size = 1, linetype = 4)+
-  geom_line(aes(y = mod.ERP.rate, col = "Average 2000-17 ERP growth rate"), size = .8, linetype = 3)+
-  geom_line(aes(y = old.PPP.rate, col = "Average 1982-99 PPP growth rate"), size = 1, linetype = 4)+
-  geom_line(aes(y = old.ERP.rate, col = "Average 1982-99 ERP growth rate"), size = .8, linetype = 3)+
-  scale_colour_manual("", 
-                      breaks = c("Increase in PPP Annual Rate", "Increase in ERP Annual Rate", "Average 2000-2017 ERP growth rate", "Average 2000-2017 PPP growth rate", "Average 1982-1999 PPP growth rate", "Average 1982-1999 ERP growth rate"),
-                      values = c("orange", "turquoise",  "orange3", "turquoise3", "red", "blue"))+
-  labs(title = "Comparison of Alternative Population Growth Rates")+
-  scale_y_continuous(labels = scales::percent, limits = c(0.0054, 0.025)) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 60),
-         legend = list( x = 100))
-
-```
 
 
 
