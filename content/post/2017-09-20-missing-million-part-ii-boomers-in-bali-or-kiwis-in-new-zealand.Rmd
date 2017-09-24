@@ -353,7 +353,8 @@ plot <- sheet_3401010 %>%
   geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m, col = "2 to 3 months"))+
   geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m, col = "3 to 6 months"))+
   geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m, col = "6 to 12 months"))+
-  labs(title = "Short Term Movements Resident Departures Previous 12 Months, and Missing Million")+
+  labs(title = "Short Term Resident Departures Previous 12 Months, and Missing Million")+
+  scale_y_continuous(labels = scales::comma, limits = c(0, 3200000)) +
   scale_y_continuous(labels = scales::comma) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
   theme(legend.title=element_blank())
@@ -379,7 +380,7 @@ plot <- sheet_340109 %>%
   geom_line(aes(y = Numb.of.move.Sing.Pre.12m, col = "Singapore"))+
   geom_line(aes(y = Numb.of.move.Fiji.Pre.12m, col = "Fiji"))+
   geom_line(aes(y = Numb.of.move.Japa.Pre.12m, col = "Japan"))+
-  labs(title = "Short Term Movements Monthly Departures Prev. 12 Months by Destination")+
+  labs(title = "Short Term Monthly Departures Prev. 12 Months by Destination")+
   scale_y_continuous(labels = scales::comma) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
   theme(legend.title=element_blank())
@@ -407,7 +408,8 @@ plot <- sheet_3401010 %>%
   geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m*273/365, col = "6 to 12 months"))+
   labs(title = "Person-Year absent from Short Term Departures")+
   scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
   layout(margin=list(l=70, t = 100, b = 70, r = 70))
@@ -450,36 +452,19 @@ We can see here that the impact of trips less than two weeks is very greatly dim
 
 But more interestingly, we can see that the short-term departures of all the trips under two months clearly can't add up to anything like a million people.  I did some calculations and found that in fact at the end of the data *all* the short-term departures probably only cumulatively add up to under 800,000.  I suspect the assumption of a flat distribution across all the categories is likely to overstate if anything.  Furthermore, at the end of 2001, before the Missing Million had left, those departures accounted for about 400,000 people absent.  So it really isn't plausible that all these departures listed actually account for anything like the full Missing Million, or pobably even half of that.  The sub-set of Boomers that Cameron Murray descrives is doomed to be a trival minority in any case.  
 
-The reason that this can be possible is that all the data we're looking at actually comes from 
+There are a couple of reasons that this could be the case.  Probably most importantly is that the data presented here is based on people's indicated intent, as per their passenger departure cards.  There's absolutely no obligation on the traveller to honour that committment.  Often they may not have actually booked their onward or return flight.  If I had  to speculate a little as to the micro-economic dynamics that might be at work, I would think that plenty of travellers (particularly those on temporary visas in Australia) would simply indicate what they felt was most appropriate to their visa, regardless of true intentions, in order to raise the least possible questions.
 
-```{r, warning=FALSE, include=F, message=FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+But perhaps more importantly, given the way that migration is defined under the 12/16 rule, there's absolutely nothing preventing these 'short term' travels actually contributing to migration.  Two six-month trips a couple of months apart will constitute migration.  As will a two-week trip, if some was travelling a lot in the previous year. 
 
-plot <- sheet_340106 %>% 
-  ggplot(aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Num.of.mov.Und.1.wee, col = "under 1 week"))+
-  geom_line(aes(y = Num.of.mov.1.and.und.2.wee, col = "1 to 2 weeks"))+
-  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon, col = "2 weeks to a month"))+
-  geom_line(aes(y = Num.of.mov.1.and.und.2.mon, col = "1 to 2 months"))+
-  geom_line(aes(y = Num.of.mov.2.and.und.3.mon, col = "2 to 3 months"))+
-  geom_line(aes(y = Num.of.mov.3.and.und.6.mon, col = "3 to 6 months"))+
-  geom_line(aes(y = Num.of.mov.6.and.und.12.mon, col = "6 to 12 months"))+
-  scale_y_continuous(labels = scales::comma, limits = c(0, 420000)) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
-  labs(title = "Short Term Movements Arrivals")
+There's also the possibility of significant shift internally within categories.  It could be the case that my estimation of a flat distribution across each time interval is false, and some change has led quite systematically to some of the categories to become increasingly  left-skewed.  The switching over of the 6-12 month and 3-6 month lines seems to show some evidence of that occurring, however a shift in that direction also occurs internally within the categories, we woud likely have even less of the Missing Million accounted for. 
 
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 70))
+But perhaps the most important explanation is that this only looks at half of the story.  We have short-term arrivals aswell:
 
-
-```
-
-
-
-
-```{r, warning=FALSE, include=F, message=FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+```{r, warning=FALSE, include=F, message=FALSE, fig.align="center", fig.cap="Short term Arrivals have been flat for a large share of the time on record"}
 
 plot <- sheet_340106 %>% 
   ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_col(data = joint_sheet_310101 %>% filter(Date > "1991-12-01 GMT"), aes(x = Date, y = cum.discrepancy, colour = "Cumulative Discrepancy"), fill = "grey", alpha = 0.6, col = "grey")+
   geom_line(aes(y = Num.of.mov.Und.1.wee.Pre.12m, col = "under 1 week"))+
   geom_line(aes(y = Num.of.mov.1.and.und.2.wee.Pre.12m, col = "1 to 2 weeks"))+
   geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m, col = "2 weeks to a month"))+
@@ -487,9 +472,10 @@ plot <- sheet_340106 %>%
   geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m, col = "2 to 3 months"))+
   geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m, col = "3 to 6 months"))+
   geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m, col = "6 to 12 months"))+
-  #scale_y_continuous(labels = scales::comma, limits = c(0, 420000)) +
+  scale_y_continuous(labels = scales::comma, limits = c(0, 3200000)) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
-  labs(title = "Short Term Movements Arrivals Previous 12 Months")
+  labs(title = "Short Term Arrivals Previous 12 Months")+
+  theme(legend.title=element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
   layout(margin=list(l=70, t = 100, b = 70, r = 70))
@@ -497,29 +483,81 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
+Here a couple of things are striking.  In particular, the under-1 week movement trend is actually the mostly the highest, ofllowed by 1-2 weeks.  People arriving in Australia seem to report a far shorter intended stay.  And, the the total number of arrivals is far far lower than the departures.  This is also consistent with the hypothesis I've outlined, earlier, that we're a hard pace to get to for a short trip, but a good place to leave from for one. 
 
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
-
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Departures of longer than one month have the largest contribution to persons absent"}
+# Impact of Departures by Time
 plot <- sheet_340106 %>% 
   ggplot(aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
-  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
-  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
-  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
-  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
-  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
-  
-  labs(title = "Short Term Movements Arrivals")
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m*22/365, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee.Pre.12m*11/365, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Num.of.mov.Und.1.wee.Pre.12m*4/365, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon.Pre.12m*46/365, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m*77/365, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m*165/365, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m*273/365, col = "6 to 12 months"))+
+  labs(title = "Person-Years present from Short Term Arrivals")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 70),
-         legend = list(y = 0.9, x = 0.1))
+  layout(margin=list(l=70, t = 100, b = 70, r = 70))
 
+days.vec <- c(4/365, 11/365, 22/365, 46/365, 77/365, 165/365, 273/365)
+days.tab <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee.Pre.12m" ,  "Num.of.mov.1.and.und.2.wee.Pre.12m", "Num.of.mov.2.wee.and.und.1.mon.Pre.12m",
+"Num.of.mov.1.and.und.2.mon.Pre.12m", "Num.of.mov.2.and.und.3.mon.Pre.12m", "Num.of.mov.3.and.und.6.mon.Pre.12m", "Num.of.mov.6.and.und.12.mon.Pre.12m")) %>% 
+  select(Component, days.vec) %>% 
+  mutate(monthly.vec = days.vec*12)
+
+end.vec.a <- sheet_340106 %>% 
+  select(Num.of.mov.Und.1.wee.Pre.12m:Num.of.mov.6.and.und.12.mon.Pre.12m) %>% 
+  tail(n = 1) %>% 
+  t() %>% 
+  data.frame() %>% 
+  rownames_to_column(var = c("Component"))
+colnames(end.vec) <- c("Component", "Movement.end")
+
+mid.vec.a <- sheet_340106 %>% 
+  filter(Date > "2001-12-30 GMT") %>% 
+  filter(Date < "2002-01-31 GMT") %>% 
+  select(Num.of.mov.Und.1.wee.Pre.12m:Num.of.mov.6.and.und.12.mon.Pre.12m) %>% 
+  t() %>% 
+  data.frame() %>% 
+  rownames_to_column(var = c("Component"))
+colnames(mid.vec) <- c("Component", "Movement.mid")
+
+days.tab.a <- days.tab %>% 
+  inner_join(end.vec, by = "Component") %>% 
+  inner_join(mid.vec, by = "Component")
+
+days.tab.a <- days.tab.a %>% 
+  mutate(mid.absent = Movement.mid*days.vec, end.absent = Movement.end*days.vec)
+
+present.shift <- days.tab.a %>% 
+  summarise(present2001 = sum(mid.absent), present2017 = sum(end.absent))
 ```
 
+Here the plausible 'second-half' of the story emerges.  By far the largest contributer to 'person-years' present in Australia from short-term arrivals is actually from the longest intended trips, of over six months, and the second-longest from 3-6 month visit.  Importantly, there's a far larger possibility that these 'short-term' visits will wind up being counted in Net Overseas Migration.  Students or backpackers who stack up a couple of 6+ month visits inside a couple of years (probably even more likely than staying continuously) will almost certainly officially 'migrate'.  In stark contrast to the case for departures, the shorter categories are relatively tiny, and didn't grow at all during the period when the missing million emerged.  This goes a lot further towards explaining the true origins of the Missing-Million, and is further supports the hypothesis outline in my earlier post. The sorts of 'visitors' we get tend to be longer-term visitors, but still visitors, where as our travel outwards tends to be for faster visits.
 
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
+Again, summing the total 'person-years' accounted for by this trend, we find there are just under 800,000 people in 2017, and just over 400,000 in 2001.  Three quarters of this increase can be accounted for by movements where the stated intent longer than six months. If a large fraction of these are counted within migration, and I think it's almost certain that they are, then the person-years present due to short term visitors would barely have moved.  If a significant share of the 3-6 month intentions were also counted as 'migration', then the person-years present would have moved backwards due to short-term arrivals.  This could explain a further part of the discrepancy between Net Overseas Migration.  However, it also seems likely to not add up to be enough to reach the million.
+
+To confirm the failing significance of passengers' stated intentions, it looks like the ABS is also going to abandon these particular series.
+
+## An interm summary
+So far, having just eyeballed some data and done a couple of quick calculations to see how the numbers stack up, it appears:
+
+1. The Missing Million grew to half it's height while travel to Indonesia was low and flat, and travel to New Zealand was increasing.  
+2. Person-year absent due to 'short-term' departures is driven by travel between two-weeks and two months. Very short holidays don't contribute much.  But all this data on stated intent can't account for the Missing Million.
+3. Person-years present due to arrivals is driven by long stays of 3+ months, and overwhelmingly by 6+ months.  If a large slice of these are counted in 'Net Overseas Migration' movements, the loss of arrivals could account for another part of the Missing Million.
+
+## Dive with me baby!
+
+What we haven't yet tackled seriously is the assumption of a high-overlap between the four different trends, or at least the three which we have data on.  To establish or refute this, it's better that we look at the information available to us, in its raw (monthly format).  As we can see, the intense seasonality present in some of these time-series can provide us with a key to possible analytic mechanism that could investigate the plausible degree of overlap:
+
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Monthly departures by duration show clear seasonality"}
 
 plot <- sheet_3401010 %>% 
   ggplot(aes(x = Date, text = as_date(Date)))+
@@ -530,141 +568,43 @@ plot <- sheet_3401010 %>%
   geom_line(aes(y = Num.of.mov.2.and.und.3.mon, col = "2 to 3 months"))+
   geom_line(aes(y = Num.of.mov.3.and.und.6.mon, col = "3 to 6 months"))+
   geom_line(aes(y = Num.of.mov.6.and.und.12.mon, col = "6 to 12 months"))+
-  labs(title = "Short Term Movements Resident Departures")+
+  labs(title = "Monthly Short Term Resident Departures")+
   scale_y_continuous(labels = scales::comma, limits = c(0, 420000)) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
   layout(margin=list(l=70, t = 100, b = 70, r = 70))
 
 ```
 
-
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Seasonality of different time series"}
-sheet_3401010 <- sheet_3401010 %>% 
-  mutate(year = year(Date)) %>% 
-  mutate(month = month(Date))
-
-plot <- sheet_3401010 %>% 
-  ggplot(aes(x = month, text = as_date(Date)))+
-  geom_line(aes( y = Num.of.mov.3.and.und.6.mon, col = year))+
-  labs(title = "3 and 6 Month Departures")+
-  scale_y_continuous(labels = scales::comma) +
-  scale_x_continuous(breaks = c(1:12))+
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-layout(margin=list(l=70, t = 100, b = 70, r = 70),
-        legend = list(y = 0.9, x = 0.1))
-
-```
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Seasonality of different time series"}
-
-plot <- sheet_3401010 %>% 
-  ggplot(aes(x = month, text = as_date(Date)))+
-  geom_line(aes( y = Num.of.mov.1.and.und.2.mon, col = year))+
-  labs(title = "2 weeks to a month Departures")+
-  scale_y_continuous(labels = scales::comma) +
-  scale_x_continuous(breaks = c(1:12))+
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-layout(margin=list(l=70, t = 100, b = 70, r = 70),
-        legend = list(y = 0.9, x = 0.1))
-
-```
-
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Seasonality of different time series"}
-sheet_340109 <- sheet_340109 %>% 
-  mutate(year = year(Date)) %>% 
-  mutate(month = month(Date))
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Different Countries also exhibit different seasonal patterns."}
 
 plot <- sheet_340109 %>% 
-  ggplot(aes(x = month, text = as_date(Date)))+
-  geom_line(aes( y = Numb.of.move.Indo, col = year))+
-  labs(title = "Short Term Departures to Indonesia")+
-  scale_y_continuous(labels = scales::comma) +
-  scale_x_continuous(breaks = c(1:12))+
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-layout(margin=list(l=70, t = 100, b = 70, r = 70),
-        legend = list(y = 0.9, x = 0.1))
-
-
-
-```
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Seasonality of different time series"}
-sheet_3401010 <- sheet_3401010 %>% 
-  mutate(year = year(Date)) %>% 
-  mutate(month = month(Date))
-
-plot <- sheet_3401010 %>% 
-  ggplot(aes(x = month, text = as_date(Date)))+
-  geom_line(aes( y = Num.of.mov.Hol, col = year))+
-  labs(title = "Holiday Movements")+
-  scale_y_continuous(labels = scales::comma) +
-  scale_x_continuous(breaks = c(1:12))+
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-layout(margin=list(l=70, t = 100, b = 70, r = 70),
-        legend = list(y = 0.9, x = 0.1))
-
-tsobj <- sheet_3401010$Num.of.mov.Hol %>% 
-  ts(frequency = 12)
-
-plot(stl(tsobj, s.window = "periodic"))
-
-
-```
-
-
-
-
-
-
-
-
-
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
-
-plot <- sheet_3401010 %>% 
   ggplot(aes(x = Date, text = as_date(Date)))+
-  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
-  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
-  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
-  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
-  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
-  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
-  
-  labs(title = "Short Term Movements Departures by Purpose")+
+  geom_line(aes(y = Numb.of.move.New.Zeal, col = "NZ"))+
+  geom_line(aes(y = Numb.of.move.Indo, col = "Indonesia"))+
+  geom_line(aes(y = Numb.of.move.Unit.Stat.of.Amer, col = "USA"))+
+  geom_line(aes(y = Numb.of.move.UK.CIs.IOM, col = "UK"))+
+  geom_line(aes(y = Numb.of.move.Thai, col = "Thailand"))+
+  geom_line(aes(y = Numb.of.move.Chin, col = "China"))+
+  geom_line(aes(y = Numb.of.move.Sing, col = "Singapore"))+
+  geom_line(aes(y = Numb.of.move.Fiji, col = "Fiji"))+
+  geom_line(aes(y = Numb.of.move.Japa, col = "Japan"))+
+  labs(title = "Short Term Monthly Departures by Destination")+
   scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 70),
-         legend = list(y = 0.9, x = 0.1))
+  layout(margin=list(l=70, t = 80, b = 50, r = 70))
+
 
 ```
 
-
-
-
-
-
-
-
-
-
+(Note, one can click the countries in the legent to turn off a series, or double-click a country to show a single series.  This helps to isolate or inspect individual trends.)
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="New Graph of Movements"}
-
 
 plot <- sheet_340109 %>% 
   ggplot(aes(x = Date, text = as_date(Date)))+
@@ -683,75 +623,165 @@ plot <- sheet_340109 %>%
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 70),
-         legend = list(y = 0.9, x = 0.1))
-
+  layout(margin=list(l=70, t = 100, b = 70, r = 70))
 ```
 
-# NOM by visas
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NOM Breakdown"}
 
-sheet_NOM <- readxl::read_xls("data/NOM_by_visa.xls", sheet = 1)
-sheet_NOM <- t(sheet_NOM) %>%  
-  as_tibble()
-#sheet_NOM <-data.frame(sheet_NOM) %>% as_tibble()
-rownames(sheet_NOM) <- NULL
-sheet_NOM <- sheet_NOM[-1,]
+From the above two charts it can be quite easily seen that the slump in departures growth that occurred in the mid-2000s, and most dramatic elevation in the post-2010s, is in South East Asia and to some extent the USA. This is again consistent with Australia now competing with other attractive pacific desinations as holiday spots, but probably acting as something of a home-base for people wanting to explore South East Asia.  Arrive long-term to Australia, but leave short-term, frequently to explore Asia.
 
-dates <- c("2007-06-30", "2008-06-30", "2009-06-30", "2010-06-30",
-           "2011-06-30", "2012-06-30", "2013-06-30", "2014-06-30",
-           "2015-06-30") %>% ymd() %>% as.numeric()
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Monthly Departures by Purpose also show contrasting seasonal structure"}
 
-dates_vec <- tibble(dates)
-
-sheet_NOM <- bind_cols(sheet_NOM, dates_vec)
-sheet_NOM <- select(sheet_NOM, dates, everything())
-colnames(sheet_NOM) <- c("Date", "Student", "Subclass 457", "Working Holiday", "Visitor", 
-                         "Other Temp.", "Skilled", "Family", "Humanitarian",
-                         "Other Perm.", "Aus Citizen", "NZ Citizen", "Other Visas")
-
-sheet_NOM <- sheet_NOM %>% 
-  good_names() %>% 
-  good_date(Origin = "1970-01-01") %>% 
-  to_numeric() %>% 
-  nom_units(meta = meta, manual = "000")
-
-sheet_NOM <- sheet_NOM %>% 
-  mutate(Tot.Temp = (Stu + Sub.457 + Wor.Hol + Vis + Oth.Tem),
-         Tot.Perm = (Ski + Fam + Hum + Oth.Per),
-         Tot.Oth = (Aus.Cit + NZ.Cit + Oth.Vis))
-
-sheet_NOM_long <- sheet_NOM %>% 
-  gather(key = "Visa.cat", value = "flow", -Date)
-
-sheet_NOM_long <- sheet_NOM_long %>% 
-  mutate(Type = case_when(Visa.cat %in% c("Stu", "Sub.457", "Wor.Hol", "Vis","Oth.Tem") ~ "Temporary",
-                          Visa.cat %in% c("Ski", "Fam", "Hum", "Oth.Per") ~ "Permanent",
-                          Visa.cat %in% c("Aus.Cit", "NZ.Cit", "Oth.Vis") ~ "Other",
-                          Visa.cat %in% c("Tot.Temp", "Tot.Perm", "Tot.Oth") ~ "Totals"))
-    
-    
-    
-pre_plot <- sheet_NOM_long %>% 
-  filter(str_detect(Visa.cat, "Tot.") == FALSE) %>% 
-  arrange(Type)
-
-lvls <- unique(pre_plot$Visa.cat)
-
-
- plot<- pre_plot %>% 
-    mutate(Visa.cat = factor(Visa.cat, levels = lvls)) %>% 
-   ggplot(aes(x = Date, text = as_date(Date), y = flow, fill = Visa.cat, colour = Type))+
-    geom_bar(position = "stack", stat = "identity")+
-   scale_colour_manual("",
-                      breaks = c("Temporary", "Permanent", "Other"),
-                      values = c("grey", "black", "white"))
-
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
+  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
+  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
+  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
+  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
+  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
+  
+  labs(title = "Short Term Movements Departures by Purpose")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=70, t = 100, b = 70, r = 70))
+  layout(margin=list(l=70, t = 80, b = 60, r = 70))
 
 ```
+
+
+It should be noted here that while holidays have been the largest growing single component, there's clear evidence here that visiting friends is a significant driver of the December annual peak in departures.  This seems also to align with a strong December Peak in departures that occurs in departures to New Zealand (which is less present in departures to Indonesia), and also in slightly longer travel times, including 1-2 month visits.  
+
+All this strongly points towards some significant overlap between the largest contributors to 'persons absent' due to departues being New Zealanders visiting friends or family back home, rather than boomers in Bali.
+
+We could go further to try to substantiate that claim useing some more advanced statistical techniques.  For example, we could use a decomposing function to isolate the seasonal and trend components in a given time series, such as this version which does this using the loess smoother:
+
+
+```{r, warning = False, message = False, fig.align="center", fig.cap = "A decomposition of departures for the purpose of Visiting Friends or Family"}
+
+tsobj <- sheet_3401010$Num.of.mov.Vis.fri %>% 
+  ts(frequency = 12)
+
+plot(stl(tsobj, s.window = "periodic"))
+
+
+
+```
+
+We could then compare the seasonal component (in the second pane) with other seasonal structures in different category types.  However, as can be seen from the assymetric errors in the bottom pain, the growth in the seasonality of the series isn't perfectly accounted for.  This highlights that the structure of the seasonality is subject to change aswell within the time-series.  Again, my preferred method to get a sense of how this might be the case is to use the Mk 1 eyeball again for a quick check.  Another visual represenation of the raw data is to overlay the different years on top of one another.
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="A clear december spike exists for departures to visit Friends"}
+sheet_3401010 <- sheet_3401010 %>% 
+  mutate(year = year(Date)) %>% 
+  mutate(month = month(Date))
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = month, text = as_date(Date)))+
+  geom_line(aes( y = Num.of.mov.Vis.fri, col = year))+
+  labs(title = "Stacked  years of 'visiting friends' departures ")+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(1:12))+
+  theme(axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+layout(margin=list(l=70, t = 80, b = 60, r = 70),
+        legend = list(y = 0.9, x = 0.1))
+
+```
+
+And one can see intuitively how there could be a significant overlap with this sort of series:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="A clear december spike exists for departures for 1-2 months"}
+sheet_3401010 <- sheet_3401010 %>% 
+  mutate(year = year(Date)) %>% 
+  mutate(month = month(Date))
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = month, text = as_date(Date)))+
+  geom_line(aes( y = Num.of.mov.1.and.und.2.mon, col = year))+
+  labs(title = "Stacked  years of 1-2 Month departures ")+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(1:12))+
+  theme(axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+layout(margin=list(l=70, t = 80, b = 60, r = 70),
+        legend = list(y = 0.9, x = 0.1))
+
+```
+And also might have quite a strong overlap with this sort of series:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Seasonality of movements to New Zealand also exhibits a December Spike"}
+sheet_340109 <- sheet_340109 %>% 
+  mutate(year = year(Date)) %>% 
+  mutate(month = month(Date))
+
+plot <- sheet_340109 %>% 
+  ggplot(aes(x = month, text = as_date(Date)))+
+  geom_line(aes( y = Numb.of.move.New.Zeal, col = year))+
+  labs(title = "Short Term Departures to New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(1:12))+
+  theme(axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+layout(margin=list(l=70, t = 80, b = 70, r = 70),
+        legend = list(y = 0.9, x = 0.1))
+
+
+
+```
+Or at least, one could say it probably has a stronger overlap than with this sort of series:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Seasonality of movements to Indonesia exhibits no December Spike"}
+sheet_340109 <- sheet_340109 %>% 
+  mutate(year = year(Date)) %>% 
+  mutate(month = month(Date))
+
+plot <- sheet_340109 %>% 
+  ggplot(aes(x = month, text = as_date(Date)))+
+  geom_line(aes( y = Numb.of.move.Indo, col = year))+
+  labs(title = "Short Term Departures to Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(1:12))+
+  theme(axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+layout(margin=list(l=70, t = 80, b = 70, r = 70),
+        legend = list(y = 0.9, x = 0.1))
+
+
+
+```
+
+Which might have more of an overlap with this sort of series:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Seasonality of Holiday Movements"}
+sheet_3401010 <- sheet_3401010 %>% 
+  mutate(year = year(Date)) %>% 
+  mutate(month = month(Date))
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = month, text = as_date(Date)))+
+  geom_line(aes( y = Num.of.mov.Hol, col = year))+
+  labs(title = "Monthly Holiday Movements")+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(1:12))+
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+layout(margin=list(l=70, t = 100, b = 70, r = 70),
+        legend = list(y = 0.9, x = 0.1))
+
+
+```
+
+All in all, this really just serves to pose more properly the question: What is the actual composition of these time series, in terms of the other ones?  Are departures to Indonesia predominantly short, and departures to New Zealand substantially longer?  
+
+## Dive Deeper
+It might be possible to attain some insight into this sort of thing by conducting a multivariate regression.  Essentially all this is doing is seeing which combinations of one division of departures corresponds best to a particular series in another characterisation. This is easily done, though care should be taken when interpreting the results, a summary of which might look like this:
+
 
 
 #census calcs
