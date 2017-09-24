@@ -796,7 +796,7 @@ All in all, this really just serves to pose more properly the question: What is 
 ## Dive Deeper
 It might be possible to attain some insight into this sort of thing by conducting a multivariate regression.  Essentially all this is doing is seeing which combinations of one division of departures corresponds best to a particular series in another characterisation. This is easily done, though care should be taken when interpreting the results, a summary of which might look like this:
 
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Unconstrained", echo = TRUE}
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Unconstrained"}
 
 #########
 kiwis <- sheet_340109 %>% 
@@ -921,10 +921,6 @@ To get a more realistic model, we can re-run the regression with a constraint th
 
 #Kiwi Constrained
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Constrained"}
-
-
-
-
 regr.names <- kiwi_length_regressor %>% 
   select(Num.of.mov.Und.1.wee:Num.of.mov.6.and.und.12.mon) %>% 
   colnames() %>% 
@@ -1048,52 +1044,9 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
          legend = list(y = 0.95, x = 0.05))
 ```
 
-However, give that this is still only a free blog at the moment, I'm going to instead just apply my favourite method trying to draw insights from extrely uncertain levels: take a derivative. 
+This leaves us in a somewhat unsatistfying place.  It indicates that there might be a significant number of people 'absent' in New Zealand due to longer trips, but we also know that it's impossible that more than 100% of the trips over 6 months went to New Zealand.  The model isn't producing realistic values yet, so we can't have any real confidence in the levels indicated there.  In addition, these values are taken for a mean for the entire period, which isn't actually that helpful since we're actually most interested in how the trends look over time.
 
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients Weighted"}
-
-coefs <- coefs %>% 
-  inner_join(weights) %>% 
-  inner_join(day.weights)
-
-coefs
-
-colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t", "Weight", "days.vec")
-
-coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
-"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
-, "Num.of.mov.6.and.und.12.mon"))
-
-plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
-  geom_bar(aes(y = Estimate*Weight), position = "stack", stat = "identity")+
-  theme(axis.text.x = element_text(size=8, angle=30))+
-  labs(title = "Mean Departure Estimates by Component New Zealand")+
-  scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=60, t = 80, b = 120, r = 70),
-         legend = list(y = 0.9, x = 0.05))
-```
-
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Unconstrained Estimated Absentees in NZ"}
-
-coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
-"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
-, "Num.of.mov.6.and.und.12.mon"))
-
-plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
-  geom_bar(aes(y = Estimate*Weight*days.vec*12), position = "stack", stat = "identity")+
-  theme(axis.text.x = element_text(size=8, angle=30))+
-  labs(title = "Absent Person-Year Estimates by Component")+
-  scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=60, t = 80, b = 120, r = 70),
-         legend = list(y = 0.9, x = 0.05))
-```
-
-
+This means that it's time to break the data up into different time increments and see if we get more realistic data, or clearer trends, by stepping through time.  Incidentally taking a derivative with respect to some sensible dimension (in this case time) is also my favourite technique for rescuing some sensible, more confident conclusions when there's extremely high uncertainty in a particular level.  Since derivatives aren't dependent on a particular level, we could still get a sense of whether the significance of these components is increasing or decreasing over time with gerater confidence.
 
 
 
@@ -1102,30 +1055,90 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Unconstrained"}
 
 #########
-kiwis <- sheet_340109 %>% 
+kiwis.e <- sheet_340109 %>% 
   filter(Date < "2000-01-01 GMT") %>% 
   select(Date, Numb.of.move.New.Zeal)
-kiwi_regressor <- inner_join(sheet_3401010, kiwis, by = "Date")
-kiwi_regressor <- select(kiwi_regressor, Date, Numb.of.move.New.Zeal,  everything ())
-kiwi_length_regressor <- kiwi_regressor %>% 
+kiwi_regressor.e <- inner_join(sheet_3401010, kiwis.e, by = "Date")
+kiwi_regressor.e <- select(kiwi_regressor.e, Date, Numb.of.move.New.Zeal,  everything ())
+kiwi_length_regressor.e <- kiwi_regressor.e %>% 
   select(Date:Num.of.mov.6.and.und.12.mon)
 ####
 
-mod <- lm(Numb.of.move.New.Zeal ~ . - Date, data = kiwi_length_regressor)  # Regress y on everything (but Year)
-#summary(mod)
-model <- tibble(fit =mod$fitted.values)
-model <- bind_cols(model, kiwi_length_regressor %>% select(Date, Numb.of.move.New.Zeal ))
-model <- model %>% 
+mod.e <- lm(Numb.of.move.New.Zeal ~ . - Date, data = kiwi_length_regressor.e)  
+model.e <- tibble(fit =mod.e$fitted.values)
+model.e <- bind_cols(model.e, kiwi_length_regressor.e %>% select(Date, Numb.of.move.New.Zeal ))
+model.e <- model.e %>% 
   month_mutate("Numb.of.move.New.Zeal") %>% 
   month_mutate("fit")
+model.e <- model.e %>% 
+  mutate(stage = "early")
 
-smoothlm <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =model) 
-smoothrsquared <- summary(smoothlm)$r.squared
-#smoothrsquared
+smoothlm.e <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =model.e) 
+smoothrsquared.e <- summary(smoothlm.e)$r.squared
+rsquared.e <- summary(mod.e)$r.squared
+rows.e <- kiwis.e$Date %>% 
+  row_number() %>% 
+  tail(n = 1)
+####################
 
-rsquared <- summary(mod)$r.squared
+#########
+kiwis.m <- sheet_340109 %>% 
+  filter(Date >= "2000-01-01 GMT", Date < "2010-01-01") %>%  
+  select(Date, Numb.of.move.New.Zeal)
+kiwi_regressor.m <- inner_join(sheet_3401010, kiwis.m, by = "Date")
+kiwi_regressor.m <- select(kiwi_regressor.m, Date, Numb.of.move.New.Zeal,  everything ())
+kiwi_length_regressor.m <- kiwi_regressor.m %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+####
 
-plot <- ggplot(model, aes(x = Date, text = as_date(Date)))+
+mod.m <- lm(Numb.of.move.New.Zeal ~ . - Date, data = kiwi_length_regressor.m)  
+model.m <- tibble(fit =mod.m$fitted.values)
+model.m <- bind_cols(model.m, kiwi_length_regressor.m %>% select(Date, Numb.of.move.New.Zeal ))
+model.m <- model.m %>% 
+  month_mutate("Numb.of.move.New.Zeal") %>% 
+  month_mutate("fit")
+model.m <- model.m %>% 
+  mutate(stage = "mid")
+
+smoothlm.m <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =model.m) 
+smoothrsquared.m <- summary(smoothlm.m)$r.squared
+rsquared.m <- summary(mod.m)$r.squared
+rows.m <- kiwis.m$Date %>% 
+  row_number() %>% 
+  tail(n = 1)
+####################
+
+#########
+kiwis.l <- sheet_340109 %>% 
+  filter(Date >= "2010-01-01 GMT") %>%  
+  select(Date, Numb.of.move.New.Zeal)
+kiwi_regressor.l <- inner_join(sheet_3401010, kiwis.l, by = "Date")
+kiwi_regressor.l <- select(kiwi_regressor.l, Date, Numb.of.move.New.Zeal,  everything ())
+kiwi_length_regressor.l <- kiwi_regressor.l %>% 
+  select(Date:Num.of.mov.6.and.und.12.mon)
+####
+
+mod.l <- lm(Numb.of.move.New.Zeal ~ . - Date, data = kiwi_length_regressor.l)  
+model.l <- tibble(fit =mod.l$fitted.values)
+model.l <- bind_cols(model.l, kiwi_length_regressor.l %>% select(Date, Numb.of.move.New.Zeal ))
+model.l <- model.l %>% 
+  month_mutate("Numb.of.move.New.Zeal") %>% 
+  month_mutate("fit")
+model.l <- model.l %>% 
+  mutate(stage = "late")
+
+smoothlm.l <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =model.l) 
+smoothrsquared.l <- summary(smoothlm.l)$r.squared
+rsquared.l <- summary(mod.l)$r.squared
+rows.l <- kiwis.l$Date %>% 
+  row_number() %>% 
+  tail(n = 1)
+####################
+
+model.f <- model.e %>% 
+  bind_rows(model.m, model.l)
+
+plot <- ggplot(model.f, aes(x = Date, text = as_date(Date)))+
   geom_line(aes(y = Numb.of.move.New.Zeal, col ="Original"))+
   geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
   geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
@@ -1136,8 +1149,11 @@ plot <- ggplot(model, aes(x = Date, text = as_date(Date)))+
   labs(title = "Un-Constrained Model Short-Term Departures to New Zealand")+
   scale_y_continuous(labels = scales::comma) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank()) +
-  geom_text(x = min(as.numeric(model$Date[50])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
-                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+  geom_text(x = min(as.numeric(model.f$Date[rows.e-50])), y=70000, label=paste0("R^2: ", round(rsquared.e, digits = 3), "\nTrend R^2: ", round(smoothrsquared.e, digits = 3), size = 2))+
+  geom_text(x = min(as.numeric(model.f$Date[rows.m+rows.e-50])), y=150000, label=paste0("R^2: ", round(rsquared.m, digits = 3), "\nTrend R^2: ", round(smoothrsquared.m, digits = 3), size = 2))+
+  geom_text(x = min(as.numeric(model.f$Date[rows.m+rows.e+rows.l-30])), y=25000, label=paste0("R^2: ", round(rsquared.l, digits = 3), "\nTrend R^2: ", round(smoothrsquared.l, digits = 3), size = 2))+
+  geom_vline(xintercept = min(as.numeric(model.f$Date[rows.e])), linetype = 3)+
+  geom_vline(xintercept = min(as.numeric(model.f$Date[rows.e+rows.m])), linetype = 3)
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
   layout(margin=list(l=70, t = 70, b = 70, r = 70),
@@ -1145,38 +1161,190 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients"}
+
+coefs.e <- summary(mod.e)$coefficients %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(rowname != "(Intercept)")
+colnames(coefs.e) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
+coefs.e <- coefs.e %>% 
+  mutate(stage = "early")
+
+coefs.m <- summary(mod.m)$coefficients %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(rowname != "(Intercept)")
+colnames(coefs.m) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
+coefs.m <- coefs.m %>% 
+  mutate(stage = "mid")
+
+coefs.l <- summary(mod.l)$coefficients %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(rowname != "(Intercept)")
+colnames(coefs.l) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
+coefs.l <- coefs.l %>% 
+  mutate(stage = "late")
+
+coefs.f <- coefs.e %>% 
+  bind_rows(coefs.m, coefs.l)
+
+
+coefs.f$Component <- factor(coefs.f$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+coefs.f$stage <- factor(coefs.f$stage, levels = c("early", "mid", "late"))
+
+#p <- ggplot(mpg, aes(displ, cty)) + geom_point()
+#p+facet_grid(. ~ cyl)
+
+plot <- ggplot(data = coefs.f, aes(x = Component, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Unconstrained Model New Zealand")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  facet_grid(. ~ stage)
+ggplotly(plot, tooltip = c("y")) %>% 
+  layout(margin=list(l=100, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
 #Kiwi Constrained
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Constrained"}
-library(nnls)
-
-
-
-regr.names <- kiwi_length_regressor %>% 
+#########
+regr.names.e <- kiwi_length_regressor.e %>% 
   select(Num.of.mov.Und.1.wee:Num.of.mov.6.and.und.12.mon) %>% 
   colnames() %>% 
   as.vector()
 
-A <- as.matrix(kiwi_length_regressor[,regr.names])
-B <- kiwi_length_regressor$Numb.of.move.New.Zeal
-nnmod <- nnls(A,B)
-coef.nnmod <- coef(nnmod)
-pred.nnmod <- as.vector(coef.nnmod%*%t(A))
-#coef.nnmod
-
-nnmodel <- tibble(fit =nnmod$fitted[,1])
-nnmodel <- bind_cols(nnmodel, kiwi_length_regressor %>% select(Date, Numb.of.move.New.Zeal ))
-nnmodel <- nnmodel %>% 
+A <- as.matrix(kiwi_length_regressor.e[,regr.names.e])
+B <- kiwi_length_regressor.e$Numb.of.move.New.Zeal
+nnmod.e <- nnls(A,B)
+coef.nnmod.e <- coef(nnmod.e)
+nnmodel.e <- tibble(fit =nnmod.e$fitted[,1])
+nnmodel.e <- bind_cols(nnmodel.e, kiwi_length_regressor.e %>% select(Date, Numb.of.move.New.Zeal ))
+nnmodel.e <- nnmodel.e %>% 
   month_mutate("Numb.of.move.New.Zeal") %>% 
   month_mutate("fit")
-nndummy <- lm(nnmodel$fit ~ nnmodel$Numb.of.move.New.Zeal)
-#summary(nndummy)
-rsquared <- summary(nndummy)$r.squared
+nndummy.e <- lm(nnmodel.e$fit ~ nnmodel.e$Numb.of.move.New.Zeal)
+rsquared.e <- summary(nndummy.e)$r.squared
+smoothnnlm.e <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =nnmodel.e) 
+smoothrsquared.e <- summary(smoothnnlm.e)$r.squared
+coefs.e <- coef.nnmod.e %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+colnames(coefs.e) <- c("Estimate", "Component")
+coefs.e <- coefs.e %>% 
+  select("Component", "Estimate") %>% 
+  mutate(stage = "early")
+weights.e <- kiwi_length_regressor.e %>% 
+  select(-Date, -Numb.of.move.New.Zeal) %>% 
+  colMeans() %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+coefs.e <- coefs.e %>% 
+  inner_join(weights.e, by = "Component") %>% 
+  inner_join(day.weights, by = "Component")
+colnames(coefs.e) <- c("Component","Estimate", "stage", "Weight", "days.vec")
+coefs.e <- coefs.e %>% 
+  mutate(departures.estimate = as.numeric(Estimate)*Weight) %>% 
+  mutate(Absent.Persons.Est = departures.estimate*days.vec*12)
+###################
+#########
+regr.names.m <- kiwi_length_regressor.m %>% 
+  select(Num.of.mov.Und.1.wee:Num.of.mov.6.and.und.12.mon) %>% 
+  colnames() %>% 
+  as.vector()
 
-smoothnnlm <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =nnmodel) 
-smoothrsquared <- summary(smoothnnlm)$r.squared
-#smoothrsquared
+A <- as.matrix(kiwi_length_regressor.m[,regr.names.m])
+B <- kiwi_length_regressor.m$Numb.of.move.New.Zeal
+nnmod.m <- nnls(A,B)
+coef.nnmod.m <- coef(nnmod.m)
+nnmodel.m <- tibble(fit =nnmod.m$fitted[,1])
+nnmodel.m <- bind_cols(nnmodel.m, kiwi_length_regressor.m %>% select(Date, Numb.of.move.New.Zeal ))
+nnmodel.m <- nnmodel.m %>% 
+  month_mutate("Numb.of.move.New.Zeal") %>% 
+  month_mutate("fit")
+nndummy.m <- lm(nnmodel.m$fit ~ nnmodel.m$Numb.of.move.New.Zeal)
+rsquared.m <- summary(nndummy.m)$r.squared
+smoothnnlm.m <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =nnmodel.m) 
+smoothrsquared.m <- summary(smoothnnlm.m)$r.squared
+coefs.m <- coef.nnmod.m %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+colnames(coefs.m) <- c("Estimate", "Component")
+coefs.m <- coefs.m %>% 
+  select("Component", "Estimate") %>% 
+  mutate(stage = "mid")
+weights.m <- kiwi_length_regressor.m %>% 
+  select(-Date, -Numb.of.move.New.Zeal) %>% 
+  colMeans() %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+coefs.m <- coefs.m %>% 
+  inner_join(weights.m, by = "Component") %>% 
+  inner_join(day.weights, by = "Component")
+colnames(coefs.m) <- c("Component","Estimate", "stage", "Weight", "days.vec")
+coefs.m <- coefs.m %>% 
+  mutate(departures.estimate = as.numeric(Estimate)*Weight) %>% 
+  mutate(Absent.Persons.Est = departures.estimate*days.vec*12)
+###################
 
-plot <- ggplot(nnmodel, aes(x = Date, text = as_date(Date)))+
+#########
+regr.names.l <- kiwi_length_regressor.l %>% 
+  select(Num.of.mov.Und.1.wee:Num.of.mov.6.and.und.12.mon) %>% 
+  colnames() %>% 
+  as.vector()
+
+A <- as.matrix(kiwi_length_regressor.l[,regr.names.l])
+B <- kiwi_length_regressor.l$Numb.of.move.New.Zeal
+nnmod.l <- nnls(A,B)
+coef.nnmod.l <- coef(nnmod.l)
+nnmodel.l <- tibble(fit =nnmod.l$fitted[,1])
+nnmodel.l <- bind_cols(nnmodel.l, kiwi_length_regressor.l %>% select(Date, Numb.of.move.New.Zeal ))
+nnmodel.l <- nnmodel.l %>% 
+  month_mutate("Numb.of.move.New.Zeal") %>% 
+  month_mutate("fit")
+nndummy.l <- lm(nnmodel.l$fit ~ nnmodel.l$Numb.of.move.New.Zeal)
+rsquared.l <- summary(nndummy.l)$r.squared
+smoothnnlm.l <- lm(Numb.of.move.New.Zeal.Pre.12m ~ fit.Pre.12m, data =nnmodel.l) 
+smoothrsquared.l <- summary(smoothnnlm.l)$r.squared
+coefs.l <- coef.nnmod.l %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+colnames(coefs.l) <- c("Estimate", "Component")
+coefs.l <- coefs.l %>% 
+  select("Component", "Estimate") %>% 
+  mutate(stage = "late")
+weights.l <- kiwi_length_regressor.l %>% 
+  select(-Date, -Numb.of.move.New.Zeal) %>% 
+  colMeans() %>% 
+  tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+coefs.l <- coefs.l %>% 
+  inner_join(weights.l, by = "Component") %>% 
+  inner_join(day.weights, by = "Component")
+colnames(coefs.l) <- c("Component","Estimate", "stage", "Weight", "days.vec")
+coefs.l <- coefs.l %>% 
+  mutate(departures.estimate = as.numeric(Estimate)*Weight) %>% 
+  mutate(Absent.Persons.Est = departures.estimate*days.vec*12)
+
+###################
+
+nnmodel.f <- nnmodel.e %>% 
+  bind_rows(nnmodel.m,nnmodel.l)
+
+plot <- ggplot(nnmodel.f, aes(x = Date, text = as_date(Date)))+
   geom_line(aes(y = Numb.of.move.New.Zeal, col ="Original"))+
   geom_line(aes(y = fit, col = "Fitted"), alpha = 0.8)+
   geom_line(aes(x = Date, y = fit.Pre.12m/12, col = "12 Month fitted"))+
@@ -1184,17 +1352,20 @@ plot <- ggplot(nnmodel, aes(x = Date, text = as_date(Date)))+
   scale_colour_manual("", 
                       breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
                       values = c("green", "blue", "red", "black"))+
-  labs(title = "Non-Negative Constrained Modeling of Short Term Departures to New Zealand")+
+  labs(title = "Non-Negative Modeling of Short Term Departures to New Zealand")+
   scale_y_continuous(labels = scales::comma) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
-  geom_text(x = min(as.numeric(model$Date[50])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
-                                                                                      "\n12 Month R Squared: ", round(smoothrsquared, digits = 3), size = 3))
+  geom_text(x = min(as.numeric(nnmodel.f$Date[rows.e-50])), y=70000, label=paste0("R^2: ", round(rsquared.e, digits = 3),"\nTrend R^2: ", round(smoothrsquared.e, digits = 3), size = 2))+
+  geom_text(x = min(as.numeric(nnmodel.f$Date[rows.m+rows.e-50])), y=150000, label=paste0("R^2: ", round(rsquared.m, digits = 3),"\nTrend R^2: ", round(smoothrsquared.m, digits = 3), size = 2))+
+  geom_text(x = min(as.numeric(nnmodel.f$Date[rows.m+rows.l+rows.l-30])), y=40000, label=paste0("R^2: ", round(rsquared.l, digits = 3),"\nTrend R^2: ", round(smoothrsquared.l, digits = 3), size = 2))+
+  geom_vline(xintercept = min(as.numeric(model.f$Date[rows.e])), linetype = 3)+
+  geom_vline(xintercept = min(as.numeric(model.f$Date[rows.e+rows.m])), linetype = 3)
 
 ggplotly(plot, tooltip = c("text", "y")) %>% 
   layout(margin=list(l=80, t = 70, b = 60, r = 60),
          legend = list(y = 0.9, x = 0.05))
 
-weights <- kiwi_length_regressor %>% 
+weights.e <- kiwi_length_regressor.e %>% 
   select(-Date, -Numb.of.move.New.Zeal) %>% 
   colMeans() %>% 
   tibble(Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
@@ -1208,31 +1379,47 @@ day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.
 
 ```
 
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Positive Coefficients Weighted"}
 
+coefs.f <- coefs.e %>% 
+  bind_rows(coefs.m, coefs.l)
 
-#Uncon Kiwi Coefs
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients"}
+coefs.g <- coefs.f %>% 
+  gather(type, value, -Component, -Estimate, -Weight, - days.vec, -stage)
 
-coefs <- summary(mod)$coefficients %>% 
-  data.frame() %>% 
-  rownames_to_column() %>% 
-  filter(rowname != "(Intercept)")
-colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
-coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+coefs.g$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee","Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
 "Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
 , "Num.of.mov.6.and.und.12.mon"))
 
-plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
-  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
-  theme(axis.text.x = element_text(size=8, angle=30))+
-  labs(title = "Coefficient Estimates from Unconstrained Model New Zealand")+
-  scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=60, t = 80, b = 120, r = 70),
-         legend = list(y = 0.9, x = 0.05))
+coefs.g$stage <- factor(coefs.g$stage, levels = c("early", "mid", "late"))
 
+plot <- ggplot(data = coefs.g, aes(x = Component))+
+  geom_bar(aes(y = value, fill = type), position = "dodge", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Impact of NZ Departures by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())+
+  facet_grid(.~stage)
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=80, t = 80, b = 120, r = 70),
+         legend = list(y = 0.95, x = 0.05))
+
+plot <- ggplot(data = coefs.g, aes(x = Component))+
+  geom_bar(aes(y = Estimate), position = "dodge", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Impact of NZ Departures by Component")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())+
+  facet_grid(.~stage)
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=80, t = 80, b = 120, r = 70),
+         legend = list(y = 0.95, x = 0.05))
 ```
+
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients Weighted"}
 
