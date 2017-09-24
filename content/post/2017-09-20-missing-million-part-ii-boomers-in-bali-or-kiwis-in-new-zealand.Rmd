@@ -3,7 +3,7 @@ title: 'Missing Million Part II: Boomers in Bali or Kiwis In New Zealand?'
 author: Aidan Morrison
 date: '2017-09-20'
 slug: missing-million-part-ii-boomers-in-bali-or-kiwis-in-new-zealand
-thumbnail: "images/IndoNZ.png"
+thumbnail: "images/IndoNZ2.png"
 categories:
   - Demographics
   - Economics
@@ -239,7 +239,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-I can't help but make further passing observation here, that all the permanent visa categories (in black boxes) during this period rarely add up much past 70,000, which is about the number that most of the small-Australia advocates advocate anyway.  It's the influx of temporary entrants that has really driven the appearance of extremely high migration during this period, which is consistent with the broad thesis I outlined in a [previous post](https://www.quixoticquant.com/post/the-state-of-debate-a-bird-s-eye-on-migration/) about 'mobility' rather than 'migration' having made a level-shift.  Eliminating the entire "Permanent Migration Program" from 100,000 to zero won't do anything to reduce two thirds of the migration we actually have, but I'll focus a full post on that charge another day, and focus here on the Missing Million, and where on earth they are.
+I can't help but make further passing observation here, that all the permanent visa categories (in black boxes) during this period rarely add up much past 70,000, which is about the number that most of the small-Australia advocates advocate anyway.  It's the influx of temporary entrants that has really driven the appearance of extremely high migration during this period, which is consistent with the broad thesis I outlined in a [previous post](https://www.quixoticquant.com/post/the-state-of-debate-a-bird-s-eye-on-migration/) about 'mobility' rather than 'migration' having made a level-shift.  Eliminating the entire "Permanent Migration Program" from 190,000 to zero won't do anything to reduce two thirds of the migration we actually have, but I'll focus a full post on that charge another day, and focus here on the Missing Million, and where on earth they are.
 
 ## The Boomers in Bali Narrative
 The image Cameron Murray created of the Missing Million relied on four characteristics in short-term departures: reason for departure (holiday), length of stay (short), destination (Indonesia), and age (older).
@@ -407,7 +407,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 Here it can be see that the accumulation of the first half occurred while travel to Indonesia was actually low, and not growing.  Furthermore, at precisely the time of the fastest acceleration in travel to Indonesia, NOM and Net Movements came closest to aligning. In contrast, travel to New Zealand grew consistently throughout this period, not to mention being higher throughout.  I'd argue that NZ looks more likely by far at this stage.
 
-My second favourite technique is to do just to a quick head-check of some numbers, to see whether things add-up even roughly.  Looking at the Short-Term-Departures by duration, we can multiply each series by an appropriate number to see what sort of impact each component might actually have on people actually absent from Australia.  Might need 30 or 40 more movements to add up to as many people being absent in the Missing Million sense if they're less than one week, versus over six months.  Not having any better information, I assumed that the distribution of movement lengths in each category was reasonably flat, and chose 4, 11, 22, 46, 77, 165, and 273 as the probable average number of person-days that each departure would reduce from Australia's Physically Present Population.  I then took the previous 12 month calculation and divided by 365 to find the total number of 'person-years' that each set of departures could contribute at any given point, to see which contributed the most. 
+My second favourite technique is to do just to a quick head-check of some numbers, to see whether things add-up even roughly.  Looking at the Short-Term-Departures by duration, we can multiply each series by an appropriate number to see what sort of impact each component might actually have on people actually absent from Australia.  One might need 30 or 40 more movements to add up to as many people being absent in the Missing Million sense if they're less than one week, versus over six months.  Not having any better information, I assumed that the distribution of movement lengths in each category was reasonably flat, and chose 4, 11, 22, 46, 77, 165, and 273 as the probable average number of person-days that each departure would reduce from Australia's Physically Present Population.  I then took the previous 12 month calculation and divided by 365 to find the total number of 'person-years' that each set of departures could contribute at any given point, to see which contributed the most. 
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Departures of longer than one month have the largest contribution to persons absent"}
 # Impact of Departures by Time
@@ -464,13 +464,13 @@ absent.shift <- days.tab %>%
 
 We can see here that the impact of trips less than two weeks is very greatly diminished.  The largest contributor to the Missing Million is likely to be trips of over a month, hardly a fleeting holiday.
 
-But more interestingly, we can see that the short-term departures of all the trips under two months clearly can't add up to anything like a million people.  I did some calculations and found that in fact at the end of the data *all* the short-term departures probably only cumulatively add up to under 800,000.  I suspect the assumption of a flat distribution across all the categories is likely to overstate if anything.  Furthermore, at the end of 2001, before the Missing Million had left, those departures accounted for about 400,000 people absent.  So it really isn't plausible that all these departures listed actually account for anything like the full Missing Million, or pobably even half of that.  The sub-set of Boomers that Cameron Murray descrives is doomed to be a trival minority in any case.  
+But more interestingly, we can see that the short-term departures of all the trips under two months clearly can't add up to anything like a million people.  I did some calculations and found that in fact at the end of the data *all* the short-term departures probably only cumulatively add up to under 800,000.  I suspect the assumption of a flat distribution across all the categories is likely to overstate if anything.  Furthermore, at the end of 2001, before the Missing Million had left, those departures accounted for about 400,000 people absent.  So it really isn't plausible that all these departures listed actually account for anything like the full Missing Million, or pobably even half of that.  The sub-set of Boomers that Cameron Murray describes is doomed to be a trival minority in any case.  
 
 There are a couple of reasons that this could be the case.  Probably most importantly is that the data presented here is based on people's indicated intent, as per their passenger departure cards.  There's absolutely no obligation on the traveller to honour that committment.  Often they may not have actually booked their onward or return flight.  If I had  to speculate a little as to the micro-economic dynamics that might be at work, I would think that plenty of travellers (particularly those on temporary visas in Australia) would simply indicate what they felt was most appropriate to their visa, regardless of true intentions, in order to raise the least possible questions.
 
 But perhaps more importantly, given the way that migration is defined under the 12/16 rule, there's absolutely nothing preventing these 'short term' travels actually contributing to migration.  Two six-month trips a couple of months apart will constitute migration.  As will a two-week trip, if some was travelling a lot in the previous year. 
 
-There's also the possibility of significant shift internally within categories.  It could be the case that my estimation of a flat distribution across each time interval is false, and some change has led quite systematically to some of the categories to become increasingly  left-skewed.  The switching over of the 6-12 month and 3-6 month lines seems to show some evidence of that occurring, however a shift in that direction also occurs internally within the categories, we woud likely have even less of the Missing Million accounted for. 
+There's also the possibility of significant a shift internally within categories.  It could be the case that my estimation of a flat distribution across each time interval is false, and some change has led quite systematically to some of the categories to become increasingly  left-skewed.  The switching over of the 6-12 month and 3-6 month lines seems to show some evidence of that occurring, however if a shift in that direction also occurs internally within the categories, we woud likely have even less of the Missing Million accounted for. 
 
 But perhaps the most important explanation is that this only looks at half of the story.  We have short-term arrivals aswell:
 
@@ -558,7 +558,7 @@ Again, summing the total 'person-years' accounted for by this trend, we find the
 
 To confirm the failing significance of passengers' stated intentions, it looks like the ABS is also going to abandon these particular series.
 
-## An interm summary
+## An interim summary
 So far, having just eyeballed some data and done a couple of quick calculations to see how the numbers stack up, it appears:
 
 1. The Missing Million grew to half it's height while travel to Indonesia was low and flat, and travel to New Zealand was increasing.  
@@ -568,8 +568,6 @@ So far, having just eyeballed some data and done a couple of quick calculations 
 ## Dive with me baby!
 
 What we haven't yet tackled seriously is the assumption of a high-overlap between the four different trends, or at least the three which we have data on.  To establish or refute this, it's better that we look at the information available to us, in its raw (monthly format).  As we can see, the intense seasonality present in some of these time-series can provide us with a key to possible analytic mechanism that could investigate the plausible degree of overlap:
-
-
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Monthly departures by duration show clear seasonality"}
 
@@ -641,7 +639,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 ```
 
 
-From the above two charts it can be quite easily seen that the slump in departures growth that occurred in the mid-2000s, and most dramatic elevation in the post-2010s, is in South East Asia and to some extent the USA. This is again consistent with Australia now competing with other attractive pacific desinations as holiday spots, but probably acting as something of a home-base for people wanting to explore South East Asia.  Arrive long-term to Australia, but leave short-term, frequently to explore Asia.
+From the above two charts it can be quite easily seen that the slump in departures growth that occurred in the mid-2000s, and most dramatic elevation in after about 2008, is in South East Asia and to some extent the USA. This is again consistent with Australia now competing with other attractive pacific desinations as holiday spots, but probably acting as something of a home-base for people wanting to explore South East Asia.  Arrive long-term to Australia, but leave short-term, frequently to explore Asia.
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Monthly Departures by Purpose also show contrasting seasonal structure"}
 
@@ -794,7 +792,7 @@ layout(margin=list(l=70, t = 100, b = 70, r = 70),
 All in all, this really just serves to pose more properly the question: What is the actual composition of these time series, in terms of the other ones?  Are departures to Indonesia predominantly short, and departures to New Zealand substantially longer?  
 
 ## Dive Deeper
-It might be possible to attain some insight into this sort of thing by conducting a multivariate regression.  Essentially all this is doing is seeing which combinations of one division of departures corresponds best to a particular series in another characterisation. This is easily done, though care should be taken when interpreting the results, a summary of which might look like this:
+It might be possible to attain to substantiate this sort of eye-balling activity statistically using a multivariate regression.  Essentially all this is doing is seeing which combinations of one division of departures corresponds best to a particular series in another characterisation. This is easily done, though care should be taken when interpreting the results, a summary of which might look like this:
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Unconstrained"}
 
@@ -873,7 +871,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-This is shows soemthing odd, it appears that there's a negative weighting of several of a couple of the components.  This doesn't make any sense, as you can't have a negative number of departures.  In addition I've shaded the colours here with the log of a variable of the output of the model called Pr(>|t|), which gives an indication of the likelihood that of this original data occurring if that co-efficient wasn't present at all.  In other words, darker colours give a higher degree of confidence that that particular coefficient weighting is likely to be good.
+This is shows something odd, it appears that there's a negative weighting of several of a couple of the components.  This doesn't make any sense, as you can't have a negative number of departures.  In addition I've shaded the colours here with the log of a variable of the output of the model called Pr(>|t|), which gives an indication of the likelihood that of this original data occurring if that co-efficient wasn't present at all.  In other words, darker colours give a higher degree of confidence that that particular coefficient weighting is likely to be good.
 
 Seeing relatively light colours for slightly negative coefficient values is probably ok, (as it's quite probable that having none of this component, or a very small positive value wouldnt' throw out the fit too much) but finding an extremely dark one for a large negative value means that the results are overall likely to be somewhat unrealistic. It appears that the negative value is likely compensating for over-weighting of the other two components to the left and right.  To understand why, let's look again at what the spectrums suggest:
 
@@ -915,7 +913,7 @@ layout(margin=list(l=70, t = 80, b = 60, r = 70),
 
 ```
 
-Here we can see why the regression came up with this result.  Departures to New Zealand slump in May each year, and 3-6 month departures have a peak in May.  Subracting that component consequently improves the fit substantially, though it's not a physically possible result. 
+Here we can see why the regression came up with this result.  Departures to New Zealand slump in May each year, and 3-6 month departures have a peak in May.  Subracting that component consequently improves the fit substantially, though it's not a physically possible result.  Overall, it appears that my attempt to get these statistical methods to substantiate a proposed split between the differet visit duration seems to have failed.  It's probable that in New Zealand's case the implicit assumption (that the distrubtion of trip-lengths to new zealand is relatively stable over time) doesn't hold well. We'll relax this assumption a little later to see if it improves things, but first let's just check to see how close a more-realistic model can come.
 
 To get a more realistic model, we can re-run the regression with a constraint that requies all the co-efficients to be non-negative.  Happily there's an R package called nnls by Katharine Mullen which can quickly create such a model.  Te result is this:
 
@@ -978,7 +976,7 @@ day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.
 
 ```
 
-This produces two curious results.  It shows that with a constrained model not nearly as much of the seasonal fluctuation can be incorporated, and the December spikes in particular don't match up aswell.  However, in an odd twist of fate, the fit of the 12-month running average is actaully better, with a slighlty higher R-squared match.  This suggests that the adjustment made to the coefficients between the unconstrained model and this one are almost certainly more in line with long-term, as opposed to intra-year trends.  By plotting the co-efficients, we can see that that is:
+This produces two curious results.  It shows that with a constrained model not nearly as much of the seasonal fluctuation can be incorporated, and the December spikes in particular don't match up aswell.  However, in an odd twist of fate, the fit of the 12-month running average is actaully better, with a slighlty higher R-squared match.  This suggests that the adjustment made to the coefficients between the unconstrained model and this one are almost certainly more in line with long-term, as opposed to intra-year trends.  By plotting the co-efficients, we can see what that is:
 
 #Con Kiwi Coefs
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Positive Coefficients"}
@@ -1009,7 +1007,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 Not being able to include a large negative weighting means that the magnitude of the other positive weightings also decreases.  In this case, I strongly suspect that the lower weighting of 6-12 month departures (which were completely flat in overall trend) actually assisted in better matching the trend.  Sadly nnls() doesn't yet have as easy a way of pulling out Pr(>|t|) so I wasn't able to give that indication of confidence with a colour scaling.
 
-The graph also shows that we have a weighting of 6-12 months that is over 1, which is also unrealistic.  With more time and resources there would certainly be means of further constraining the models, including with the outputs of other regressions on other variables, to make a fuller and more consistent model. But first let's just multiply these 'weightings' by the mean actual number of travel undertaken under each departure lenth, and then by the average length of stay, to convert the coefficients back into numbers which are easier to make some sense of: numbers of departures monthly, and number of 'person-years' absent that could be attributable to that flow.
+The graph also shows that we have a weighting of 6-12 months that is over 1, which is also unrealistic, since we can't have 120% of 6-12 month departures all going to New Zealand.  With more time and resources there would certainly be means of further constraining the models, including with the outputs of other regressions on other variables, to make a fuller and more consistent model. But first let's just multiply these 'weightings' by the mean actual number of travel undertaken under each departure lenth, and then by the average length of stay, to convert the coefficients back into numbers which are easier to make some sense of: numbers of departures monthly, and number of 'person-years' absent that could be attributable to that flow.
 
 
 
@@ -1046,11 +1044,8 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 This leaves us in a somewhat unsatistfying place.  It indicates that there might be a significant number of people 'absent' in New Zealand due to longer trips, but we also know that it's impossible that more than 100% of the trips over 6 months went to New Zealand.  The model isn't producing realistic values yet, so we can't have any real confidence in the levels indicated there.  In addition, these values are taken for a mean for the entire period, which isn't actually that helpful since we're actually most interested in how the trends look over time.
 
-This means that it's time to break the data up into different time increments and see if we get more realistic data, or clearer trends, by stepping through time.  Incidentally taking a derivative with respect to some sensible dimension (in this case time) is also my favourite technique for rescuing some sensible, more confident conclusions when there's extremely high uncertainty in a particular level.  Since derivatives aren't dependent on a particular level, we could still get a sense of whether the significance of these components is increasing or decreasing over time with gerater confidence.
+This means that it's time to break the data up into different time increments and see if we get more realistic data, or clearer trends, by stepping through time.  Incidentally taking a derivative with respect to some sensible dimension (in this case time) is also my favourite technique for rescuing some sensible, more confident conclusions when there's extremely high uncertainty in a particular level that's been measured.  Since derivatives aren't dependent on a particular level, we could still get a sense of whether the significance of these components is increasing or decreasing over time with gerater confidence.
 
-
-
-#Early Kiwi Regression
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Unconstrained"}
 
@@ -1161,6 +1156,8 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
+This graph shows the results of running three different multi-variate regressions on the three time-intervals indicated.  As you can see, the fits now look quite impressive.  However, the unconstrained model relied upon some unrealistic methods to get such good results:
+
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Unconstrained Coefficients"}
 
 coefs.e <- summary(mod.e)$coefficients %>% 
@@ -1212,6 +1209,8 @@ ggplotly(plot, tooltip = c("y")) %>%
          legend = list(y = 0.9, x = 0.05))
 
 ```
+
+Again, in all three of these fits, the most important elements (dark colours) tended to be unrealistic, both extremely large (greater than 1), and negative.  The note-workthy exception, if anything, could be the improved significance and scale of very short-term trips in the middle period. But overall this result confirms little.  Let's see how constraining the coefficients works.
 
 #Kiwi Constrained
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of Kiwis Constrained"}
@@ -1379,6 +1378,8 @@ day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.
 
 ```
 
+Here we can see that the model was still able to reflect the overall trend quite well, however seasonal fluctuations were poorly accounted for, especially in the later period.  This strongly suggests that within each year there could be substantial shifts in the average trip-length of a visit to New Zealand.  This sounds quite plausible, as shorter holiday visits might be made to New Zealand in the winter for skiing, while longer visits to spend time with family back home might be more common in the larger summer holidays, in particular for the substantial NZ expat community that lives (substantially) in Australia.  I won't dive down that rabbit hole just now, instead let's check out how the coefficients for this constrained model looks, just to see how close to the realm of plausibility they lie.
+
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Positive Coefficients"}
 
 coefs.f <- coefs.e %>% 
@@ -1407,6 +1408,9 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
          legend = list(y = 0.95, x = 0.05))
 ```
 
+
+If anything one could say that there's a lack of evidence that visits to New Zealand are short term, and weak evidence to suggest that an increasing share might be slightly longer, but the unrealistically large coefficients confirm most strongly that the model doesn't hold well.  Our time-invariance assumption on the intra-year level is failing.  But just to put an order-of-magnitude on the corresponding implied departures, and people absent, we should multiply by the relevant weights for each series, and estimated duration of absence:
+
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="NZ Departures Positive Coefficients Weighted"}
 
 
@@ -1432,9 +1436,9 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
+This suggests that if there is a significant share of longer trips, it's these that are far more likely to constitute a larger share of the missing million.  However, even the shorter trips of a few weeks could plausibly contribute around 50,000 people of the Missing Million.
 
-
-#Start bali Regression
+To make the most of an uncertain insight, I'll again revert to my favourite technique, compare it to something else, or take a derivative, so we can at least see how different it is to something else.  Let's have a look at a similar regression model for departures to Indonesia.
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of balis Unconstrained"}
 
@@ -1481,7 +1485,35 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
-#bali Constrained
+This is an interesting contrast, since in this case the trend line (sum of previous 12 months divided by 12) doesn't actually fit much better than the monthly exact figures.  In fact, there are periods where the fitted line seems to do quite a good job at capturing the seasonal fluctuation, whilst the overall level is a bit off.  Unlike New Zealand, it looks a bit like the time-invariance assumption regarding the distribution of departures amongst the different intended lengths of travel holds quite well within a give year, but perhaps not so well in the larger drift of time.  
+
+Let's inspect the model to see what sort of results we're getting:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Unconstrained Coefficients"}
+
+coefs <- summary(mod)$coefficients %>% 
+  data.frame() %>% 
+  rownames_to_column() %>% 
+  filter(rowname != "(Intercept)")
+colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
+coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
+"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
+, "Num.of.mov.6.and.und.12.mon"))
+
+plot <- ggplot(data = coefs, aes(x = Component, text = Pr.abs.t, fill = log(Pr.abs.t)))+
+  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
+  theme(axis.text.x = element_text(size=8, angle=30))+
+  labs(title = "Coefficient Estimates from Unconstrained Model Indonesia")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=60, t = 80, b = 120, r = 70),
+         legend = list(y = 0.9, x = 0.05))
+
+```
+
+This looks like a far better result.  We can see here that the component with the greatest statistical confidence (dark colour) is a positive component, and less than 1, which means that it's a realistic number.  The largest negative also have the least significance statistically (lighter colour).  Overall this looks far better.  Let's see how whether it translates to a decent model with only-positive coefficients.
+
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of balis Constrained"}
 library(nnls)
 
@@ -1520,7 +1552,7 @@ plot <- ggplot(nnmodel, aes(x = Date, text = as_date(Date)))+
   scale_colour_manual("", 
                       breaks = c("Original", "Fitted", "Past 12 Trend Fitted", "Past 12 Trend Original"),
                       values = c("green", "blue", "red", "black"))+
-  labs(title = "Non-Negative Constrained Modeling of Short Term Departures to Indonesia")+
+  labs(title = "Non-Negative Modeling of Short Term Departures to Indonesia")+
   scale_y_continuous(labels = scales::comma) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
   geom_text(x = min(as.numeric(model$Date[150])), y=80000, label=paste0("Monthly R Squared: ", round(rsquared, digits = 3), 
@@ -1544,32 +1576,7 @@ day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.
 
 ```
 
-
-
-#Uncon bali Coefs
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Unconstrained Coefficients"}
-
-coefs <- summary(mod)$coefficients %>% 
-  data.frame() %>% 
-  rownames_to_column() %>% 
-  filter(rowname != "(Intercept)")
-colnames(coefs) <- c("Component", "Estimate", "Std.Error", "t.value", "Pr.abs.t")
-coefs$Component <- factor(coefs$Component, levels = c("Num.of.mov.Und.1.wee" ,          "Num.of.mov.1.and.und.2.wee", "Num.of.mov.2.wee.and.und.1.mon",
-"Num.of.mov.1.and.und.2.mon", "Num.of.mov.2.and.und.3.mon", "Num.of.mov.3.and.und.6.mon"    
-, "Num.of.mov.6.and.und.12.mon"))
-
-plot <- ggplot(data = coefs, aes(x = Component, fill = log(Pr.abs.t)))+
-  geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
-  theme(axis.text.x = element_text(size=8, angle=30))+
-  labs(title = "Coefficient Estimates from Unconstrained Model Indonesia")+
-  scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
-ggplotly(plot, tooltip = c("text", "y")) %>% 
-  layout(margin=list(l=60, t = 80, b = 120, r = 70),
-         legend = list(y = 0.9, x = 0.05))
-
-```
-
+It certainly does.  This model looks almost as good as the un-constrained one, with the exact fit almost as good, though the trend line in the middle period does slightly worse at keeping with the original data.  Examining the components of this model, we find a clear story emerging about short-term travel.
 
 #Con bali Coefs
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Positive Coefficients"}
@@ -1596,6 +1603,8 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
   layout(margin=list(l=60, t = 80, b = 120, r = 70),
          legend = list(y = 0.9, x = 0.05))
 ```
+
+In this respect, Cameron Murray looks like he was right, indeed travel to Indonesia does tend to be short term, or so it seems here.  What he was wrong about though was that this comprises a significant component of the Missing Million:
 
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Positive Coefficients Weighted"}
@@ -1629,7 +1638,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
          legend = list(y = 0.95, x = 0.6))
 ```
 
-#Early bali Regression
+As we can see here, even a solid 35,000 departures per month only adds up to about 12,000 people continually absent over such a short trip.  However, this is only taking an average over the whole period, and we'd be negligent not to investigate how that might have changed over time.  Whilst it would be tempting to test a variety of change-point detection algorithms to optimise the selection of differnt breaks in the series, for consistency and expediency I've broken the series into the same intervals as I did for New Zealand, at the turn of the decade.
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of balis Unconstrained"}
 
@@ -1740,6 +1749,8 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
+We can see now that the middle-section does far better at capturing the trend, and overall the fit looks quite good.  Let's see how the coefficients change in the three periods.
+
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Unconstrained Coefficients"}
 
 coefs.e <- summary(mod.e)$coefficients %>% 
@@ -1779,18 +1790,20 @@ coefs.f$stage <- factor(coefs.f$stage, levels = c("early", "mid", "late"))
 #p <- ggplot(mpg, aes(displ, cty)) + geom_point()
 #p+facet_grid(. ~ cyl)
 
-plot <- ggplot(data = coefs.f, aes(x = Component, fill = log(Pr.abs.t)))+
+plot <- ggplot(data = coefs.f, aes(x = Component, text = Pr.abs.t, fill = log(Pr.abs.t)))+
   geom_bar(aes(y = Estimate), position = "stack", stat = "identity")+
   theme(axis.text.x = element_text(size=8, angle=30))+
   labs(title = "Coefficient Estimates from Unconstrained Model Indonesia")+
   scale_y_continuous(labels = scales::comma) +
   theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
   facet_grid(. ~ stage)
-ggplotly(plot, tooltip = c("y")) %>% 
+ggplotly(plot, tooltip = c("y", "text")) %>% 
   layout(margin=list(l=110, t = 80, b = 120, r = 70),
          legend = list(y = 0.9, x = 0.05))
 
 ```
+
+Perhaps the most striking feature here is the prevalence of some larger negative co-efficients in the middle period.  This is intriguing, and suggests overall that the model functions less well in this period, again most probably because the time-invariance assumption holds less well.  The other significant trend is that in the late period there's a substantial shift towards longer travel.  Let's see if those trends persist in a constrained model with positive coefficients.
 
 #bali Constrained
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Multivariat Regression of balis Constrained"}
@@ -1958,6 +1971,8 @@ day.weights <- tibble(days.vec, Component = c("Num.of.mov.Und.1.wee" ,  "Num.of.
 
 ```
 
+Things look good.  Those fits are barely any worse than the unconstrained version, except in the middle, where (as expected) the fit isn't as good.  Those coefficients are:
+
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Positive Coefficients"}
 
 coefs.f <- coefs.e %>% 
@@ -1986,6 +2001,8 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
          legend = list(y = 0.95, x = 0.05))
 ```
 
+This seems to still tell a sensible story.  Travel to Indonesia mostly consists of short trips, but there's been a noticeable increase in both very short, and quite long trips of late.  Let's multiply that by the right weights and durations to get the impact on travel in numbers we can understand.
+
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Indonesia Departures Positive Coefficients Weighted"}
 
 
@@ -2011,5 +2028,30 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 ```
 
+Finally a result which we can put some more faith in.  Travel to Indonesia was dominated by quick trips when it was low in the 90s and 2000s.  Since 2010 the largest increase has also been in short trips, probably of 1-2 weeks duration.  However, it's likely that there's been a noticeable, and new component of longer trips.  Whilst substantially smaller in number, it's plausible that this shift towards longer-term visits accounts for even more absentees from Australia overall.  However, even combined, the growth in short term departures between the decades of the naughties and the teens could only account for about 50,000 people, around 5% of the Missing Million, and a neglible portion of the significant share that had grown in the years prior to 2010. 
+
+##Conclusions
+Even if we neglect entirely the unrealistically large component of longer departures (6-12 months) to New Zealand, in the post 2010 period it's plausible that New Zealand contributes nearly as many towards the Missing Million from journeys of just a few weeks duration.  Adding in at least the hint that longer visits are a significant component of journeys to New Zealand, it's almost certain that they comprise a larger share than visits to Bali.
+
+However, perhaps the more important conclusion to draw is that only a trivial fraction of the Missing Million is accounted for by short-term visits to both Indonesia and New Zealand, and even all of the "Short Term" departures don't come close.  Other elements, including our long-term movements and short-term arrivals, are needed aswell to understand what is going on.  The extent to which these series overlap or exclude one another is completely unclear.
+
+Realistically, far more work has to be done to really understand the complex dynamics of Australia's population.  The statistics need a lot of work to shed substantial light, and grasping at the easiest available story is likely not sufficient.  ABS has recently decided to abandon the requirement for people to fill in departure cards, and doing so has actually caused another series break in 2007, which I've neglected to give any consideration to here.
+
+```{r, fig.align="center", out.width = 600, fig.cap="The abandoned departure card assumed that people know whether they are 'resident' or 'termporary entrant'."}
+
+
+knitr::include_graphics("images/ddcard3.jpg")
+
+```
+
+Apparently the ABS is realising that the data collected on them wasn't adding up and isn't helping.  In particular, asking people to self-select what type of traveller they are, in particular whether they are a 'visitor or temporary entrant' or 'Australian resident' makes no sense for our increasinly part-time population, many of whom are foreign citizens, here on a temporary visa, but staying (as a Student, worker, or backpacker) for long enough to officially qualify to be 'resident' under a statistical definition they've never heard of.
+
+Not only are people unlikely to accurately identify their category, but they have absolutely no obligation to honour their stated intention of travel plans. With more and more people making multiple stops on their travels, with few of them planned in advance, they're likely to make some educated guess about what the scary people at the customs gate are going to be most happy to hear. 
+
+Furthermore, not all the data captured in departures cards is comprehensively enumerated.  According to the ABS, on average, [only about 5%](http://www.abs.gov.au/AUSSTATS/abs@.nsf/Lookup/3401.0Explanatory%20Notes1Jul%202017?OpenDocument) of the cards are selected for a sample, and most of the rest imputed.  Many of the methods I've used above could well struggle if there's substantiall errors or other poor assumptions made in this sampling or imputation process. The strange results produced by our New Zealand regression could be an indication of uncertainty or inconsistency in this process as much as anything else.
+
+Overall I remain adamant, as I've [previously claimed](https://www.quixoticquant.com/post/the-state-of-debate-a-bird-s-eye-on-migration/), that immigration data is one of the most falsely-revered 'clean' statistics in existence.  The hardest numbers we have still show [evidence of substantial](https://www.quixoticquant.com/post/the-missing-million/) discrepancies, enough to radically alter the policy conclusions we have from them.  The more detailed numbers we tend to reach to construct narratives to defend our use of them generally don't add up, or aren't consistently or comprehensively recorded enough to indicate anything at all with any confidence.  I still maintain that the best narrative to explain the Missing Million is that the enormous increase in international mobility has, coupled with our peculaur economic, polical, and overwhelmingly geographical circumstance has left us with a 'part-time population', and a frothy figure of 'residents' that is consistently and substantially higher than the number of people we physically have here at any given time.  The nature of this dynamic needs a lot more work, and I welcome any further contributions.
+
+Q.Q.
 
 The .Rmd file for this post can be accessed which will require the installation of this [package](https://github.com/aidandmorrison/UtilsQQ) to run. 
