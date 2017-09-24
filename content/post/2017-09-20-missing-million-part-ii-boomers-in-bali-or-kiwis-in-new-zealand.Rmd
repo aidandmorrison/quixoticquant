@@ -3,7 +3,7 @@ title: 'Missing Million Part II: Boomers in Bali or Kiwis In New Zealand?'
 author: Aidan Morrison
 date: '2017-09-20'
 slug: missing-million-part-ii-boomers-in-bali-or-kiwis-in-new-zealand
-thumbnail: "images/IndoNZ2.png"
+thumbnail: "images/IndoRegr2.png"
 categories:
   - Demographics
   - Economics
