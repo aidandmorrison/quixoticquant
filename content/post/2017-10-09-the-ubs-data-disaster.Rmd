@@ -201,7 +201,7 @@ Unfortunately Chris missed the triple-asterisk, pointing out the epic flaw in he
 
 > ***Does not adjust for potential double counting
 
-GULP. Contrary to Chris's assertion in the video, Net Overseas Migration does not just include permanent residents.  Infact, it has absolutely nothing to do with someone's visa status at all.  As I've [laboured before](https://www.quixoticquant.com/post/the-missing-million/), it's an arbitrary definition that counts someone as 'resident' if they are here for 12 out of 16 months cumulatively, and non-resident if they are overseas for the same cumulative part of any 16 months. Three quarters is the rule that determines if you're resident or not.  
+GULP. Contrary to Chris's assertion in his article, Net Overseas Migration does not just include permanent residents.  Infact, it has absolutely nothing to do with someone's visa status at all.  As I've [laboured before](https://www.quixoticquant.com/post/the-missing-million/), it's an arbitrary definition that counts someone as 'resident' if they are here for 12 out of 16 months cumulatively, and non-resident if they are overseas for the same cumulative part of any 16 months. Three quarters is the rule that determines if you're resident or not.  
 
 Furthermore, as I've also [pointed out before](https://www.quixoticquant.com/post/missing-million-part-ii/), a large number of the person-years present (akin to what UBS calls 'people') caused by Short-Term Arrivals are actually contributed by relatively long, Short-Term Arrivals, of 6-12 months:
 
