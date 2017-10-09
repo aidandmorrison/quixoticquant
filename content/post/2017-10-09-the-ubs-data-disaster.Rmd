@@ -3,6 +3,7 @@ title: The UBS Data Disaster
 author: Aidan Morrison
 date: '2017-10-09'
 slug: the-ubs-data-disaster
+thumbnail: "images/ShortTermNet.png"
 categories:
   - Demographics
   - Economics
