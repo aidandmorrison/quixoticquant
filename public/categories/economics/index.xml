@@ -6,10 +6,19 @@
     <description>Recent content in Economics on Quixotic Quant</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 25 Sep 2017 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 09 Oct 2017 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/economics/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>The UBS Data Disaster</title>
+      <link>/post/the-ubs-data-disaster/</link>
+      <pubDate>Mon, 09 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/post/the-ubs-data-disaster/</guid>
+      <description>In an earlier post I took a swipe at the likes of NAB, the RBA, Bernard Salt at KPMG, the ABS themselves, Business Insider, and others for their persistent failure to mark a sweeping definition-change that completely broke the continuity of the data they were reporting. I should write to them all and apologise for the fuss, because their indiscretion has been completely overshadowed by the most ghastly abuse of data I’ve ever seen.</description>
+    </item>
     
     <item>
       <title>Missing Million Part II: Boomers in Bali or Kiwis In New Zealand?</title>

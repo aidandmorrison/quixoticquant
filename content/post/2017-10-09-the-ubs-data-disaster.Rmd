@@ -1,0 +1,523 @@
+---
+title: The UBS Data Disaster
+author: Aidan Morrison
+date: '2017-10-09'
+slug: the-ubs-data-disaster
+categories:
+  - Demographics
+  - Economics
+  - Migration
+tags:
+  - Ausecon
+  - Immigration
+  - Statistics
+  - ABS
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r get_data, include=FALSE, warning=FALSE, message= FALSE}
+library(tidyverse)
+library(stringr)
+library(gdata)
+library(lubridate)
+library(plotly)
+library(UtilsQQ)
+library(ggplot2)
+library(nnls)
+
+
+sheet_310101 <- readxl::read_xls("data/310101.xls", sheet = 2)
+sheet_310101 <- good_names(sheet = sheet_310101)
+meta <- stash_meta(sheet_310101)
+meta <- good_names(meta, meta = TRUE)
+sheet_310101 <- cut_meta(sheet_310101)
+sheet_310101 <- good_date(sheet_310101)
+sheet_310101 <- to_numeric(sheet_310101)
+sheet_310101 <- nom_units(sheet_310101, meta)
+sheet_310101 <- inst_ann(sheet_310101, meta)
+sheet_310101 <- prev_12_month(sheet_310101, meta)
+
+sheet_340101 <- readxl::read_xls("data/340101.xls", sheet = 2)
+
+sheet_340101 <- good_names(sheet = sheet_340101)
+meta1 <- stash_meta(sheet_340101)
+meta1 <- good_names(meta1, meta = TRUE)
+meta <- bind_rows(meta, meta1)
+sheet_340101 <- cut_meta(sheet_340101)
+sheet_340101 <- good_date(sheet_340101)
+sheet_340101 <- to_numeric(sheet_340101)
+sheet_340101 <- nom_units(sheet_340101, meta)
+sheet_340101 <- inst_ann(sheet_340101, meta)
+sheet_340101 <- prev_12_month(sheet_340101, meta)
+
+sheet_340102 <- readxl::read_xls("data/340102.xls", sheet = 2)
+
+sheet_340102 <- good_names(sheet = sheet_340102)
+meta2 <- stash_meta(sheet_340102)
+meta2 <- good_names(meta2, meta = TRUE)
+meta <- bind_rows(meta, meta2)
+sheet_340102 <- cut_meta(sheet_340102)
+sheet_340102 <- good_date(sheet_340102)
+sheet_340102 <- to_numeric(sheet_340102)
+sheet_340102 <- nom_units(sheet_340102, meta)
+sheet_340102 <- inst_ann(sheet_340102, meta)
+sheet_340102 <- prev_12_month(sheet_340102, meta)
+
+
+sheet_310101 <- sheet_310101 %>% 
+  mutate(NOM.12.12.Pre.12 = (case_when(Date < "2006-09-01 GMT" ~ Net.Ove.Mig.Aus.Pre.12m)),
+         NOM.12.16.Pre.12 = (case_when(Date >= "2006-09-01 GMT" ~ Net.Ove.Mig.Aus.Pre.12m)))
+
+sheet_arr_dep <- bind_cols(sheet_340101, sheet_340102)
+sheet_arr_dep <- sheet_arr_dep %>% 
+  mutate(net.movements = (Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep),
+         net.per.long.term = (Num.of.mov.Per.and.Lon.ter.Arr - Num.of.mov.Per.and.Lon.ter.Dep),
+         net.movements.Pre.12m = (Num.of.mov.Tot.Arr.Pre.12m - Num.of.mov.Tot.Dep.Pre.12m)
+  )
+
+match_sheet_arr_dep <- sheet_arr_dep %>% 
+  filter(Date %in% sheet_310101$Date)
+
+joint_sheet_310101 <- sheet_310101 %>% 
+  inner_join(match_sheet_arr_dep, by = "Date")
+
+joint_sheet_310101 <- joint_sheet_310101 %>% 
+  mutate(Net.Ove.Mig.Aus.Pre.12m.per.ERP = (Net.Ove.Mig.Aus.Pre.12m/Est.Res.Pop.ERP.Aus),
+         net.movements.Pre.12m.per.ERP = (net.movements.Pre.12m/Est.Res.Pop.ERP.Aus),
+         cum.net.movements = cumsum(net.movements.Pre.12m/4),
+         cum.Net.Ove.Mig.Aus = cumsum(Net.Ove.Mig.Aus),
+         cum.discrepancy = cum.Net.Ove.Mig.Aus - cum.net.movements,
+         Phy.Pre.Pop.PPP.Aus = Est.Res.Pop.ERP.Aus - cum.discrepancy,
+         Net.Ove.Mig.Aus.Pre.12m.per.PPP = Net.Ove.Mig.Aus.Pre.12m/Phy.Pre.Pop.PPP.Aus,
+         net.movements.Pre.12m.per.PPP = net.movements.Pre.12m/Phy.Pre.Pop.PPP.Aus
+  )
+
+datevec <- sheet_340101 %>% 
+  filter(Date < "2006-09-01 GMT")%>% 
+  select(Date)
+
+date_change <- length(datevec$Date) +1
+
+```
+
+```{r get_data3, include=FALSE, warning=FALSE, message= FALSE}
+
+sheet_3401010 <- readxl::read_xls("data/3401010.xls", sheet = 2)
+
+sheet_3401010 <- good_names(sheet = sheet_3401010)
+meta4 <- stash_meta(sheet_3401010)
+meta4 <- good_names(meta4, meta = TRUE)
+meta <- bind_rows(meta, meta4)
+sheet_3401010 <- cut_meta(sheet_3401010)
+sheet_3401010 <- good_date(sheet_3401010)
+sheet_3401010 <- to_numeric(sheet_3401010)
+sheet_3401010 <- nom_units(sheet_3401010, meta)
+sheet_3401010 <- inst_ann(sheet_3401010, meta4)
+sheet_3401010 <- prev_12_month(sheet_3401010, meta4)
+
+```
+
+
+```{r get_data2, include=FALSE, warning=FALSE, message= FALSE}
+sheet_340106 <- readxl::read_xls("data/340106.xls", sheet = 2)
+
+sheet_340106 <- good_names(sheet = sheet_340106)
+meta3 <- stash_meta(sheet_340106)
+meta3 <- good_names(meta3, meta = TRUE)
+meta <- bind_rows(meta, meta3)
+sheet_340106 <- cut_meta(sheet_340106)
+sheet_340106 <- good_date(sheet_340106)
+sheet_340106 <- to_numeric(sheet_340106)
+sheet_340106 <- nom_units(sheet_340106, meta)
+sheet_340106 <- inst_ann(sheet_340106, meta)
+sheet_340106 <- prev_12_month(sheet_340106, meta)
+
+
+```
+
+```{r get_data4, include=FALSE, warning=FALSE, message= FALSE}
+
+sheet_340109 <- readxl::read_xls("data/340109.xls", sheet = 2)
+
+sheet_340109 <- good_names(sheet = sheet_340109, trunc_length = 4)
+meta5 <- stash_meta(sheet_340109)
+meta5 <- good_names(meta5, meta = TRUE, trunc_length = 4)
+meta <- bind_rows(meta, meta5)
+sheet_340109 <- cut_meta(sheet_340109)
+sheet_340109 <- good_date(sheet_340109)
+sheet_340109 <- to_numeric(sheet_340109)
+sheet_340109 <- nom_units(sheet_340109, meta5)
+sheet_340109 <- inst_ann(sheet_340109, meta5)
+sheet_340109 <- prev_12_month(sheet_340109, meta5)
+
+topcountries <- sheet_340109 %>% 
+  filter(Date > "2014-01-01 GMT") %>% 
+  select(Numb.of.move.Norf.Isla:Numb.of.move.Tota.Coun.of.stay) %>% 
+  gather(country, movements, Numb.of.move.Norf.Isla:Numb.of.move.Tota.Coun.of.stay)
+  
+topcountriessum <- topcountries %>% 
+  group_by(country) %>% 
+  summarise(ave_mov = mean(movements)) %>% 
+  arrange(ave_mov, desc(ave_mov)) %>% 
+  filter(str_detect(country, ".Tota.") == FALSE) %>% 
+  tail(n = 15)
+
+topregionssum <- topcountries %>% 
+  group_by(country) %>% 
+  summarise(ave_mov = mean(movements)) %>% 
+  arrange(ave_mov, desc(ave_mov)) %>% 
+  filter(str_detect(country, ".Tota.") == TRUE) %>% 
+  tail(n = 10)
+
+```
+
+In an [earlier post](https://www.quixoticquant.com/post/the-missing-million/) I took a swipe at the likes of NAB, the RBA, Bernard Salt at KPMG, the ABS themselves, Business Insider, and others for their persistent failure to mark a sweeping definition-change that completely broke the continuity of the data they were reporting.  I should write to them all and apologise for the fuss, because their indiscretion has been completely overshadowed by the most ghastly abuse of data I've ever seen.
+
+But if ever there was a case of truely attrocious, and utterly deceptive use of data being deliberately used to draw exactly the wrong conclusion, the gong definitely has to go to UBS investment bank, for this graph, which I noticed in the AFR a couple of weeks ago [published](http://www.afr.com/news/economy/the-great-wage-squeeze--the-economy-picks-up-but-wage-growth-remains-at-a-low-20170825-gy3yg9) by Jacob Greber:
+
+```{r, fig.align="center", out.width = 500, fig.cap="The Australian Financial Review plumbs new depths in quality of data presentation"}
+
+ knitr::include_graphics("images/AFRGreberUBS.jpg")
+ 
+```
+
+The litany of data-sins committed in this graph is so galling that I barely know where to start, except they've at least failed to point out the definition change in Net Overseas Migration in 2006, so they're at least as bad as everyone else.  But there's so much more.  The columns here are at quarterly frequency, but the rate implied is actual annual, so we can't really guage the order of magnitude. 'Migration' isn't defined, though I can see they mean the offical Net Overseas Migration statistic.  Read literally, the label 'Short-term arrivals' suggests one-way movement, though one suspects (or hopes) they mean net arrivals.  The only clear lable is "POPULATION GROWTH", which is the only one which is absolutely uncontravertabely incorrect, since there's no inclusion of births and deaths, let alone any justification for stacking up the official Net Overseas Migration with a selective, small sub-set of short-term movements.
+
+Now another Fairfax journalist, Chis Kohler from Domain has run a little feature about the how the UBS's 'People Growth' measure is actually running at 3.5%, citing the same graph, (which at least in his is properly labeled):
+
+```{r, fig.align="center", out.width = 500, fig.cap="The Australian Financial Review plumbs new depths in quality of data presentation"}
+
+ knitr::include_graphics("images/PeopleGrowth1.png")
+ 
+```
+
+Moreover Chris decently took it upon himself to explain just what was going on in this graph, and why additional skyward line was added. Sadly Chris missed the triple-asterisk, pointing out the epic flaw in heart of this graph which makes it so utterly erroneous, misleading, and altogether an absolute abomination on the analytic and data-serious community that I once thought UBS might belong to.  So sadly the essential point of his video and article is a 100% true-blue, genuine, factual blunder.
+
+> ***Does not adjust for potential double counting
+
+GULP. Contrary to Chris's assertion in the video, Net Overseas Migration does not just include permanent residents.  Infact, it has absolutely nothing to do with someones visa status at all.  As I've [laboured before](https://www.quixoticquant.com/post/the-missing-million/), it's an arbitrary definition that counts someone as 'resident' if they are here for 12 out of 16 months cumulatively, and non-resident if they are overseas for the same cumulative part of any 16 months. Three quarters is the rule that determines if you're resident or not.  
+
+Furthermore, as I've also [pointed out before](https://www.quixoticquant.com/post/missing-million-part-ii/), a large number of the person-years present (akin to what UBS calls 'people') caused by Short-Term Arrivals are actually contributed by relatively long, Short-Term Arrivals, of 6-12 months:
+
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Longish Short-Term Arrivals than one month have the largest contribution to persons absent"}
+# Impact of Departures by Time
+plot <- sheet_340106 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.2.wee.and.und.1.mon.Pre.12m*22/365, col = "2 weeks to a month"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.wee.Pre.12m*11/365, col = "1 to 2 weeks"))+
+  geom_line(aes(y = Mov.Und.1.wee.Pre.12m*4/365, col = "under 1 week"))+
+  geom_line(aes(y = Num.of.mov.1.and.und.2.mon.Pre.12m*46/365, col = "1 to 2 months"))+
+  geom_line(aes(y = Num.of.mov.2.and.und.3.mon.Pre.12m*77/365, col = "2 to 3 months"))+
+  geom_line(aes(y = Num.of.mov.3.and.und.6.mon.Pre.12m*165/365, col = "3 to 6 months"))+
+  geom_line(aes(y = Num.of.mov.6.and.und.12.mon.Pre.12m*273/365, col = "6 to 12 months"))+
+  labs(title = "Person-Years present from Short Term Arrivals")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70))
+
+```
+
+If these arrivals are students for example, who are here for a course/visa that lasts a couple of years, but take a sizeable 'holiday' back home during their course, it's almost certain that they'll become 'resident' under the 12/16 rule of Net Overseas Migration, as well as arriving 'Short-Term' as well as arriving at least twice, "Short Term" for Education in Australia.  So UBS's graph will actually triple-count those people, or worse, if they take another trip home.
+
+Why would they present such data in the first place, if they know it's likely to present such misleading false conclusions?  The mind boggles. It's the most attrocious embarrassment for an investment bank. If I were wealthy I'd make sure that my money never went near the hands of people doing analysis like this.  
+
+## A recipe for data-deception 
+To see the full glory of the strange contortions that are required to build a graph like this, let's go through the raw data step by step.  First let's take the raw monthly data on short-term arrivals:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Monthly Short Term Arrivals by Purpose shows strong seasonality"}
+
+plot <- sheet_340106 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
+  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
+  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
+  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
+  geom_line(aes(y = Num.of.mov.Oth.not.sta, col = "Other and Not Stated"))+
+  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
+  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
+  
+  labs(title = "Short Term Movements Arrivals by Purpose")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 60, r = 70))
+
+```
+
+That's right, peer down the bottom there, you can just make out the education, but barely the employment lines.  Double-click on those items in the legend if you want to actually see what's going on.  It also helps a little bit to smooth out the data by looking at totals as per the previous 12 months:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Monthly Short Term Arrivals by Purpose over previous 12 months show trends, and magnitudes"}
+
+plot <- sheet_340106 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Con.Pre.12m, col = "Conferences"))+
+  geom_line(aes(y = Num.of.mov.Hol.Pre.12m, col = "Holidays"))+
+  geom_line(aes(y = Num.of.mov.Bus.Pre.12m, col = "Business"))+
+  geom_line(aes(y = Num.of.mov.Vis.fri.Pre.12m, col = "Visit Friends"))+
+  geom_line(aes(y = Num.of.mov.Oth.not.sta.Pre.12m, col = "Other and Not Stated"))+
+  geom_line(aes(y = Num.of.mov.Emp.Pre.12m, col = "Employment"))+
+  geom_line(aes(y = Num.of.mov.Edu.Pre.12m, col = "Education"))+
+  
+  labs(title = "Short Term Movements Arrivals by Purpose, Previous 12 Months")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 60, r = 70))
+
+```
+
+What's strange about this data, other than the trivally samll level of the Education and Employment lines?  Actually Short-Term arrivals have been surprisingly flat for much of the 2000s, particularly for Holidays, which is worrying for tourism.  It certainly contrasts to the Departures:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Monthly Short Term Departures by Purpose"}
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Con, col = "Conferences"))+
+  geom_line(aes(y = Num.of.mov.Hol, col = "Holidays"))+
+  geom_line(aes(y = Num.of.mov.Bus, col = "Business"))+
+  geom_line(aes(y = Num.of.mov.Vis.fri, col = "Visit Friends"))+
+  geom_line(aes(y = Num.of.mov.Oth.not.sta, col = "Other and Not Stated"))+
+  geom_line(aes(y = Num.of.mov.Emp, col = "Employment"))+
+  geom_line(aes(y = Num.of.mov.Edu, col = "Education"))+
+  
+  labs(title = "Short Term Movements Departures by Purpose")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 60, r = 70))
+
+```
+
+Here we can see that there's been explosive growth in outbound holidays from Australia. 
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Monthly Short Term Departures by Purpose over previous 12 months show trends, and magnitudes"}
+
+plot <- sheet_3401010 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Num.of.mov.Con.Pre.12m, col = "Conferences"))+
+  geom_line(aes(y = Num.of.mov.Hol.Pre.12m, col = "Holidays"))+
+  geom_line(aes(y = Num.of.mov.Bus.Pre.12m, col = "Business"))+
+  geom_line(aes(y = Num.of.mov.Vis.fri.Pre.12m, col = "Visit Friends"))+
+  geom_line(aes(y = Num.of.mov.Oth.not.sta.Pre.12m, col = "Other and Not Stated"))+
+  geom_line(aes(y = Num.of.mov.Emp.Pre.12m, col = "Employment"))+
+  geom_line(aes(y = Num.of.mov.Edu.Pre.12m, col = "Education"))+
+  
+  labs(title = "Short Term Movements Departures by Purpose, Previous 12 Months")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 60, r = 70))
+
+```
+
+Education and Employment are also tiny compared to every other kind of Short-Term Departure.  But most importantly, you can see that the magnitude of holiday departures is far larger than the arrivals.  Netting that out, we can see the net short term-movements by purpose:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Net Movements by Category"}
+
+dep_vec <- colnames(sheet_3401010)
+arr_vec <- colnames(sheet_340106)
+
+dep_vec <- dep_vec %>% 
+  map(~ paste0(., ".dep")) %>% 
+  unlist()
+
+arr_vec <- arr_vec %>% 
+  map(~ paste0(., ".arr")) %>% 
+  unlist()
+
+sheet_3401010_dep <- sheet_3401010
+names(sheet_3401010_dep) <- dep_vec
+colnames(sheet_3401010_dep)[colnames(sheet_3401010_dep)=="Date.dep"] <- "Date"
+
+sheet_340106_arr <- sheet_340106
+names(sheet_340106_arr) <- arr_vec
+colnames(sheet_340106_arr)[colnames(sheet_340106_arr)=="Date.arr"] <- "Date"
+
+joint_sheet_3401 <- sheet_3401010_dep %>% 
+  inner_join(sheet_340106_arr, by = "Date")
+joint_sheet_3401 <- joint_sheet_3401 %>% 
+  mutate(Net.Num.of.mov.Con = Num.of.mov.Con.arr - Num.of.mov.Con.dep,
+         Net.Num.of.mov.Hol = Num.of.mov.Hol.arr - Num.of.mov.Hol.dep,
+         Net.Num.of.mov.Bus = Num.of.mov.Bus.arr - Num.of.mov.Bus.dep,
+         Net.Num.of.mov.Emp = Num.of.mov.Emp.arr - Num.of.mov.Emp.dep,
+         Net.Num.of.mov.Edu = Num.of.mov.Edu.arr - Num.of.mov.Edu.dep,
+         Net.Num.of.mov.Vis.fri = Num.of.mov.Vis.fri.arr - Num.of.mov.Vis.fri.dep,
+         Net.Num.of.mov.Oth.not.sta = Num.of.mov.Oth.not.sta.arr - Num.of.mov.Oth.not.sta.dep,
+         Net.Num.of.mov.Con.Pre.12m = Num.of.mov.Con.Pre.12m.arr - Num.of.mov.Con.Pre.12m.dep,
+         Net.Num.of.mov.Hol.Pre.12m = Num.of.mov.Hol.Pre.12m.arr - Num.of.mov.Hol.Pre.12m.dep,
+         Net.Num.of.mov.Bus.Pre.12m = Num.of.mov.Bus.Pre.12m.arr - Num.of.mov.Bus.Pre.12m.dep,
+         Net.Num.of.mov.Emp.Pre.12m = Num.of.mov.Emp.Pre.12m.arr - Num.of.mov.Emp.Pre.12m.dep,
+         Net.Num.of.mov.Edu.Pre.12m = Num.of.mov.Edu.Pre.12m.arr - Num.of.mov.Edu.Pre.12m.dep,
+         Net.Num.of.mov.Vis.fri.Pre.12m = Num.of.mov.Vis.fri.Pre.12m.arr - Num.of.mov.Vis.fri.Pre.12m.dep,
+         Net.Num.of.mov.Oth.not.sta.Pre.12m = Num.of.mov.Oth.not.sta.Pre.12m.arr - Num.of.mov.Oth.not.sta.Pre.12m.dep)
+         
+
+plot <- joint_sheet_3401 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Net.Num.of.mov.Con, col = "Conferences"))+
+  geom_line(aes(y = Net.Num.of.mov.Hol, col = "Holidays"))+
+  geom_line(aes(y = Net.Num.of.mov.Bus, col = "Business"))+
+  geom_line(aes(y = Net.Num.of.mov.Vis.fri, col = "Visit Friends"))+
+  geom_line(aes(y = Net.Num.of.mov.Oth.not.sta, col = "Other and Not Stated"))+
+  geom_line(aes(y = Net.Num.of.mov.Emp, col = "Employment"))+
+  geom_line(aes(y = Net.Num.of.mov.Edu, col = "Education"))+
+  
+  labs(title = "Short Term Net Movements by Purpose")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 60, r = 70))
+
+```
+
+Now we can really see the decptiveness of UBS's selection. Not only are Employment and Education relatively tiny in the overall scheme of Short-Term Movements, they're essentially the only two that net out to a positive result.  This is even clearer in the previous 12-months trend:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Net Short-Term Movements Previous 12 months by Category"}
+plot <- joint_sheet_3401 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Net.Num.of.mov.Con.Pre.12m, col = "Conferences"))+
+  geom_line(aes(y = Net.Num.of.mov.Hol.Pre.12m, col = "Holidays"))+
+  geom_line(aes(y = Net.Num.of.mov.Bus.Pre.12m, col = "Business"))+
+  geom_line(aes(y = Net.Num.of.mov.Vis.fri.Pre.12m, col = "Visit Friends"))+
+  geom_line(aes(y = Net.Num.of.mov.Oth.not.sta.Pre.12m, col = "Other and Not Stated"))+
+  geom_line(aes(y = Net.Num.of.mov.Emp.Pre.12m, col = "Employment"), size = 1, linetype = 3)+
+  geom_line(aes(y = Net.Num.of.mov.Edu.Pre.12m, col = "Education"), size = 1, linetype = 3)+
+  labs(title = "Short Term Net Movements by Purpose Previous 12 months")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 60, r = 70))
+
+```
+
+I wasn't kidding about the students taking holidays back home.  Here it is in the statistics.  As I've [previously argued](https://www.quixoticquant.com/post/the-state-of-debate-a-bird-s-eye-on-migration/), Australia is a great place to arrive long-term (like to study) and take frequent trips away from, whilst arriving back each time for some longer-term (but quite possibly still temporary) purpose. That's what explains the seemingly impossible phenomenon of Australia losing a couple of million people annuall, for a decade, on holidays. 
+
+Or, you could ignore all that and select the two largest positive netting lines, and add them up, we can get UBS's concocted addition to 'people-growth':
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Re-Creating People"}
+
+joint_sheet_3401 <- joint_sheet_3401 %>% 
+  mutate(Net.Emp.Edu.12m = Net.Num.of.mov.Emp.Pre.12m + Net.Num.of.mov.Edu.Pre.12m)
+
+plot <- joint_sheet_3401 %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Net.Emp.Edu.12m))+
+   labs(title = "Net Education and Employment Short Term Movements")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 60, r = 70))
+
+```
+
+And if we pile on top of that the Net Overseas Migration figure, and ignore the definition change in 2006 which makes the data incomparable, you can finally see where UBS got their data:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Re-Creating People"}
+match_sheet_3401 <- joint_sheet_3401 %>% 
+  filter(Date %in% sheet_310101$Date)
+
+joint_sheet_310101 <- joint_sheet_310101 %>% 
+  inner_join(match_sheet_3401, by = "Date")
+
+people_sheet <- joint_sheet_310101 %>% 
+  select(Date, Net.Emp.Edu.12m, Net.Ove.Mig.Aus.Pre.12m, NOM.12.12.Pre.12, NOM.12.16.Pre.12) %>% 
+  gather(key, value, -Date)
+
+people_sheet$key <- factor(people_sheet$key, levels = c( "NOM.12.12.Pre.12", "NOM.12.16.Pre.12","Net.Emp.Edu.12m", "Net.Ove.Mig.Aus.Pre.12"))
+ 
+plot <- people_sheet %>% 
+  filter(key %in% c("Net.Emp.Edu.12m", "NOM.12.12.Pre.12", "NOM.12.16.Pre.12")) %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_bar(aes( y = value, fill = key), position = "stack", stat = "identity")+
+  labs(title = "NOM plus Net Education and Employment Short Term Movements")+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  theme(legend.title=element_blank())
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 60, r = 70))
+
+
+```
+
+How do we improve on this?  Think clearly and carefully about which numbers do and don't add up or overlap, and find the ones which actually reflect real changes in Physically Present Population due to people coming and going overseas. Which two numbers are those?  Drumroll please.  Total Arrivals less Total Departures.  It's not rocket-science.  And they tell us the opposite of what UBS is trying to tell us, for the last decade or so, people growth has actually been much smaller than official Net Overseas Migration.  The cumulatiove effects of all movements in and out of the country have added on average just over 100,000 people per year, nothing like the ridiculous 600,000+ figure implied by the UBS graph:
+
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Long-Term Cumulative Net Movements shows steady linear growth"}
+
+sheet_arr_dep <- sheet_arr_dep %>% 
+  mutate(count = row_number(),
+         years = count/12,
+         month = as.factor(month(Date)))
+
+linmod = lm(cumsum(sheet_arr_dep$net.movements) ~ (sheet_arr_dep$years))
+#summary(linmod)
+rate <- linmod$coefficients[2]
+
+
+plot <- sheet_arr_dep %>% 
+  #filter(Date > "2009-12-02 GMT") %>% 
+  ggplot(aes(x = Date, y = cumsum(net.movements)))+
+  geom_line()+
+  stat_smooth(method = 'lm', formula = y ~ poly(x,1), se= FALSE, colour = "red", size = 0.5)+
+  labs(title = paste0("Cumulative Net Movements and trend (", round(rate, digits = 0), " per annum)"))+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+ 
+ ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 80, b = 70, r = 70))
+
+```
+
+And even Net Overseas Migration, on its own, has substantially over-stated the actual growth in the Physically Present Population (which we might call 'people'), which is now a million people less than the arbitrarily defined 'Estimated Resident Population':
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "The cumulative discrepancy between official NOM and the population actually in Australia has exploded"}
+
+plot <-ggplot(joint_sheet_310101, aes(x = Date, text = as_date(Date)))+
+  geom_col(aes(x = Date, y = cum.discrepancy, colour = "Cumulative Discrepancy"), fill = "grey", alpha = 0.6)+
+  geom_line(aes(y = NOM.12.12.Pre.12, col = "NOM 12/12 Definition"), size = .8)+
+  geom_line(aes(y = NOM.12.16.Pre.12, col = "NOM 12/16 Definition"), size = .8)+
+  geom_line(aes(x = Date, y = net.movements.Pre.12m, colour = "Net Overseas Movements"), size = .8)+
+  scale_colour_manual("", 
+                      breaks = c("Cumulative Discrepancy", "Net Overseas Migration", "Net Overseas Movements"),
+                      values = c("grey30", "blue", "red", "magenta1" ))+
+  labs(title = "Net Overseas Migration vs Net Movements, and Cumulative Discrepancy")+
+  geom_vline(xintercept = as.numeric(sheet_340101$Date[date_change]), linetype = 4, size = 0.4) +
+  scale_y_continuous("Number")+
+  geom_text(x = as.numeric(sheet_340101$Date[date_change - 40]), y = 750000, label =  "Break in 
+            Methodology", size =3)+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())
+  
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=70, t = 100, b = 70, r = 70),
+         legend = list(y = 0.9, x = 0.1))
+
+```
+
+So when Chris Kohler says that Net Overseas Migration is only half the story, he's kinda right, but in all the wrong ways.  Actually NOM is almost double the story, if he's talking about the actual number of people physically here. 
+
+Australian cities might be feeling busier and more crowded for a range of reasons. Low unemployment, More part-time jobs, increasingly city-centric job growth, higher labour mobility, longer commutes, urban development along concentrated growth corridors, poor infrastructure, a decline in working from home, more female in workforce participation, increasing use of day-care, the list goes on. Unmeasured population growth, or 'people growth' isn't one of them. 
