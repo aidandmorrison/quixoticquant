@@ -517,7 +517,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 Here a couple of things are striking.  In particular, the under-1-week movement trend is ususally the highest, followed by 1-2 weeks.  People arriving in Australia seem to report a far shorter intended stay than those leaving.  And, the total number of arrivals is far far lower than the departures.  This is also consistent with the hypothesis I've [outlined earlier](https://www.quixoticquant.com/post/the-state-of-debate-a-bird-s-eye-on-migration/), that we're a hard pace to get to for a short trip, but a good place to leave from for one. 
 
-```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Departures of longer than one month have the largest contribution to persons absent"}
+```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Relatively long 'Short-Term' Arrivals have the largest contribution to persons absent"}
 # Impact of Departures by Time
 plot <- sheet_340106 %>% 
   ggplot(aes(x = Date, text = as_date(Date)))+
