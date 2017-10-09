@@ -201,9 +201,9 @@ Unfortunately Chris missed the triple-asterisk, pointing out the epic flaw in he
 
 > ***Does not adjust for potential double counting
 
-GULP. Contrary to Chris's assertion in his article, Net Overseas Migration does not just include permanent residents.  Infact, it has absolutely nothing to do with someone's visa status at all.  As I've [laboured before](https://www.quixoticquant.com/post/the-missing-million/), it's an arbitrary definition that counts someone as 'resident' if they are here for 12 out of 16 months cumulatively, and non-resident if they are overseas for the same cumulative part of any 16 months. Three quarters is the rule that determines if you're resident or not.  
+GULP. Contrary to Chris's assertion in his article, Net Overseas Migration does not just include permanent residents.  Infact, it has absolutely nothing to do with someone's visa status at all.  As I've [laboured before](https://www.quixoticquant.com/post/the-missing-million/), it's an arbitrary definition that counts someone as 'resident' if they are here for 12 out of 16 months cumulatively, and non-resident if they are overseas for the same cumulative part of any 16 months.  Three quarters is the rule that determines if you're resident or not.  It's a rule designed specifically to capture the 'expats' that Chris dwell so heavily on as if they're the missing piece. 
 
-Furthermore, as I've also [pointed out before](https://www.quixoticquant.com/post/missing-million-part-ii/), a large number of the person-years present (akin to what UBS calls 'people') caused by Short-Term Arrivals are actually contributed by relatively long, Short-Term Arrivals, of 6-12 months:
+Furthermore, as I've also [pointed out before](https://www.quixoticquant.com/post/missing-million-part-ii/), a large number of the person-years present (akin to what UBS calls 'people') caused by Short-Term Arrivals are actually contributed by relatively long Short-Term Arrivals, of 6-12 months:
 
 
 ```{r, warning=FALSE, message= FALSE, fig.align="center", fig.cap="Longish Short-Term Arrivals than one month have the largest contribution to persons absent"}
@@ -229,7 +229,7 @@ ggplotly(plot, tooltip = c("text", "y")) %>%
 
 If these arrivals are students who are here for a course/visa that lasts a couple of years, but take a sizeable 'holiday' back home or elsewhere overseas during their course, it's almost certain that they'll become 'resident' under the 12/16 rule of Net Overseas Migration, as well as arriving at least twice, "Short Term" for Education in Australia.  So UBS's graph will actually triple-count those people, or worse, if they take another trip home.
 
-Why would UBS ever present such data in the first place, if they know it's likely to present such completely misleading false conclusions?  The mind boggles. It's the pinnacle of embarrassment for an investment bank. If I were wealthy I'd make sure that my money never went near the hands of people doing analysis like this.  
+Why would UBS ever present such data in the first place, if they know it's likely to present such completely misleading false conclusions?  The mind boggles.  Perhaps they don't even realise.  It's the pinnacle of embarrassment for an investment bank. If I were wealthy I'd make sure that my money never went near the hands of people doing analysis like this.  
 
 ## A recipe for data-deception 
 To see the full glory of the strange contortions that are required to build a graph like this, let's go through the raw data step by step.  First let's take the raw monthly data on short-term arrivals:
