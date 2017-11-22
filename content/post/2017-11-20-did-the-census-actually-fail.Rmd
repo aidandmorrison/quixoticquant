@@ -1,0 +1,450 @@
+---
+title: "Did the census actually fail?"
+author: Aidan Morrison
+date: '2017-11-20'
+thumbnail: "images/IndoNZ3.png"
+slug: did-the-census-actually-fail
+categories:
+  - Demographics
+  - Economics
+  - Migration
+tags:
+  - ABS
+  - Ausecon
+  - Census
+  - Immigration
+  - Statistics
+draft: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r get_data, include=FALSE}
+library(tidyverse)
+library(stringr)
+library(gdata)
+library(lubridate)
+library(plotly)
+library(UtilsQQ)
+library(ggplot2)
+
+
+
+sheet_310101 <- readxl::read_xls("data/310101.xls", sheet = 2)
+sheet_310101 <- good_names(sheet = sheet_310101)
+meta <- stash_meta(sheet_310101)
+meta <- good_names(meta, meta = TRUE)
+sheet_310101 <- cut_meta(sheet_310101)
+sheet_310101 <- good_date(sheet_310101)
+sheet_310101 <- to_numeric(sheet_310101)
+sheet_310101 <- nom_units(sheet_310101, meta)
+sheet_310101 <- inst_ann(sheet_310101, meta)
+sheet_310101 <- prev_12_month(sheet_310101, meta)
+
+sheet_340101 <- readxl::read_xls("data/340101.xls", sheet = 2)
+
+sheet_340101 <- good_names(sheet = sheet_340101)
+meta1 <- stash_meta(sheet_340101)
+meta1 <- good_names(meta1, meta = TRUE)
+meta <- bind_rows(meta, meta1)
+sheet_340101 <- cut_meta(sheet_340101)
+sheet_340101 <- good_date(sheet_340101)
+sheet_340101 <- to_numeric(sheet_340101)
+sheet_340101 <- nom_units(sheet_340101, meta)
+sheet_340101 <- inst_ann(sheet_340101, meta)
+sheet_340101 <- prev_12_month(sheet_340101, meta)
+
+sheet_340102 <- readxl::read_xls("data/340102.xls", sheet = 2)
+
+sheet_340102 <- good_names(sheet = sheet_340102)
+meta2 <- stash_meta(sheet_340102)
+meta2 <- good_names(meta2, meta = TRUE)
+meta <- bind_rows(meta, meta2)
+sheet_340102 <- cut_meta(sheet_340102)
+sheet_340102 <- good_date(sheet_340102)
+sheet_340102 <- to_numeric(sheet_340102)
+sheet_340102 <- nom_units(sheet_340102, meta)
+sheet_340102 <- inst_ann(sheet_340102, meta)
+sheet_340102 <- prev_12_month(sheet_340102, meta)
+
+```
+
+```{r, fig.align="center", warning=FALSE, include=FALSE, message= FALSE, fig.cap = "Net Movement figures don't replicate Net Overseas Migration"}
+
+
+
+sheet_310101 <- sheet_310101 %>% 
+  mutate(NOM.12.12.Pre.12 = (case_when(Date < "2006-09-01 GMT" ~ Net.Ove.Mig.Aus.Pre.12m)),
+         NOM.12.16.Pre.12 = (case_when(Date >= "2006-09-01 GMT" ~ Net.Ove.Mig.Aus.Pre.12m)))
+
+sheet_arr_dep <- bind_cols(sheet_340101, sheet_340102)
+sheet_arr_dep <- sheet_arr_dep %>% 
+  mutate(net.movements = (Num.of.mov.Tot.Arr - Num.of.mov.Tot.Dep),
+         net.per.long.term = (Num.of.mov.Per.and.Lon.ter.Arr - Num.of.mov.Per.and.Lon.ter.Dep),
+         net.movements.Pre.12m = (Num.of.mov.Tot.Arr.Pre.12m - Num.of.mov.Tot.Dep.Pre.12m)
+  )
+
+match_sheet_arr_dep <- sheet_arr_dep %>% 
+  filter(Date %in% sheet_310101$Date)
+
+joint_sheet_310101 <- sheet_310101 %>% 
+  inner_join(match_sheet_arr_dep, by = "Date")
+
+joint_sheet_310101 <- joint_sheet_310101 %>% 
+  mutate(Net.Ove.Mig.Aus.Pre.12m.per.ERP = (Net.Ove.Mig.Aus.Pre.12m/Est.Res.Pop.ERP.Aus),
+         net.movements.Pre.12m.per.ERP = (net.movements.Pre.12m/Est.Res.Pop.ERP.Aus),
+         net.movements.smooth.quarter = net.movements.Pre.12m/4,
+         net.change.ppp.quarter = net.movements.smooth.quarter + Nat.Inc.Aus,
+         cum.net.movements = cumsum(net.movements.Pre.12m/4),
+         cum.Net.Ove.Mig.Aus = cumsum(Net.Ove.Mig.Aus),
+         cum.discrepancy = cum.Net.Ove.Mig.Aus - cum.net.movements,
+         Phy.Pre.Pop.PPP.Aus = Est.Res.Pop.ERP.Aus - cum.discrepancy,
+         Net.Ove.Mig.Aus.Pre.12m.per.PPP = Net.Ove.Mig.Aus.Pre.12m/Phy.Pre.Pop.PPP.Aus,
+         net.movements.Pre.12m.per.PPP = net.movements.Pre.12m/Phy.Pre.Pop.PPP.Aus
+  )
+
+```
+
+It would be nice to think that the Census was a good hard back-stop to demographic statistics.  Every five years we lavish our statisticians with enough of a budget to attempt to poll 100% of households, rather than trying to extrapolate from tiny surveys and samples.  It's a chance to peer into some of the more detailed aspects of our demographic composition, including how many languages, and bedrooms, we have in our homes.  But far more importantly, the Census acts a stock-take of our contries most important assets: it's people.  Every month or quarter we employ statisticans to collect and publish the data on all the 'flows' of people, their movements in and out of the country, and their births and deaths. But to arrive at a total number of our stock (population), we rely on some anchor-point a some starting level, or an occasional check on the entire stock.  That's what the Census is.  Australia is like a company that conducts millions of transactions each year and has an accounting department keeping track of the Profit and Loss (P&L) report every month, but is only able to get a bank statement every five years to confirm that dollars we think we have are actually there, to make a solid report of the Balance Sheet. 
+
+So what was the result of the last Census? The headlines will tell you that the confirmation was achieved.  The Estimated Resident Population (ERP) was 24.25 Million as at the 9th of August, only a whisker away from the 24.31 million that the P&L report (series 3101) reported at the time. However, as I've noted at some length in an earlier [blog post](https://www.quixoticquant.com/post/the-missing-million/) ERP has quite a bit of baggage, particularly associated with the definition of the word 'resident'.  Furthermore, in the last ten years it's systematically diverged from an alternative, less arbitrary statistic which can be derived from ABS numbers, the Physically Present Population (PPP), which was now about a million people lower than ERP. 
+
+The unspoken news is that the last Census published a result which is severely inconsistent with the observed flows of the PPP. Why is this big news?  Because the ERP is actually derived from observations of the flows which make up the PPP.  PPP is the hard number, ERP is a derived number which relies upon a bunch of arbitrary classifications of people being 'resident' when they're not actually here, and not 'resident' when they are. So if you don't know where people are with any confidence, you can't claim to know even the starting point for figuring out whether they're resident.  You've only coincidentally (or deliberately) arrived at a confirmatroy result of the derived figure (ERP) by using all your fudge-factors to bury the contradictions and inconsistencies in your PPP. 
+
+It seems that in this respect the Census may have actually failed.  Or, if we take it at face value, the Census is telling us that around 350,000 people (more than the population of Canberra) somehow slipped into Australia without passing a customs gate, or were borne off the grid without getting a birth-certificate, and made their way into households that filled in a Census form, or should have.  (I.e, they're not living in some massive un-noticed commune in the outback.)  Unless there's some considerable mistake in my working below, (please let me know if you find one, I'd love to hear) the ABS has no idea how many people are here to the level of accuracy that they claim.  Which means that no-one does, which can't be a good thing.
+
+Check out my working below, and get ready to dust off some conspiracy theories about who hacked the Census, and why, if you can't find my error.   My money is still on a good old-fashioned bureaucratic bungle. 
+
+In I challenged the notion that Australia's migration rate is as high as it actually seems, but pointing out the widening gap between the officially reported Estimated Resident Population (ERP) and the Physically Present Population (PPP), as derived by summing all births, deaths and overseas movements, irrespective of visas, lenghth of stay etc. In this post, I want to follow up by seeing whether the Census held last year confirms or rejects my view that our perceived population growth might be overstated.
+
+In a teaser for the topic, I posted this graph, which shows how the ERP and PPP compare to two census figures for the PURP, (the count at the Place of Usual Residence).
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, include=FALSE, fig.cap = "An assortment of alternative population measurements"}
+Date <- c(as.POSIXct(as_date( "2011-09-09 GMT")))
+Cen.Pop <- c( (10634012 + 10873706))
+Census_2011 <- tibble(Date, Cen.Pop)
+
+Date <- c(as.POSIXct(as_date("2016-09-09 GMT")))
+Cen.Pop <- c(23401892)
+Census_2016 <- tibble(Date, Cen.Pop)
+
+plot<- ggplot(joint_sheet_310101, aes(x = Date, y = Est.Res.Pop.ERP.Aus, text = as_date(Date)))+
+  #geom_vline(xintercept = as.numeric(sheet_340101$Date[date_change]), linetype = 4, size = 0.4) +
+  geom_line(aes(y = Est.Res.Pop.ERP.Aus, col = "ERP"), size =0.8)+
+  geom_line(aes(y = (Est.Res.Pop.ERP.Aus - cum.discrepancy), colour = "PPP"), linetype = 3, size = 1)+
+  geom_point(data = Census_2011, aes(x = Date, y = Cen.Pop, colour = "Census 2011 PURP"),  shape = 4, size = 3)+ 
+  geom_point(data = Census_2016, aes(x = Date, y = Cen.Pop, colour = "Census 2016 PURP"), shape = 4, size = 3)+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  labs(title = "Estimated Resident Population (ERP), 
+       Physically Present Population(PPP),
+Recent Census Place of Ususal Residence (PURP) Counts")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 100, b = 100, r = 100),
+         legend = list(y = 0.95, x = 0.1))
+
+
+```
+
+Whilst this seems to show some support to the idea that the ERP might be overstating things, I acknowledged at the time that PURP didn't technically correspond properly to either the ERP or PPP.  Some deeper digging was required to find out exactly which measurements from the census actually would. 
+
+The relevant tables which outline the actual calculation of all the different components can be found in these links for the [2006](http://www.abs.gov.au/ausstats/abs@.nsf/featurearticlesbytitle/0895259E4D2E019ECA25735D0013EB81?OpenDocument), [2011](http://www.abs.gov.au/ausstats/abs@.nsf/Previousproducts/3101.0Feature%20Article1Dec%202011?opendocument&tabname=Summary&prodno=3101.0&issue=Dec%202011&num=&view=), and [2016](http://www.abs.gov.au/AUSSTATS/abs@.nsf/Previousproducts/3101.0Feature%20Article1Dec%202016?opendocument&tabname=Summary&prodno=3101.0&issue=Dec%202016&num=&view=) Census results. 
+
+The formatting is so useless I manually copied the data just for the Australian totals into a table, negating interstate movements (which net to zero).
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Some Headline Census Population Statistics"}
+
+census <- readxl::read_xls("data/CensusData.xls", sheet = 1)
+census <- census %>%
+  mutate(Date = as_date(Date))
+
+
+plot <- census %>% 
+  filter(Stat %in% c("Census count, actual location", "Census count, place of usual residence", "equals - ERP as at 9 August 2016")) %>% 
+  ggplot(aes(x = Date, y = Value, col = Stat))+
+  geom_point()+
+  geom_line(size = 0.2)+
+  scale_y_continuous(labels = scales::comma) +
+  theme(legend.title = element_blank()) +
+  labs(title = "Census Population Statistics")
+ggplotly(plot, tooltip = c("x", "y")) %>% 
+  layout(margin=list(l=100, t = 80, b = 70, r = 60),
+         legend = list(y = 0.95, x = 0.05))
+
+
+```
+
+
+This chart shows that the Estimated Residential Population is consistently much higher than the number of people who are actually counted on Census night.  The difference between these figures can be explained by the following graph:
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Census Population Statistics Adjustments"}
+
+
+plot <- census %>% 
+  filter(!(Stat %in% c("Census count, actual location", "Census count, place of usual residence", "equals - ERP as at 9 August 2016"))) %>% 
+  ggplot(aes(x = Date, y = Value, col = Stat))+
+  geom_point()+
+  geom_line(size = 0.2)+
+  scale_y_continuous(labels = scales::comma) +
+  theme(legend.title = element_blank()) +
+  labs(title = "Census Population Adjustments")
+ggplotly(plot, tooltip = c("x", "y")) %>% 
+  layout(margin=list(l=100, t = 80, b = 70, r = 60))
+
+```
+
+These smaller numbers explain all the adjustments between the different higher numbers.  The process goes something like this:
+
+First you count the number of people who are present actually present at that actual location.  (This is called the count at place of enumeration.)  Subtracting the number of people who are present, but not 'usually' living in that place (overseas visitors) gives the 'count' of people in their ususal place of residence (PURP). However, to reach the Estimated Resident Population (ERP) which we use for our standard measure of population, the ABS adds back in all the 'residents' who are judged to be 'temporarily' overseas (over 600,000 of them, roughly double the number of foreigners temporarily here) as well as an additional adjustment for 'under-enumeration', short for "ummm... probably we missed some, add a few more to be safe?". 
+
+What seems particularly interesting is the rapid decline in the under-enumeration adjustment, as well as the dramatic increase in the number of residents 'temporarily' overseas.  The latter is not surprising.  As I've outlined extensively in an earlier post, Australia has an increasingly [part-time population](https://www.quixoticquant.com/post/movement-trends-speed-and-seasonality/), with overseas travel skyrocketing, and the Census strongly confirms this observation. (Or rather, relies on it.)  We'll come back to the under-enumeration a little later. 
+
+However, armed with these different statistics, it's possible to reconstruct census-based statistics which correspond to the Physically Present Population, as I've definied it.  We simply count all the people who were physically here (or assumed to be), but only those who are physically here (or assumed to be). That means we include the under-enumeration and demographic adjustment, but don't add or subtract any foreign visitors or residents.  This particular combination isn't actually added up as a total in any of the earlier reported headline statistics, but we can re-create it.
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Some Headline Census Population Statistics, with Census PPP estimate added"}
+
+
+census.wide <- census %>%
+  spread(Stat, Value) %>% 
+  mutate(Census.PPP = `Census count, actual location` + `plus - Allowance for under-enumeration` + `plus - Demographic adjustment`)
+
+census <- census.wide %>% 
+  gather(key = Stat, value = Value, -Date)
+
+
+plot <- census %>% 
+  filter(Stat %in% c("Census count, actual location", "Census count, place of usual residence", "equals - ERP as at 9 August 2016", "Census.PPP")) %>% 
+  ggplot(aes(x = Date, y = Value, col = Stat))+
+  geom_point()+
+  geom_line(size = 0.2)+
+  scale_y_continuous(labels = scales::comma) +
+  theme(legend.title = element_blank()) +
+  labs(title = "Census Population Statistics")
+ggplotly(plot, tooltip = c("x", "y")) %>% 
+  layout(margin=list(l=100, t = 80, b = 70, r = 60),
+         legend = list(y = 0.95, x = 0.05))
+
+
+```
+
+
+Unsurprisingly, the PPP is somewhat underneath the ERP. But more interesting is the fact that the gap isn't anything like what I had earlier observed in my [Missing Million post](https://www.quixoticquant.com/post/the-missing-million/). In fact, this shows the gap to be about 320,000 people, with the PPP at 23.93 million not that far below the ERP at 24.25 million.
+
+So, at face value, the Census seems to contradict my earlier observation that there was a cumulative discrepancy of about a million people.  But it's worth asking the question, how is this the case?  Let's go back to the comparison with the quarterly data-series of ERP, and my comparison with PPP:
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "ERP series, PPP, and the Census PPP observations"}
+
+colnames(census.wide) <- c("Date", "Census.Count", "Census.PURP","Census.PPP", "Census.ERP", "OS.Visitors", "Under.Enum", "Demo.Adj", "Residents.OS")
+
+census.slim <- census.wide %>% 
+  select(Date, Census.Count, Census.PURP, Census.PPP, Census.ERP) %>% 
+  gather(key = Stat, value = Value, -Date)
+
+plot<- joint_sheet_310101 %>% 
+  filter(Date > as_date("1990-01-01")) %>% 
+  ggplot(aes(x = Date, y = Est.Res.Pop.ERP.Aus, text = as_date(Date)))+
+  #geom_vline(xintercept = as.numeric(sheet_340101$Date[date_change]), linetype = 4, size = 0.4) +
+  geom_line(aes(y = Est.Res.Pop.ERP.Aus, col = "ERP"), size =0.8)+
+  geom_line(aes(y = (Est.Res.Pop.ERP.Aus - cum.discrepancy), colour = "PPP"), linetype = 3, size = 1)+
+  geom_point(data = census.slim, aes(x = as.POSIXct(Date, tz = "AEST"), y = Value, colour = Stat),  shape = 4, size = 3)+
+  #geom_point(data = Census_2016, aes(x = Date, y = Cen.Pop, colour = "Census 2016 PURP"), shape = 4, size = 3)+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  labs(title = "Census vs Quarterly Population Statistics")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 80, b = 60, r = 70),
+         legend = list(y = 0.95, x = 0.1))
+
+
+```
+
+At a glance this doesn't tell us a lot.  The ERP from Census was a bit high in the 2006, and a bit low in 2011.  However, that's probably to be expected given the massive [intercensal error](http://www.abs.gov.au/AUSSTATS/abs@.nsf/Previousproducts/3101.0Feature%20Article3Jun%202012?opendocument&tabname=Summary&prodno=3101.0&issue=Jun%202012&num=&view=) which was noted in that period. 
+
+What I'm keen to check is whether the lines of the more frequently recorded series can plausibly link up the other level-shifts between the census periods.  
+
+Let's focus simply on the ERP and PPP, since these are the only two comparable series and observations. To conduct the test, let's index the 2006 observations at zero (for both the Census and time series, as of September quarter), and see how the subsequent changes track over five years, and how close the running series come to matching the Census observations. We might call this just a plot of 'Intercensal Population Growth'. 
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Intercensal Population Growth between 2006 and 2011, shows an ERP discrepancy between 3101 and the Census"}
+
+init.series.ERP <- joint_sheet_310101 %>% 
+  filter(Date == as_date("2006-09-01")) %>% 
+  pull(Est.Res.Pop.ERP.Aus)
+
+init.series.PPP <- joint_sheet_310101 %>% 
+  filter(Date == as_date("2006-09-01")) %>% 
+  pull(Phy.Pre.Pop.PPP.Aus)
+
+init.census.ERP <- census.wide %>% 
+  filter(Date <= as_date("2006-09-01")) %>% 
+  pull(Census.ERP)
+
+init.census.PPP <- census.wide %>% 
+  filter(Date <= as_date("2006-09-01")) %>% 
+  pull(Census.PPP)
+
+cols <- c("Change in ERP" = "red", "Change in PPP" = "blue", "Census Change in ERP" = "red", "Census Change in PPP" = "blue")
+
+plot<- joint_sheet_310101 %>% 
+  filter(Date >= as_date("2006-09-01"), Date <= as_date("2012-01-01")) %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Est.Res.Pop.ERP.Aus - init.series.ERP, colour = "Change in ERP"), size =0.8)+
+  geom_line(aes(y = Phy.Pre.Pop.PPP.Aus - init.series.PPP, colour = "Change in PPP"), size = 0.8)+
+  geom_point(data = census.slim %>% filter(Date <= as_date("2012-09-01"), Stat == "Census.ERP"), aes(x = as.POSIXct(Date, tz = "AEST"), y = Value-init.census.ERP, colour = "Census Change in ERP"), shape = 5, size = 3)+
+  geom_point(data = census.slim %>% filter(Date <= as_date("2012-09-01"), Stat == "Census.PPP"), aes(x = as.POSIXct(Date, tz = "AEST"), y = Value-init.census.PPP, colour = "Census Change in PPP"),  shape = 4, size = 3)+
+  scale_colour_manual(name="Data Series",values=cols)+
+  #geom_point(data = Census_2016, aes(x = Date, y = Cen.Pop, colour = "Census 2016 PURP"), shape = 4, size = 3)+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  labs(title = "Discrepancy between 2006 and 2011 Census and Series 3101, 3401")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 80, b = 60, r = 100))
+
+
+```
+
+This shows that the Census ERP seemed quite a bit lower than the series would have seemed to suggest, but we know that this particular year was the time when an improvement in methods meant that a systematic error that could have been incorporated in all previous years was omitted.  It's not good, but at least it's known to be not good, and openly [discussed as such](http://www.abs.gov.au/AUSSTATS/abs@.nsf/Previousproducts/3101.0Feature%20Article3Jun%202012?opendocument&tabname=Summary&prodno=3101.0&issue=Jun%202012&num=&view=).  It would look substantially worse if the error hadn't been smoothed out over the previous 20 years in the time-series.  However, the good news is that the error, so to speak, can be made up/accommodated stretching a little bit all those fudge-factors around how 'Resident' is definied, which as I've laboured before, are inherently arbitrary and opaque.  This means that the change in number of people who are physically here (which the Census actually counts) comes reasonably close (well, within 50,000, or ~3%) of what one tracked by counting movements in and out of the country, and births and deaths during that period. 
+
+
+```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "Intercensal Population Growth between 2011 and 2016, shows a PPP discrepancy between 3101 and the Census"}
+
+init.series.ERP <- joint_sheet_310101 %>% 
+  filter(Date == as_date("2011-09-01")) %>% 
+  pull(Est.Res.Pop.ERP.Aus)
+
+init.series.PPP <- joint_sheet_310101 %>% 
+  filter(Date == as_date("2011-09-01")) %>% 
+  pull(Phy.Pre.Pop.PPP.Aus)
+
+init.census.ERP <- census.wide %>% 
+  filter(Date <= as_date("2012-09-01"), Date >= as_date("2010-09-01")) %>% 
+  pull(Census.ERP)
+
+init.census.PPP <- census.wide %>% 
+  filter(Date <= as_date("2012-09-01"), Date >= as_date("2010-09-01")) %>% 
+  pull(Census.PPP)
+
+cols <- c("Change in ERP" = "red", "Change in PPP" = "blue", "Census Change in ERP" = "red", "Census Change in PPP" = "blue")
+
+plot<- joint_sheet_310101 %>% 
+  filter(Date >= as_date("2011-09-01"), Date <= as_date("2017-01-01")) %>% 
+  ggplot(aes(x = Date, text = as_date(Date)))+
+  geom_line(aes(y = Est.Res.Pop.ERP.Aus - init.series.ERP, colour = "Change in ERP"), size =0.8)+
+  geom_line(aes(y = Phy.Pre.Pop.PPP.Aus - init.series.PPP, colour = "Change in PPP"), size = 0.8)+
+  geom_point(data = census.slim %>% filter(Date <= as_date("2017-09-01"), Date >= as_date("2007-09-01"), Stat == "Census.ERP"), aes(x = as.POSIXct(Date, tz = "AEST"), y = Value-init.census.ERP, colour = "Census Change in ERP"), shape = 5, size = 3)+
+  geom_point(data = census.slim %>% filter(Date <= as_date("2017-09-01"), Date >= as_date("2007-09-01"), Stat == "Census.PPP"), aes(x = as.POSIXct(Date, tz = "AEST"), y = Value-init.census.PPP, colour = "Census Change in PPP"),  shape = 4, size = 3)+
+  scale_colour_manual(name="Data Series",values=cols)+
+  #geom_point(data = Census_2016, aes(x = Date, y = Cen.Pop, colour = "Census 2016 PURP"), shape = 4, size = 3)+
+  scale_y_continuous(labels = scales::comma) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank())+
+  labs(title = "Discrepancy between 2011 and 2016 Census and Series 3101, 3401")
+
+ggplotly(plot, tooltip = c("text", "y")) %>% 
+  layout(margin=list(l=100, t = 80, b = 60, r = 100))
+
+
+```
+
+Now the table seems to have turned.  The ERP is back on track, but now there is a massive discrepancy between the change in PPP recorded by the time series, and the Census. This time the difference is 346,375 people, or a whopping 23%.
+
+This is seriously worrying, only because of all the time-series that the ABS records, PPP is one of the only one that's composed of data which should be recoreded in its entirety, rather than extrapolated from small surveys.  Unless there are large numbers of border crossings that aren't recorded by customs (which would be a national security disaster, amongst other things), or a large number of home-births that never get recorded, or a large number of murders/missing persons who are also never reported, an error of anything like 300,000 people over a five year time-period is virtually unthinkable.  GDP, inflation, savings rates, basically everything else the ABS does has a really significant potential for some sample error, which could become relatively large by extrapolating to the whole population.  Births, Deaths, and overseas border crossings are as hard a statistic as one can find.  Which leads one to ask the next question obvious question.  How much uncertainty can there be in a Census?
+
+Happily there's a weighty 80-page report called "Report on the Quality of 2016 Census Data", produced by some group called "Census Independent Assurance Panel to the Australian Statistician".  Sounds like exactly what I'm after.  The group includes a clutch of important sounding people, judging by their professorships and AM/AO titles, and on the first page of the Executive Summary conclude that:
+
+>The Panel has concluded that the 2016 Census data is fit-for-purpose and can be used with confidence.  The 2016 Census data is of comparable quality to the 2011 and 2006 Census data.
+
+Being one of the few people who've taken the time to attempt to grapple with how the 2011 Census data proved that the 2006 Census included a flaw which resulted in such a large intercensal error (~350,000 people) that the difference was agreed to be smudged over 20 years, and still resulted in a large discrepancy for 2011, that's not a statement that fills me with confidence. 
+
+But the report is well laid-out and does a good job (I think) of explaining all the different elements that go into the Census statistics, with plenty of focus on the population statistics, in particular the process that is used to derive the 'Allowance for under-enumeration', or the "ummm.... maybe we missed some" factor.
+
+##Post Enumeration Survey and the Net Undercount
+The good news is that there's a process, the bad news is what the process is.  To arrive at that seemingly small adjustment of 226,500 people (actually this document specifies that it is 226,407 people) there are few steps that need to be undertaken. In truth, of the 23,397,296 'usual residents' of Australia that the Census counted on Census night, a full 1,183,519 of those people didn't actually respond to the Census, rather the ABS 'imputed' them into dwellings that didn't respond.  That's around 5% of people.  
+
+However, there's a process for testing how well this 'imputation' worked, as well as identifying other potential errors (such as people including people in the household who shouldn't be counted, or not including those who should be).  That process is called the Post Enumeration Survey (PES).  It's a survey of 50,000 dwellings (or 0.5%) that takes place soon after the Census period. The ABS conducts this survey in phone or in person, where they try to establish as best they can who was eligible to be counted in the Census in that dwelling, and whether they actually were counted in either a returned form, or by imputation, correctly. 
+
+It goes something like this, and to my knowledge, the survey of 50,000 dwellings of which 42,463 responded, is basically the only source used to arrive at these numbers.
+
+First there's the 'Gross undercount for people on Census forms', which are the people who should have been included in a form that was returned and weren't, or were in a dwelling that wasn't known to Census, and never got a form.  (Don't ask me how they find the people who are in the latter category.)  That was 1,018,775. 
+
+(Why all these numbers are to six or seven significant figures when the survey was of 0.4% of the target  population, I have no idea.  Heavy sigh.)
+
+Next is the 'Gross overcount for people on Census forms'.  This one is for people who are included on multiple forms, or multiple times over by error, 302,194 last Census.  Those two numbers net out to a 'Net undercount for people on Census forms', or 716,581 people, or 3.0% of population.
+
+Then we have to add in "Net overcount for people imputed". This, for me is the really important part, and where I take massive issue with the method.  Less than 5% of dwellings who were thought to be occupied on Census night didn't respond, despite all the reminders and visits, so the component of the component of the Post Enumeration Survey who fit represent that imputed part must be roughly a similar proportion.  That's ~5% of a 50,000 household survey, or perhaps 2500 households. Appendix B in this document informs us that actually only 42,436 households responded to the PES, so that fraction is likely to be closer to 2,100. 
+
+However, that's just me translating the fractions across, in actual fact, what we're talking about is an attempt to get an accurate sample of the group of people who didn't respond to a letter, phone-call or visit to prompt them to return a census form, by giving them a phone-call or visit nine or ten weeks later.  The potential for sample bias here is enormous, particulalry if the [part-time population](https://www.quixoticquant.com/post/movement-trends-speed-and-seasonality/) that I've discussed earlier is actually at work.  Plenty of people, (and not just Baby Boomers, as Cameron Murray suggested) spend a considerable amount of time overseas, but are still officiall 'resident' since they don't spend more than 12 out of any 16 overseas. So, the people who don't respond to the Census but are imputed, and also aren't found by the PES (which can't then confirm them as either an overcount) are potentially a large, and highly correlated group.  Whilst discussing the possibility that they are correlated in Appedix B, This is illustrated in a table in the Appendix A of the report:
+
+```{r, fig.align="center", out.width = 600, fig.cap="ABS expressing the assumption that non-respondents to both Census and PES are independent"}
+
+
+knitr::include_graphics("images/PESA1.png")
+
+```
+
+Here, the ABS clearly betrays the inherent assumption that the probability that someone responds to the Census and PES as independent.  If they're one of the people who are overseas for a bit more than a month at a time, and we know just how massively that kind of travel has increased, then that assumption will absolutely not hold.  In fact, a significant component will be as far from 'independent' as possible. They will be linked by a function kown as the identity function, which is mathematical speak for EXACTLY THE SAME PEOPLE. In this case the ABS's assumption that some non-zero fraction of people who are here couldn't be found by either, and must be simply guessed for (whether they are here/exist or not), is only as good as the guess you put in in the first place.  
+
+This possibility is described clearly and accurately in section 3.2 of Appendix A, on page 52, which covers "Correlation and non-repsonse bias".  However, they firmly state that this possibility leads only to a potential underestimate of the population.  The language that's used refers to the same set of people 'not being found' in either the Census or the PES.  It's cute that we're so concerned about making sure that everyone gets counted, but the concern for representation masks a glaring and terrible logical error that's brought about by imputation.  There's over a million people who are 'counted' in the Census who were never actually found, they were put there by imputation.  Hence the role of the PES turns out to be actually to 'unfind' them, essentially prove that they weren't actually here, and should never have been found in the first place.  So, in the presence of heavy imputation, and known over-imputation, correlation in a group that is 'not found' in either the Census or the PES can actually lead to an over-estimate, since we could be failing to 'unfind' people faster than we're failing to 'find' them.
+
+There's also reference in this section to further reseach and another mathematical model that has been made to help account for the possibility of correlation (created just after the 2006 Census), which you can find [here](http://www.ausstats.abs.gov.au/Ausstats/subscriber.nsf/0/46A26CC908FA49E3CA2572D10020C786/$File/1351055019_may%202007.pdf). It's even more weighty, but it carefully describes a process that doesn't do anything to address the sort of bias that would arise from people being overseas during both the Census and the PES.  The two key sections that make that explicitly clear are here:
+
+```{r, fig.align="center", out.width = 600, fig.cap="The ABS has attempted to create a model to determine the likelihood of people not responding to the PES"}
+
+
+knitr::include_graphics("images/modelmotive2.png")
+
+```
+
+
+```{r, fig.align="center", out.width = 600, fig.cap="The method that is used still relies upon the independence of the PES and Census responses, which would fail when one person is overseas for both"}
+
+
+knitr::include_graphics("images/modellimits.png")
+
+```
+
+Helpfully this paper points out exactly what their model can and can't do.  What they can't account for is respondents who don't respond to one survey because of the same reason that meant they didn't respond to the other one.  The person who feels guilty about missing the Census, and avoids the PES survey as direct result of missing the census, is their example.  A person who is overseas at the time of Census, and is still overseas at the time of PES, is exactly the same sort of bias, which can't be accounted for in any of this modeling.
+
+In short, the Census has a serious blind-spot. The error that was concealed in that blind-spot might not have been that large in 2006, but in that time overseas travel has increased so massively that the error could now be extremely substantial.  In a staggeringly poor assessment of this potential error, the report makes this claim:
+
+```{r, fig.align="center", out.width = 600, fig.cap="Despite lower response rates, the chance of correlation bias is quickly dismissed."}
+
+
+knitr::include_graphics("images/bias.png")
+
+```
+
+Not only do they implicitly assume that the bias would result in an underestimate, but they summarily dismiss the possibility that this is significant.  However, the table below shows that the level of non-responses is highest in the most populous east coast states lead by NSW (NT excepted, which has a very high Aboriginal population).  These states having lowest responses, being the principal destinations of international visitors, (and having an large share of young, urban, mobile young people around university age) is perfectly consistent with the hypothesis that a rapid increase in international travel is driving the increase in non-responses, as is the considerable increase across all states since previous years. 
+
+However, it would be extremely easy to test the validity of my hypothesis by comparing the proportion of the PES responses that correspond to imputed households with the proportion of households imputed in the Census.  Nearly 5% of the people 'counted' in the Census were counted by imputation, because a non-responding dwelling was deemed (by some unknown process) to be occupied on Census night.  If much less than 5% of the households who responded to the PES turned out to correspond to households which were imputed in the Census, this would provide strong support for a large overlap in the two non-responding groups.  The imputed households didn't fail to reply to the census because of some random reason (like them being forgetful/disorganised), they were away overseas (and hence shouldn't have been imputed) and were still overseas at the time of the PES, so were part of the 8.5% of PES households who didn't respond, and couldn't 'unfind' themselves from the Census.
+
+However, this report tells us nothing at all about the what fraction of the PES respondents corresponded to imputed households.  The simplest fact which would shed enormous light on what could be going on in their blind-spot, is conveniently omitted from any discussion in the 2016 report on the data quality of the Census. 
+
+However, in section 3.2 of the [paper](http://www.ausstats.abs.gov.au/Ausstats/subscriber.nsf/0/46A26CC908FA49E3CA2572D10020C786/$File/1351055019_may%202007.pdf) discussing the modelling for weighting different groups of respondents and non-respondents to the Census and PES, there's a clear admission (from 2006) that the weighting of PES respondents favours dwellings that did respond to Census.  They attribute this to people being prompted by the PES to return a Census form late, but admit that they have no way of knowing which late forms were actually prompted by the PES. In other words, it's just their hunch. In 2016, where the PES occurred 9 weeks after the Census, a full month after returns were meant to be completed, this phenomenon would surely have been almost entirely eliminated.  If only the numbers were revealed in the 2016 paper, all doubt could be removed.
+
+However, back to that guess in the first place.  One assumes that the PES did infact find enough data to produce a "Net Overcount for people imputed", though we can say with confidence that the six significant figure that it's scaled up is utter rubbish. The result: 490,174 net overcount for imputed persons.  That's a staggering figure, when compared to two reference-points.  Firstly, it means that nearly half of the million-odd 'imputations' were wrong.  Infact, given that there isn't any gross undercount and gross overcount for the imputed persons (there were bound to be a few households where not enough people were imputed) this figure gives us some assurance that the process of imputation is no better than a coin-toss.  
+
+Secondly, this figure is nearly double what it was five years ago.  The report includes a note that the ABS found that "the process of determining whether a home is occupied on Census night or not has become mch more difficult with the increase in the number of people living in high-density, secure buildings and the decreasing likelihood of making doorstep contact." That's probably both true and fair, but it doesn't detract from the increasing level of uncertainty that we actually have about the statistics.  The summary as far as the trajectory is concerned tells a very different and alarming story, as this table shows:
+
+```{r, fig.align="center", out.width = 600, fig.cap="While the Total Net Undercount seems small, and falling, the cancelling errors which lead to it are large, and growing"}
+
+
+knitr::include_graphics("images/Undercount.png")
+
+```
+
+So whilst we get the appearance of increasing certainty and accuracy from the most recent Census, in truth all of the measurements actually have decreasingly accuracy, but the errors cancel in such a way that the 'net' error seems small.
+
+What is particularly strange is how the significance of these increasing levels of uncertainty is not propagated through to the final result, in terms of total uncertainty. 
+
+
+
+
+
+
+
+
+
