@@ -211,11 +211,11 @@ census.wide <- census %>%
   spread(Stat, Value) %>% 
   mutate(Census.PPP = `Census count, actual location` + `plus - Allowance for under-enumeration` + `plus - Demographic adjustment`)
 
-census <- census.wide %>% 
+census.2 <- census.wide %>% 
   gather(key = Stat, value = Value, -Date)
 
 
-plot <- census %>% 
+plot <- census.2 %>% 
   filter(Stat %in% c("Census count, actual location", "Census count, place of usual residence", "equals - ERP as at 9 August 2016", "Census.PPP")) %>% 
   ggplot(aes(x = Date, y = Value, col = Stat))+
   geom_point()+
@@ -237,7 +237,7 @@ So, at face value, the Census seems to contradict my earlier observation that th
 
 ```{r, fig.align="center", warning=FALSE, message= FALSE, fig.cap = "ERP series, PPP, and the Census PPP observations"}
 
-colnames(census.wide) <- c("Date", "Census.Count", "Census.PURP","Census.PPP", "Census.ERP", "OS.Visitors", "Under.Enum", "Demo.Adj", "Residents.OS")
+colnames(census.wide) <- c("Date", "Census.Count", "Census.PURP", "Census.ERP", "OS.Visitors", "Under.Enum", "Demo.Adj", "Residents.OS","Census.PPP")
 
 census.slim <- census.wide %>% 
   select(Date, Census.Count, Census.PURP, Census.PPP, Census.ERP) %>% 
