@@ -1,7 +1,7 @@
 ---
 title: "Did the Census actually fail?"
 author: Aidan Morrison
-date: '2017-11-20'
+date: '2017-11-23'
 thumbnail: "images/Discrep2.png"
 slug: did-the-census-actually-fail
 categories:
