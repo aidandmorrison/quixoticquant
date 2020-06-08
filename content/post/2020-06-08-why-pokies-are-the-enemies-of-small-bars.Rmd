@@ -1,0 +1,198 @@
+---
+title: Why Pokies are the enemies of small-bars
+author: Aidan Morrison
+date: '2020-06-08'
+slug: why-pokies-are-the-enemies-of-small-bars
+thumbnail: "images/Screen Shot 2020-06-08 at 10.37.25 pm.png"
+categories:
+  - Economics
+  - Pokies
+  - Gambling
+  - Hospitality
+  - Demographics
+tags:
+  - Ausecon
+  - Statistics
+  - AusPol
+  - NSW
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(skimr)
+library(ggrepel)
+
+### get hotels data
+data <- readxl::read_xlsx("data/hotels-gaming-machine-quarterly-report-by-lga-1-oct-2019-31-dec-2019.xlsx", sheet = 1, range = "A3:E100", trim_ws = T)
+colnames(data) <- c("LGA", "NetProfit", "Tax", "Machines", "Venues")
+data <- data %>% filter(LGA != "Total")
+
+### get clubs data
+clubs <- readxl::read_xlsx("data/clubs-gaming-machine-quarterly-report-by-lga-1-sep-2019-30-nov-2019.xlsx", sheet = 1, range = "A3:E100", trim_ws = T)
+colnames(clubs) <- c("LGA", "NetProfit", "Tax", "Machines", "Venues")
+clubs <- clubs %>% filter(LGA != "Total")
+
+## label clubs and hotels
+data <- data %>% 
+  mutate(License = "Hotel")
+clubs <- clubs %>% 
+  mutate(License = "Club")
+
+### Get the ABS data on popuation
+lgas <- readxl::read_xls("data/ABSlgas.xls", sheet = 2)
+lgas <- lgas %>% 
+  select(...2, ...4, ...13, ...14) %>% 
+  drop_na() %>% 
+  filter(...2 != "Local Government Area")
+colnames(lgas) <- c("LGA", "Population", "Area", "Density")
+lgas <- lgas %>% 
+  mutate(LGA = LGA %>% 
+           str_remove_all(regex("\\(.\\)")) %>% 
+           str_squish() %>% 
+           str_remove_all("Shire") %>% 
+           str_squish()) %>% 
+  filter(LGA != "TOTAL NEW SOUTH WALES")
+
+## Combine all the data and create features
+comb <- data %>% 
+  bind_rows(clubs) %>% 
+  left_join(lgas, by = "LGA")
+comb <- comb %>% 
+  type.convert() %>% 
+  mutate(Machines_per_person = Machines/Population,
+         Venues_per_person = Venues/Population,
+         Profit_per_person = NetProfit/Population,
+         Profit_per_venue = NetProfit/Venues,
+         Machines_per_venue = Machines/Venues,
+         Profit_per_machine = NetProfit/Machines,
+         Population_per_venue = Population/Venues)
+```
+
+## The position of a small bar-owner
+I'm one of the owners of a local neighbourhood cafe/bar/restaurant in Eastern Sydney.  We've recently been hit by Covid-19 restrictions, which meant that we lost over half of our revenue, despite aggressively pivoting towards take-away and delivery.  We've been going through some tough negotiations with our landlord about how much rent should be paid now and later.  Overall, the outlook was pretty gloomy.  In a welcome burst of good news, we heard that our local council was going to trail extending trading hours in our area for venues like ours, from midnight to 1am.  We'd applied for such extensions years ago and got a flat refusal. But this looked like a godsend. Prior to Covid we would regularly empty a near-full venue on Friday and Saturday nights at closing time.  An extra hour would make a massive difference.  
+
+Of course, it was too good to be true. Some Councillors moved to overturn the motion and have it re-debated. So I started to send some emails, and do some research to try to support the case.
+
+## What's with pokies?
+In  trying to build an argument, I looked for precedent.  Just a couple of hundred meters from my little 100sqm venue, there's a large hotel (>1000sqm) that can already trade later than us.  Another couple of hundred meters away, there's another that can trade (pre-Covid) at least until 3am if not later.  They're not in drastically different areas.  They have residential properties a stones throw away (literally) on multiple sides.
+
+So put simply, there's ample precedent for later trading in our area, including serving alcohol.  But only the massive pubs are allowed to do it.  The general Hotel Licence comes with a raft of privileges which small-bars and bar-restaurants don't have, including selling take-away alcohol.  (Happily, during Covid, that's been relaxed.)  But there's one difference that I've always had a massive hunch made a disproportionately large economic difference. And that's the profitability of gambling, particularly pokes.  And with it, I assumed there would be a proportionate impact on tax-revenues, and lobbying influence.  Probably a sufficient explanation for what appears to be the blatant discrimination against smaller non-gambling venues. 
+
+## How much does a venue make from Pokies?
+So, I set out to do just a little research to size up the economic power behind my competitors who currently have the late-night market legislatively cornered. I downloaded the latest quarterly reports (end of 2019) by Local Government Area (LGA) and got an ABS table on the corresponding populations in the LGA. 
+
+```{r,fig.align='center',warning=FALSE, message= FALSE, fig.cap = "Venues make millions of dollars of profit from pokies"}
+
+comb %>% 
+  filter(Population > 70000) %>% 
+  #filter(LGA != "Sydney") %>% 
+  ggplot(aes(x = Population_per_venue, y = Profit_per_venue, col = Population, size = NetProfit))+
+  geom_point()+
+  facet_grid(License~.) +
+  geom_text_repel(aes(label = LGA), colour = "black")+
+  scale_colour_gradientn(colours = rainbow(7))+
+  ggtitle("NSW Pokies Quarterly (end of 2019) Net Profit in selected LGAs")
+
+
+
+```
+
+In my own council (Randwick) the average each venue earns just under a million clear profit each quarter from pokies alone.  You can see plenty of other LGAs where that number is much higher.  To put that into perspective, a successful small neighbourhood cafe or restaurant would be doing well to turn over that amount in a year.  These business fail more often than they thrive, but even stable ones would rarely earn above 10% profit.  
+
+So, in round numbers, that describes the foundational economic background to a hotel with pokies.  They can probably count on as much profit from pokies alone as the entire operations of the nearest 50-100 small cafes, bars and restaurants would make from their entire operations.  That's before they've served up a single pint, polished a wine-class, fried a schnitzel.
+
+I hope that explains for most onlookers why the majority of pubs look they way they do, and serve what they serve.  The food, the wine, the service, the vibe... all kinda mediocre?  That's mostly because everything that isn't gaming just maintained with a view to preserve their licence to operate their gaming machines.  
+
+Once a banking executive with responsibility for a large portfolio of hotel customers told me as much. I was running a start-up trying to make a demand-forecasting tool for restaurants like mine so that we could manage our rosters better, and wage-costs.  I was introduced to him through an accelerator program, trying to provide useful connections for fledgling tech start-ups.  Credit to the guy, he was honest, and told me like it was. Yes, his clients had big businesses, and were looking for ways to become smarter and more tech savvy.  But, unfortunately, they didn't really care much about 'food and bev'. 
+
+That phrase 'food and bev' has been seared into my mind in a special way ever since.  The funny thing is that I'd never heard of the term before. At the time probably 95% of the money I'd ever earned in my life from working or investing in cafes, bars and restaurants. All that any of them did was serve food and beverages.  We'd never used the term because it was redundant.  For us, that's all hospitality was.  Normally in managing a business, we would consider food and beverages separately to analyse profits, costs etc. Generally we'd refer to kitchen 'kitchen', and 'bar'. Or often 'coffee' is something separate too. But everyone outside the hotels industry, referring to 'food and bev', together, is entirely unnatural and illogical.  Unless of course, together, they still somehow comprise just another small subcategory of your larger hospitality business. This data confirms the economics that pokies, on their own, can bind food and beverages together into just another aspect of the window-dressing for a gambling business.
+
+## So what, on average, to people lose?
+
+Having confirmed my suspicion that pokies really did tilt the economic tables very much in the favour of hotels against smaller venues, I turned my attention to what was required, in terms of people's spending, and the number of machines in venues, to make this possible.
+
+Here, the divergence between the nature of pubs and clubs became very clear.  Clubs had, on average, vastly larger numbers of machines, with much lower profit per machine.  Some of them, with over a hundred machines per venue _on average_ literally must have halls full of them. But on a per-head of population basis, hotels still make nearly as much money as clubs from pokies, at least in a lot of LGA.  Western Sydney LGAs stand out here as clearly.  Even per head of population gambling profits (for pubs and clubs) are far higher. And the numbers of machines per venue higher. And the profits per machine are higher.  My hipster-cafe/small-bar-owning Easter-suburbs-millennial self never before found such data-driven support for a degree of cultural cringe about the West.
+
+
+```{r,fig.align='center',warning=FALSE, message= FALSE, fig.cap = "On average, there are hundreds of dollars lost to the pokies per quarter for every person in most LGAs"}
+
+comb %>% 
+  filter(Population > 70000) %>% 
+  ggplot(aes(x = Machines_per_venue, y = Profit_per_person, col = Profit_per_machine, size = Machines))+
+  geom_point()+
+  facet_grid(License~., scales = "free_x") +
+  geom_text_repel(aes(label = LGA), col = "black")+
+  scale_colour_gradientn(colours = rainbow(10))+
+  ggtitle("NSW Pokies Quarterly (end of 2019) profit per person in selected LGAs")
+
+
+```
+
+Let's think about that that would require from residents in a place like Fairfield, where on average nearly a thousand dollars is lost to pokies per person in the LGA every quarter across pubs and clubs combined. (Taxes are excluded from the net figure). That's $4000 annually for every man, woman and child. Per household, more than double that amount.  And that's the _mean_ spend. No matter what the distribution looks like, that seems incredible, with nearly twenty cents in the dollar of [household mean disposable income](https://www.abs.gov.au/household-income#:~:text=6523.0%20%2D%20Household%20Income%20and%20Wealth%2C%20Australia%2C%202017%2D18&text=In%202017%E2%80%9318%2C%20the%20average,income%20was%20%241%2C062%20per%20week.) lost into the pokies.  The long tail of that distribution can't just be pensioners wasting their entire pension cheque every week.  There must be at least a few criminal syndicates laundering some money through these machines as well. 
+
+For interest's sake, let's have a better look at how the Hotels appear without the clubs. 
+
+
+```{r,fig.align='center',warning=FALSE, message= FALSE, fig.cap = "On average, there are hundreds of dollars lost to the pokies per quarter for every person in most LGAs"}
+
+comb %>% 
+  filter(Population > 70000) %>% 
+  filter(License == "Hotel") %>% 
+  ggplot(aes(x = Machines_per_venue, y = Profit_per_person, col = Profit_per_machine, size = Machines))+
+  geom_point()+
+  facet_grid(License~.) +
+  geom_text_repel(aes(label = LGA), col = "black", size = 3.5)+
+  scale_colour_gradientn(colours = rainbow(10))+
+  ggtitle("NSW Pokies (Hotels only) Quarterly Net Profits per person (end of 2019)")
+
+
+```
+
+My cultural cringe doesn't exactly lessen seeing this plot.  Aside from the clear outlier of the Sydney LGA (which would have plenty of workers from other suburbs gambling at lunch or after work), the trend remains pretty clear. There are more machines per venue, and more profits taken per machine in Western Sydney, generally $50,000 per quarter or more. The Inner-West, though apparently keen to gamble, is also the capital small-pubs as well as small-bars, with fewer machines per venue than almost every comparable Sydney LGA.
+
+## How does it add up?
+
+Maybe it's worthwhile seeing some totals, rather than the ratios I've plotted so far.  I'm curious to get a sense of just how many machines, venues, and dollars there are in these LGAs.
+
+```{r,fig.align='center',warning=FALSE, message= FALSE, fig.cap = "Sydney LGA has a massive number of venues, with just a few machines in each one."}
+
+comb %>% 
+  filter(Population > 70000) %>% 
+  ggplot(aes(x = Venues, y = NetProfit, col = Machines, size = Population))+
+  geom_point()+
+  facet_grid(License~.)+
+  geom_text_repel(aes(label = LGA), col = "black")+
+  scale_colour_gradientn(colours = rainbow(10))+
+  ggtitle("NSW Pokies Quarterly (end of 2019) Total Net Profit in selected LGAs")
+
+
+```
+
+This really just tells the story of one outlier. Sydney. I've also heard through the grapevine of the industry that pubs the value of any pub is a known multiple of the number of pokies it's licensed for. I've also heard that it's a well-known play to buy a pub out in a country town, and instead of renovating the pub where it is, one can apparently shut it down, and have it's license (including its entitlement for gaming machines) transferred to the CBD of Sydney, where those previous gaming machines are much more valuable.  I don't know the details of the scheme, but there's some evidence that this isn't a rare occurrence.  Plenty LGAs, including quite populous ones, only have a dozen or so pubs.  Randwick has 15, and a similar number of clubs. But Sydney has nearly 200 such hotels, but on average each with a number of machines that would look normal in Lake Macquarie or Port Stephens (from previous graph).
+
+The same is not true, however, of clubs in Sydney.  Apparently the sports teams, retired servicemen, or other excuses for a 'club' aren't quite so easily profited from through a purchase-and-relocate kind of business manoeuvre. 
+
+
+```{r,fig.align='center',warning=FALSE, message= FALSE, fig.cap = "Tens of millions of dollars in pokies profits are made in most LGAs, by just a few tens of venues."}
+
+comb %>% 
+  filter(Population > 70000) %>% 
+  filter(LGA != "Sydney") %>% 
+  ggplot(aes(x = Venues, y = NetProfit, col = Machines, size = Population))+
+  geom_point()+
+  facet_grid(License~.)+
+  geom_text_repel(aes(label = LGA), col = "black")+
+  scale_colour_gradientn(colours = rainbow(10))+
+  ggtitle("NSW Pokies Quarterly (end of 2019) Total Net Profit in LGAs excluding Sydney")
+
+
+```
+
+Without Sydney, we can see that the total pokie profits are broadly similar in magnitude between hotels and clubs. As in, tens of millions of dollars every quarter. For some Western suburbs, well over a hundred million combined. There's also a clear contrast in the numbers of machines.  Most of these LGAs have a a thousand or more machines in clubs, but only a couple hundred in Hotels. But across the board, these machines are concentrated in just a dozen or so extremely large venues. Only Newcastle and the Inner West have more than a couple of dozen pubs with pokies.
+
+Again, as a small-bar owner I feel the injustice is absurd. These are a small number of big businesses.  They have a license to print so much money that they generally don't really have care about 'food and bev'.  And then, as if the playing-field wasn't already stacked against us, thousands of smaller cafes/bars/restaurants, who _live and breath_ food and beverage, and do so much better at it, are banned from even opening after midnight. 
+
+Something's gotta give. 

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on Quixotic Quant</title>
@@ -6,6 +6,7 @@
     <description>Recent content in Categories on Quixotic Quant</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+    <lastBuildDate>Mon, 08 Jun 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
     
@@ -13,7 +14,7 @@
     <item>
       <title>Demographics</title>
       <link>/categories/demographics/</link>
-      <pubDate>Mon, 09 Oct 2017 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
       
       <guid>/categories/demographics/</guid>
       <description></description>
@@ -22,9 +23,36 @@
     <item>
       <title>Economics</title>
       <link>/categories/economics/</link>
-      <pubDate>Mon, 09 Oct 2017 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
       
       <guid>/categories/economics/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Gambling</title>
+      <link>/categories/gambling/</link>
+      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/gambling/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Hospitality</title>
+      <link>/categories/hospitality/</link>
+      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/hospitality/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Pokies</title>
+      <link>/categories/pokies/</link>
+      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/categories/pokies/</guid>
       <description></description>
     </item>
     

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pokies on Quixotic Quant</title>
+    <link>/categories/pokies/</link>
+    <description>Recent content in Pokies on Quixotic Quant</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 08 Jun 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/pokies/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Why Pokies are the enemies of small-bars</title>
+      <link>/post/why-pokies-are-the-enemies-of-small-bars/</link>
+      <pubDate>Mon, 08 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/why-pokies-are-the-enemies-of-small-bars/</guid>
+      <description>The position of a small bar-owner I&#39;m one of the owners of a local neighbourhood cafe/bar/restaurant in Eastern Sydney. We&#39;ve recently been hit by Covid-19 restrictions, which meant that we lost over half of our revenue, despite aggressively pivoting towards take-away and delivery. We&#39;ve been going through some tough negotiations with our landlord about how much rent should be paid now and later. Overall, the outlook was pretty gloomy. In a welcome burst of good news, we heard that our local council was going to trail extending trading hours in our area for venues like ours, from midnight to 1am.</description>
+    </item>
+    
+  </channel>
+</rss>
